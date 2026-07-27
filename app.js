@@ -67,7 +67,10 @@ function refreshCompose() {
   ui.payload.value = payload;
   ui.segments.textContent = segments;
   ui.ucs2.textContent = today;
-  ui.ratio.textContent = today > 0 ? `${(today / segments).toFixed(1)}×` : '—';
+  // Segment counts both round up, so on short messages they hide the gain.
+  // Compare the bits instead: UCS-2 spends 16 per character, we spend what we
+  // spend, and that ratio is honest at every length.
+  ui.ratio.textContent = `${((chars * 16) / (septets * 7)).toFixed(1)}×`;
   ui.send.disabled = false;
   ui.copy.disabled = false;
   ui.composeNote.textContent =
