@@ -174,11 +174,11 @@ test('rejects a file that is not a model', () => {
 });
 
 test('compresses real Bangla into one segment with the shipped model', (t) => {
-  if (!fs.existsSync('web/model.bin')) {
-    t.skip('web/model.bin not built yet — run tools/train_model.py');
+  if (!fs.existsSync('model.bin')) {
+    t.skip('model.bin not built yet — run tools/train_model.py');
     return;
   }
-  const file = fs.readFileSync('web/model.bin');
+  const file = fs.readFileSync('model.bin');
   const model = Model.fromBuffer(
     file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength),
   );

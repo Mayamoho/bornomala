@@ -15,7 +15,13 @@ lower order. Order 0 is always complete over the alphabet, so decoding always
 terminates; a character outside the alphabet is coded as the LITERAL symbol
 followed by its raw code point.
 
-    python3 tools/train_model.py corpus/clean/*.txt -o web/model.bin
+    python3 tools/train_model.py \
+        corpus/clean/opensubtitles-bn.txt corpus/clean/wiki-bn.txt:8000000
+
+The corpus mix is deliberate. Subtitles are conversational, which is the
+register an SMS is written in; Wikipedia adds vocabulary and spelling the
+subtitles never use. Training on Wikipedia alone, or mostly, measurably hurts
+conversational text — hence the cap on how much of it is read.
 
 Memory: contexts are counted as packed int64 keys in numpy arrays, merged
 chunk by chunk, so peak usage stays a few hundred MB rather than the tens of
@@ -42,26 +48,54 @@ def parse_args(argv):
     p = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    p.add_argument("corpus", nargs="+", type=Path, help="cleaned UTF-8 text, one line per message")
-    p.add_argument("-o", "--out", type=Path, default=Path("web/model.bin"))
-    p.add_argument("--max-chars", type=int, default=40_000_000, help="cap on characters per file")
+    p.add_argument(
+        "corpus",
+        nargs="+",
+        help="cleaned UTF-8 text, one line per message; PATH:CHARS caps that file",
+    )
+    p.add_argument("-o", "--out", type=Path, default=Path("model.bin"))
+    p.add_argument(
+        "--max-chars", type=int, default=40_000_000, help="default cap on characters per file"
+    )
     p.add_argument("--coverage", type=float, default=0.9995, help="share of characters covered")
     p.add_argument("--max-alphabet", type=int, default=250)
     p.add_argument("--top-entries", type=int, default=24, help="symbols kept per context")
-    p.add_argument("--contexts-order3", type=int, default=60_000)
+    p.add_argument("--contexts-order3", type=int, default=400_000)
     p.add_argument("--contexts-order2", type=int, default=40_000)
     p.add_argument("--contexts-order1", type=int, default=4_000)
     p.add_argument("--quant-total", type=int, default=16_384, help="frequency total per context")
-    p.add_argument("--min-count", type=int, default=4, help="ignore contexts rarer than this")
+    p.add_argument("--min-count", type=int, default=2, help="ignore contexts rarer than this")
+    p.add_argument(
+        "--holdout-every",
+        type=int,
+        default=50,
+        help="reserve every Nth line for evaluation (0 trains on everything)",
+    )
     return p.parse_args(argv)
 
 
-def read_lines(paths, max_chars):
-    """Yield NFC-normalised non-empty lines, at most max_chars per file."""
-    for path in paths:
+def parse_corpus_arg(spec, default_cap):
+    """`path` or `path:chars` -> (Path, cap). Windows-style drive letters are
+    not a concern here; only a trailing all-digit suffix counts as a cap."""
+    head, sep, tail = spec.rpartition(":")
+    if sep and tail.isdigit():
+        return Path(head), int(tail)
+    return Path(spec), default_cap
+
+
+def read_lines(sources, holdout_every):
+    """Yield NFC-normalised training lines, honouring each file's cap.
+
+    Every `holdout_every`-th raw line is reserved for evaluation and never
+    trained on. tools/benchmark.js applies the identical rule in reverse, so
+    the benchmark only ever sees text the model has not read.
+    """
+    for path, max_chars in sources:
         seen = 0
         with open(path, encoding="utf-8") as fh:
-            for line in fh:
+            for lineno, line in enumerate(fh, start=1):
+                if holdout_every and lineno % holdout_every == 0:
+                    continue
                 line = unicodedata.normalize("NFC", line.rstrip("\n"))
                 if not line:
                     continue
@@ -283,7 +317,8 @@ def main(argv=None) -> int:
     args = parse_args(argv if argv is not None else sys.argv[1:])
 
     print("reading corpus…", file=sys.stderr)
-    lines = list(read_lines(args.corpus, args.max_chars))
+    sources = [parse_corpus_arg(spec, args.max_chars) for spec in args.corpus]
+    lines = list(read_lines(sources, args.holdout_every))
     if not lines:
         print("no input lines", file=sys.stderr)
         return 1

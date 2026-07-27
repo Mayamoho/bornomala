@@ -1,0 +1,36 @@
+{
+  "name": "Bornomala — বাংলা এসএমএস সংকোচন",
+  "short_name": "বর্ণমালা",
+  "description": "Offline Bangla SMS compression. Roughly 350 Bangla characters in one SMS segment, with no server and no internet.",
+  "lang": "bn",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0f0e",
+  "theme_color": "#0b0f0e",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "shared",
+      "url": "url"
+    }
+  }
+}

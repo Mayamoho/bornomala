@@ -1,0 +1,12 @@
+{
+  "alphabet_size": 152,
+  "coverage": 0.9995109286222488,
+  "quant_total": 16384,
+  "contexts": {
+    "1": 153,
+    "2": 7585,
+    "3": 68039
+  },
+  "model_bytes": 1769145,
+  "training_chars": 24634441
+}

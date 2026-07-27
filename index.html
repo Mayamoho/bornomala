@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>বর্ণমালা — Bornomala</title>
+    <meta
+      name="description"
+      content="Offline Bangla SMS compression. Fits roughly 350 Bangla characters into one SMS segment, with no server and no internet."
+    />
+    <meta name="theme-color" content="#0b0f0e" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        --bg: #0b0f0e;
+        --panel: #131a18;
+        --line: #24322e;
+        --ink: #e8f0ec;
+        --muted: #8ba099;
+        --accent: #35d39a;
+        --warn: #f2a93b;
+        color-scheme: dark;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font: 16px/1.55 system-ui, "Noto Sans Bengali", "SolaimanLipi", sans-serif;
+        padding: max(16px, env(safe-area-inset-top)) 16px 48px;
+      }
+      main { max-width: 640px; margin: 0 auto; }
+      header { padding: 8px 0 20px; }
+      h1 { font-size: 1.6rem; margin: 0 0 4px; letter-spacing: 0.01em; }
+      .tagline { color: var(--muted); margin: 0; font-size: 0.95rem; }
+      section {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      h2 { font-size: 1rem; margin: 0 0 12px; color: var(--muted); font-weight: 600; }
+      textarea {
+        width: 100%;
+        min-height: 116px;
+        resize: vertical;
+        background: #0d1413;
+        color: var(--ink);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px;
+        font: inherit;
+      }
+      textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+      .payload {
+        min-height: 74px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 0.85rem;
+        word-break: break-all;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+        margin: 14px 0 4px;
+      }
+      .stat {
+        background: #0d1413;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .stat b { display: block; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+      .stat span { color: var(--muted); font-size: 0.78rem; }
+      .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+      button {
+        flex: 1 1 auto;
+        min-height: 46px;
+        padding: 0 18px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: #182320;
+        color: var(--ink);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button.primary { background: var(--accent); color: #05100c; border-color: transparent; }
+      button:disabled { opacity: 0.45; cursor: not-allowed; }
+      .note { color: var(--muted); font-size: 0.82rem; margin: 10px 0 0; }
+      .warn { color: var(--warn); }
+      footer { color: var(--muted); font-size: 0.8rem; text-align: center; padding-top: 8px; }
+      footer p { margin: 4px 0; }
+      #status[hidden] { display: none; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>বর্ণমালা <span aria-hidden="true">·</span> Bornomala</h1>
+        <p class="tagline">
+          বাংলা এসএমএস সংকোচন — ইন্টারনেট ছাড়াই।
+          <br />Bangla SMS compression that runs with the network down.
+        </p>
+      </header>
+
+      <p id="status" class="note warn" role="status">মডেল লোড হচ্ছে… loading model…</p>
+
+      <section aria-labelledby="compose-heading">
+        <h2 id="compose-heading">১. লিখুন — compose</h2>
+        <textarea
+          id="input"
+          lang="bn"
+          placeholder="এখানে বাংলায় লিখুন…"
+          autocomplete="off"
+          spellcheck="false"
+        ></textarea>
+
+        <div class="stats">
+          <div class="stat"><b id="stat-chars">0</b><span>অক্ষর / characters</span></div>
+          <div class="stat"><b id="stat-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
+          <div class="stat"><b id="stat-ucs2">0</b><span>সেগমেন্ট আজ (UCS-2)</span></div>
+          <div class="stat"><b id="stat-ratio">—</b><span>সাশ্রয় / saved</span></div>
+        </div>
+
+        <div class="row">
+          <button id="send" class="primary" type="button" disabled>এসএমএস পাঠান</button>
+          <button id="copy" type="button" disabled>কপি করুন</button>
+        </div>
+        <p class="note" id="compose-note"></p>
+      </section>
+
+      <section aria-labelledby="payload-heading">
+        <h2 id="payload-heading">২. সংকুচিত বার্তা — compressed payload</h2>
+        <textarea id="payload" class="payload" readonly aria-live="polite"></textarea>
+      </section>
+
+      <section aria-labelledby="decode-heading">
+        <h2 id="decode-heading">৩. পাওয়া বার্তা খুলুন — decode</h2>
+        <textarea
+          id="cipher"
+          class="payload"
+          placeholder="প্রাপ্ত সংকুচিত বার্তা এখানে পেস্ট করুন…"
+          autocomplete="off"
+          spellcheck="false"
+        ></textarea>
+        <textarea id="plain" lang="bn" readonly aria-live="polite"></textarea>
+        <p class="note" id="decode-note"></p>
+      </section>
+
+      <footer>
+        <p>সব কিছু আপনার ফোনেই চলে — কোনো সার্ভার নেই।</p>
+        <p>Everything runs on your phone. No server, no internet, no message leaves the device.</p>
+      </footer>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
