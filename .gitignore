@@ -1,0 +1,5 @@
+corpus/raw/
+corpus/clean/
+corpus/tools/*.log
+node_modules/
+*.tmp

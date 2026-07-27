@@ -1,0 +1,12 @@
+{
+  "name": "bornomala",
+  "version": "0.1.0",
+  "description": "Offline Bangla SMS compression codec — fits ~200 Bangla characters into one GSM-7 SMS segment",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "bench": "node tools/benchmark.js"
+  },
+  "license": "MIT"
+}

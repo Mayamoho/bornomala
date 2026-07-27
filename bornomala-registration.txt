@@ -1,0 +1,169 @@
+================================================================
+BORNOMALA — July Hackathon 2026 Registration Answers
+JRA Foundation | 1st Conclave on July Revolution
+Track: Crisis Tech | Solo entry | Role: ml-ai
+================================================================
+
+
+----------------------------------------------------------------
+WORKING PROJECT TITLE
+----------------------------------------------------------------
+
+Bornomala
+
+
+----------------------------------------------------------------
+PROBLEM YOU PLAN TO TACKLE  (138 words / 150 limit)
+----------------------------------------------------------------
+
+In July 2024, the state cut 3G and 4G. Broadband went dark. What
+survived was 2G — voice and SMS. People fell back to text.
+
+But Bangla text is not in the GSM-7 alphabet, so every Bangla SMS
+is forced into UCS-2 encoding: 70 characters per segment instead
+of English's 160. Bangla costs 2.3x more to send, splits into more
+segments, and fails more often on a congested network — exactly
+when SMS is the only channel left.
+
+Bornomala is an offline compression codec for Bangla built for the
+SMS segment boundary. A small statistical language model drives an
+integer arithmetic coder, packing the output into GSM-7. Target:
+roughly 200 Bangla characters inside a single 160-byte segment.
+
+It ships as an installable offline app: compose, compress, send by
+SMS, decode on arrival. No server, no internet, works on low-end
+phones.
+
+
+----------------------------------------------------------------
+PLANNED FORM FACTOR
+----------------------------------------------------------------
+
+Web app
+
+(Accurate for an installable offline PWA, and does not promise an
+APK that may not ship in 72h. The PWA runs on the phone, which is
+what matters.)
+
+
+----------------------------------------------------------------
+PLANNED TECH STACK
+----------------------------------------------------------------
+
+Offline-first PWA (vanilla JS + service worker, no framework,
+small footprint).
+
+Codec: small Bangla context model trained offline, exported as
+integer probability tables; deterministic integer arithmetic coder
+in WASM/JS; GSM-7 septet packing.
+
+SMS path with no server: sms: URI to prefill the device SMS app
+for sending; Web Share Target API to receive shared SMS text back
+into the PWA for decoding; paste fallback.
+
+Static hosting on GitHub Pages. Benchmark harness vs gzip and raw
+UCS-2.
+
+Stretch: Capacitor Android build.
+
+
+----------------------------------------------------------------
+BUILDS ON PRIOR WORK?
+----------------------------------------------------------------
+
+No, starting fresh
+
+(True for the code. Academic prior art on Bangla compression goes
+in the README Related Work section, not here.)
+
+
+----------------------------------------------------------------
+DOES YOUR PROJECT INVOLVE HARDWARE?
+----------------------------------------------------------------
+
+No
+
+
+----------------------------------------------------------------
+HOW DID YOU HEAR ABOUT US?
+----------------------------------------------------------------
+
+Company website
+
+(Or whatever is actually true. Do not optimize this one.)
+
+
+----------------------------------------------------------------
+ANYTHING WE SHOULD KNOW?
+----------------------------------------------------------------
+
+Solo entry. Everything runs client-side and offline — no server or
+VM involved, by design, since the tool has to work when the
+network is gone.
+
+Repository goes public at the start of the sprint rather than at
+submission, so the commit history shows the build as it happens.
+
+
+================================================================
+NOTES BEFORE SUBMITTING
+================================================================
+
+1. Web Share Target is how the receive side works with no server
+   and no SMS read permissions. Worth having in the form so judges
+   see it was thought through.
+
+2. The deterministic integer coder is the load-bearing constraint.
+   Float models will not decode bit-identically across devices,
+   which is why the stack specifies integer probability tables.
+
+3. Registration closes 27 July, 23:59. Sprint runs 28-30 July.
+   Submission (repo + demo video + post) due 30 July, 23:59.
+
+
+================================================================
+KEY FACTS BEHIND THE PITCH  (verified)
+================================================================
+
+- Grameenphone / Telenor records: 3G and 4G were shut down during
+  the July 2024 blackout; 2G stayed up — voice and SMS. SMS was
+  not a fallback theory, it was the channel that survived.
+
+- GSM 03.38: 7-bit alphabet gives 160 chars per SMS segment.
+  Bangla is not in GSM-7 basic or extension tables, so it is
+  forced to UCS-2 — 70 chars per segment. A 2.3x penalty.
+
+- Shutdown ran 18-28 July 2024 (10 days), phased: throttle,
+  mobile data cut, broadband cut, broadband back 24 July, mobile
+  back 28 July, social platforms blocked until 31 July. Second
+  blackout 4-5 August. VPNs (Proton, Nord, TunnelBear) blocked.
+
+- Judging weights: Impact & Relevance 25, Technical Execution 20,
+  Public Engagement 20, Innovation 15, Feasibility & Resilience
+  10, Presentation & Usability 10.
+
+- Public Engagement is measured on Facebook reactions/shares and
+  GitHub stars, scored RELATIVE TO THE HIGHEST IN YOUR TRACK.
+  Buying reactions or stars scores zero on that component.
+
+
+================================================================
+FRAMING TO LEAD WITH  (posts, README, demo video)
+================================================================
+
+July 2024. The state cuts 3G and 4G. Broadband goes dark.
+Facebook, YouTube, TikTok — gone. What survives is 2G: voice
+and SMS.
+
+So people fall back to text. And Bangla text gets 70 characters
+per SMS. English gets 160.
+
+Because Bangla is not in the GSM-7 alphabet, every Bangla message
+is forced into UCS-2 — 2.3x the cost, 2.3x the segments, 2.3x the
+failures on a congested network. In the days when SMS was the only
+thing left standing, the language people were dying for was the
+expensive one to send.
+
+Bangladesh has fought this fight before. 1952 was about the right
+to speak Bangla. 2024 was about the right to speak at all. This is
+the same fight, one layer down — in the character encoding.
