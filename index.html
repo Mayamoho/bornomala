@@ -156,6 +156,41 @@
       </footer>
     </main>
 
+    <script>
+      // Classic script on purpose: it still runs when the module below is
+      // blocked, which is exactly what happens if the page is opened from
+      // disk. Without this the status line sits on "loading model…" forever
+      // and the buttons stay disabled with no explanation.
+      (function () {
+        var HINT =
+          'সার্ভার থেকে খুলুন / open over http, not from a file:\n' +
+          'python3 -m http.server 8765  →  http://127.0.0.1:8765/';
+
+        function stall(reason) {
+          var status = document.getElementById('status');
+          if (!status || status.hidden) return;
+          status.textContent = reason + ' — ' + HINT;
+          status.style.whiteSpace = 'pre-line';
+        }
+
+        if (location.protocol === 'file:') {
+          document.addEventListener('DOMContentLoaded', function () {
+            stall('ফাইল থেকে চলবে না / cannot run from file://');
+          });
+          return;
+        }
+
+        window.addEventListener('error', function (event) {
+          stall('স্ক্রিপ্ট লোড হয়নি / script failed: ' + (event.message || 'load error'));
+        });
+
+        // Nothing has reported a loaded model after this long: something is
+        // wrong that the app itself never got far enough to report.
+        setTimeout(function () {
+          if (!window.__bornomalaReady) stall('মডেল আসেনি / model never arrived');
+        }, 8000);
+      })();
+    </script>
     <script type="module" src="app.js"></script>
   </body>
 </html>

@@ -31,6 +31,14 @@ const ui = {
 let model = null;
 
 async function loadModel() {
+  // Opened straight off disk, the browser blocks both module scripts and
+  // fetch, and nothing below this line ever runs. Say so plainly.
+  if (window.location.protocol === 'file:') {
+    throw new Error(
+      'ফাইল থেকে খোলা যাবে না — সার্ভার লাগবে / ' +
+        'cannot run from file://, serve the folder over http (python3 -m http.server 8765)',
+    );
+  }
   const response = await fetch('model.bin', { cache: 'force-cache' });
   if (!response.ok) throw new Error(`model.bin: HTTP ${response.status}`);
   return Model.fromBuffer(await response.arrayBuffer());
@@ -131,6 +139,7 @@ async function main() {
 
   try {
     model = await loadModel();
+    window.__bornomalaReady = true; // tells the watchdog in index.html to stand down
     ui.status.hidden = true;
     refreshCompose();
     consumeSharedText();
