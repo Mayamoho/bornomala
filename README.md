@@ -1,6 +1,8 @@
 # বর্ণমালা · Bornomala
 
-**Offline Bangla SMS compression. Around 350 Bangla characters in one SMS segment, on a phone with no internet.**
+**Crisis messaging for the network you have left. A family's status report is
+eight characters. Forty-five of them fit in one SMS. And if the phone is dead,
+the same message can be read off a printed card by hand.**
 
 In July 2024 the state cut 3G and 4G in Bangladesh. Broadband went dark. What
 survived was 2G — voice and SMS. People fell back to text.
@@ -14,36 +16,96 @@ Bangladesh has fought this fight before. 1952 was the right to speak Bangla.
 2024 was the right to speak at all. This is the same fight one layer down, in
 the character encoding.
 
-## What it does
+## The thing that is actually different
 
-Type Bangla. Bornomala compresses it into characters that are all in the GSM-7
-basic alphabet, so the phone sends it as a **7-bit** message instead of UCS-2.
-The recipient pastes it back (or shares it into the app) and gets the original
-text, character for character.
+Most crisis messaging tries to build a new network. Bornomala assumes you
+cannot, and makes the message small enough that the broken network you still
+have is enough.
 
-No server. No internet. No message leaves the device.
+That turns out to matter most for the messages people actually send in the
+first hours: not prose, but a small closed set of facts. *We are five. We are
+safe. We are in Khulna. The water is chest deep. Do not come this way.*
+
+So Bornomala does not compress the sentence. It sends the fact.
+
+| what you send | on the wire | what it costs today |
+| --- | --- | ---: |
+| "আমরা ৩ জন নিরাপদ আছি, ঢাকা, ২ ঘণ্টা আগে" | `H-428R-H7E` | 37 chars of UCS-2 |
+| the same, as compressed free text | 24 characters | — |
+| 45 families' status reports | **one SMS segment** | 45 SMS |
+| 15 families' reports, with names | **one SMS segment** | 15 SMS |
+
+`H-428R-H7E` is a real payload, not an illustration. `npm test` asserts it.
+
+## Three kinds of message
+
+Every payload announces itself with one leading character, so the receiver
+never has to guess.
+
+- **`H` — a crisis frame, hand-decodable.** Five bits pick one of 32 phrasebook
+  messages; the rest are typed slots (how many people, how urgent, blood group,
+  flood depth, shelter capacity), a location, and how many hours ago. Packed in
+  Crockford base-32, which has no `I`, `L`, `O` or `U` to confuse with `1`, `0`
+  or `V`.
+- **`C` / `D` — the same, packed dense.** 6.95 bits per character instead of 5,
+  for when both ends have the app. `D` is a batch of up to 64 frames.
+- **`B` — free Bangla prose**, arithmetic-coded against the language model, for
+  everything the phrasebook does not cover.
+
+## Graceful degradation, taken literally
+
+The Crisis Tech criteria ask how well a project works with no internet, no
+electricity, or on a button phone. Each of those is a separate design decision
+here, not a disclaimer.
+
+| what you have | what still works |
+| --- | --- |
+| No internet | Everything. The app is a PWA; nothing leaves the device. |
+| No mobile data, 2G only | Everything. Messages go through the phone's own SMS composer. |
+| A slow connection that never finishes | Crisis frames, relay and decoding all work **before `model.bin` arrives**. The shell is 92 kB against the model's 1.7 MB, and the service worker installs without it. |
+| No GPS | Location degrades from a 32-bit coordinate (±10 m) to a 6-bit district index, in the same slot, behind one flag bit. |
+| **A button phone** | It cannot run the app, but it can carry the message: an `H` payload is plain GSM-7 that any handset can receive, store and forward verbatim. |
+| **No phone at all** | An `H` payload decodes by hand from the printed card in the app's last tab. Character values, the 32 messages, the field ladders and all 64 districts fit on one sheet. |
+| A damaged message | CRC-8 on every payload. It refuses instead of decoding into fluent Bangla nobody wrote. |
+
+That last row is the one that matters most and is easiest to skip. Without a
+checksum a message garbled in transit does not fail — it *arrives*, plausible
+and wrong, in front of somebody deciding where to send a boat.
+
+## Relay: one person's signal, everyone's message
+
+Frames are small enough that batching stops being a micro-optimisation and
+becomes the product. A volunteer at a shelter collects status from the families
+around them and spends one SMS on all of it.
+
+```
+45 reports  →  159 septets  →  1 segment
+46 reports  →  162 septets  →  2 segments
+```
+
+Both numbers are asserted in `test/message.test.js`, so the claim in this
+README breaks the build if it ever stops being true.
 
 ## Results
 
-Measured on 4,000 held-out messages — every 50th corpus line, excluded from
-training and never read by the model (`npm run bench`):
+Free-text compression, measured on 5,000 held-out messages — every 50th corpus
+line, excluded from training and never read by the model (`npm run bench`):
 
 | codec | bits/char | Bangla chars per segment | fits in one segment |
 | --- | ---: | ---: | ---: |
-| **Bornomala** | **3.12** | **359** | 100.0% |
-| gzip -9 | 21.07 | 53 | 99.5% |
-| raw UCS-2 (what phones send today) | 16.00 | 70 | 98.3% |
+| **Bornomala** | **3.106** | **361** | 100.0% |
+| gzip -9 | 21.002 | 53 | 99.5% |
+| raw UCS-2 (what phones send today) | 16.000 | 70 | 98.2% |
 
-**5.1× the Bangla per segment versus UCS-2.** gzip is worse than sending the raw
+**5.15× the Bangla per segment versus UCS-2.** gzip is worse than sending the raw
 text on messages this short — its window never gets a chance to learn, and the
 header alone outweighs the message.
 
-The model is 1.7 MB, loads in ~50 ms, and compresses a message in under a
-millisecond in a desktop browser.
+Structured frames go further, because they are not compressing text at all:
+**11× versus UCS-2** on the same sentence, and **3× versus our own free-text
+compression**.
 
 ## How it works
-
-Four pieces, each doing one job:
 
 - **`src/coder.js`** — a deterministic integer arithmetic coder (Witten-Neal-Cleary,
   32-bit registers). Every product stays under 2⁴⁸, which a double holds exactly,
@@ -51,17 +113,26 @@ Four pieces, each doing one job:
   constraint: a float model would decode differently on different phones and the
   message would arrive as garbage.
 - **`src/model.js`** — a static PPM model with backoff, order 3 → 2 → 1 → 0,
-  stored as quantised 16-bit integer frequencies. Each context lists its most
-  likely symbols plus an escape. Order 0 is complete, so decoding always
-  terminates; characters outside the alphabet fall through to a 21-bit literal.
+  stored as quantised 16-bit integer frequencies. Order 0 is complete, so
+  decoding always terminates; characters outside the alphabet fall through to a
+  21-bit literal.
+- **`src/phrasebook.js`** — the 32 messages and their slot ladders. Append-only:
+  the index *is* the wire value, so reordering it would silently change the
+  meaning of every message already in flight.
+- **`src/frame.js`** — fixed-width bit fields, deliberately *not* run through the
+  arithmetic coder. That is what makes a frame decodable by hand. Notes are the
+  exception and are arithmetic-coded onto the tail, which is why a frame with a
+  note cannot use the paper profile — the app says so rather than failing.
+- **`src/geo.js`** — the two location precisions, and the 64 districts.
+- **`src/crc.js`** — CRC-8/ATM, with the payload length folded in so the trailing
+  zero bits the transport is free to add or drop cannot pass unnoticed.
 - **`src/gsm7.js`** — packs the bitstream into GSM 03.38 basic characters,
-  excluding ESC, CR, LF and space (which composers mangle or trim). 124 symbols
-  in the `full` profile, 6.95 bits each; an 85-symbol `ascii` profile is
-  available for gateways that transliterate.
-- **`index.html` / `app.js` / `sw.js`** — an installable offline PWA. Sending
-  goes through an `sms:` URI so the phone's own composer does the transmitting;
-  receiving uses the Web Share Target API, with paste as the fallback. The
-  service worker precaches everything, model included.
+  excluding ESC, CR, LF and space (which composers mangle or trim). Three
+  profiles: `full` (124 symbols, 6.95 bits each), `ascii` for gateways that
+  transliterate, and `base32` for the paper path.
+- **`index.html` / `app.js` / `sw.js`** — an installable offline PWA. Sending goes
+  through an `sms:` URI so the phone's own composer transmits; receiving uses the
+  Web Share Target API, with paste as the fallback.
 
 ### What the corpus taught us
 
@@ -87,7 +158,7 @@ python3 tools/train_model.py \
     corpus/clean/opensubtitles-bn.txt corpus/clean/wiki-bn.txt:8000000
 
 # 3. Verify
-npm test          # coder, GSM-7, model and codec round trips
+npm test          # coder, GSM-7, frames, checksum, relay and codec round trips
 npm run bench     # held-out comparison against gzip and UCS-2
 
 # 4. Run the app
@@ -99,14 +170,21 @@ holds the scripts that clean them.
 
 ## Limitations, honestly
 
-- **The recipient needs the app.** A compressed message is unreadable without
-  it. This is a tool for a network under stress, not a replacement for SMS.
-- **The model must match.** Sender and receiver need the same `model.bin`. The
-  payload carries a version marker so a mismatch fails loudly instead of
-  producing wrong text.
-- **One segment is not guaranteed.** 359 characters is the average; a message
-  full of out-of-alphabet characters will run longer. The app shows the real
-  segment count as you type.
+- **A free-text message needs the app at the other end.** A crisis frame does
+  not need the *model*, and an `H` frame does not need a *device*, but prose
+  needs both. This is a tool for a network under stress, not a replacement for
+  SMS.
+- **The model must match.** Sender and receiver need the same `model.bin` for
+  prose and for notes. The payload carries a version marker so a mismatch fails
+  loudly instead of producing wrong text.
+- **The phrasebook is a guess.** 32 messages chosen from what a network
+  blackout and a flood season actually produce. It is append-only by design,
+  but the right list comes from people who have run a shelter, not from me.
+- **Hand-decoding is slow.** Realistically a minute or two per message with the
+  card, and it only covers frames without notes. It is a floor, not a workflow.
+- **The district index assumes Bangladesh.** The 32-bit coordinate grid covers
+  the national bounding box only; outside it the app tells you to pick a
+  district rather than sending a wrong position.
 - **Some SMS gateways transliterate.** The `ascii` profile exists for that case
   and costs about 7% capacity.
 
@@ -116,8 +194,10 @@ Bangla text compression has been studied for decades — dictionary methods,
 Huffman variants over conjunct clusters, and PPM applied to Indic scripts. What
 is different here is the target: not the smallest possible file, but the
 **160-septet SMS segment boundary**, with a decoder that has to be bit-exact on
-a low-end phone with no network.
+a low-end phone with no network — and a fallback that assumes no phone at all.
 
 ---
 
 Built for the July Hackathon 2026 (Crisis Tech), JRA Foundation. Licensed MIT.
+
+Built with AI assistance (Claude Code), disclosed per the hackathon rules.
