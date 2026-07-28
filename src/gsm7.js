@@ -37,15 +37,37 @@ const FRAGILE = new Set(['\n', '\r', '', ' ']);
 const FULL = [...GSM7_BASIC].filter((c) => !FRAGILE.has(c));
 const ASCII = FULL.filter((c) => c.codePointAt(0) < 128);
 
-export const ALPHABETS = { full: FULL, ascii: ASCII };
+/**
+ * Crockford base-32: digits and capitals with I, L, O and U removed, so no
+ * pair of characters can be confused when a message is read off a printed
+ * card, copied by hand, or dictated over a voice call. Five bits a character
+ * instead of 6.95 — about 40% more characters — which is a real cost, and
+ * worth it for the only profile a human can decode without a phone.
+ */
+const BASE32 = [...'0123456789ABCDEFGHJKMNPQRSTVWXYZ'];
+
+export const ALPHABETS = { full: FULL, ascii: ASCII, base32: BASE32 };
+
+/** Separators tolerated inside a base-32 payload, so it can be written in groups. */
+const GROUP_SEPARATORS = /[\s-]+/g;
 
 /**
- * Marker characters: each encodes (version, profile). Digits follow the
+ * Marker characters: each encodes (version, profile, kind). Digits follow the
  * marker, so a marker may also appear in the digit alphabet without ambiguity.
+ *
+ *   text   — free Bangla prose, arithmetic-coded against the model
+ *   crisis — one structured phrasebook frame
+ *   batch  — up to 64 frames relayed in a single message
  */
 const MARKERS = [
-  { char: 'B', version: 1, profile: 'full' },
-  { char: 'b', version: 1, profile: 'ascii' },
+  { char: 'B', version: 1, profile: 'full', kind: 'text' },
+  { char: 'b', version: 1, profile: 'ascii', kind: 'text' },
+  { char: 'C', version: 1, profile: 'full', kind: 'crisis' },
+  { char: 'c', version: 1, profile: 'ascii', kind: 'crisis' },
+  { char: 'H', version: 1, profile: 'base32', kind: 'crisis' },
+  { char: 'D', version: 1, profile: 'full', kind: 'batch' },
+  { char: 'd', version: 1, profile: 'ascii', kind: 'batch' },
+  { char: 'J', version: 1, profile: 'base32', kind: 'batch' },
 ];
 
 const MARKER_BY_CHAR = new Map(MARKERS.map((m) => [m.char, m]));
@@ -62,9 +84,12 @@ function alphabetFor(profile) {
  * A sentinel 1 bit is prepended before the base conversion so leading zeros
  * survive the round trip and the exact bit count stays recoverable.
  */
-export function packBits(bits, profile = 'full') {
+export function packBits(bits, profile = 'full', kind = 'text') {
   const alphabet = alphabetFor(profile);
-  const marker = MARKERS.find((m) => m.profile === profile && m.version === 1);
+  const marker = MARKERS.find(
+    (m) => m.profile === profile && m.kind === kind && m.version === 1,
+  );
+  if (!marker) throw new RangeError(`no marker for ${kind} in the ${profile} profile`);
 
   const base = BigInt(alphabet.length);
   let value = 1n; // sentinel
@@ -83,7 +108,7 @@ export function packBits(bits, profile = 'full') {
   return marker.char + digits.join('');
 }
 
-/** Transmittable text -> { bits, profile, version }. */
+/** Transmittable text -> { bits, profile, version, kind }. */
 export function unpackBits(text) {
   if (typeof text !== 'string' || text.length === 0) {
     throw new RangeError('empty payload');
@@ -95,8 +120,16 @@ export function unpackBits(text) {
   const index = new Map(alphabet.map((c, i) => [c, i]));
   const base = BigInt(alphabet.length);
 
+  // Base-32 payloads are meant to be written down and read back, so accept the
+  // grouping a human will have added. Other profiles use every character in
+  // the alphabet as data and cannot afford to reserve separators.
+  const body =
+    marker.profile === 'base32'
+      ? [...text].slice(1).join('').replace(GROUP_SEPARATORS, '')
+      : [...text].slice(1).join('');
+
   let value = 0n;
-  for (const char of [...text].slice(1)) {
+  for (const char of body) {
     const digit = index.get(char);
     if (digit === undefined) {
       throw new RangeError(
@@ -109,7 +142,21 @@ export function unpackBits(text) {
   const binary = value.toString(2);
   if (binary === '0') throw new RangeError('payload carries no sentinel');
   const bits = [...binary].slice(1).map(Number); // drop the sentinel
-  return { bits, profile: marker.profile, version: marker.version };
+  return { bits, profile: marker.profile, version: marker.version, kind: marker.kind };
+}
+
+/**
+ * Breaks a base-32 payload into four-character groups.
+ *
+ * Purely presentational: `unpackBits` strips the separators again. Anyone
+ * copying a code onto a form, or reading it down a phone line, loses their
+ * place in an undifferentiated run of characters.
+ */
+export function group(text, size = 4) {
+  const [marker, ...rest] = [...text];
+  const chunks = [];
+  for (let i = 0; i < rest.length; i += size) chunks.push(rest.slice(i, i + size).join(''));
+  return [marker, ...chunks].join('-');
 }
 
 /** Septets a GSM-7 text costs; null if the text is not GSM-7 encodable. */
