@@ -32,6 +32,7 @@ const SHELL = [
   './src/message.js',
   './src/model.js',
   './src/phrasebook.js',
+  './src/qr.js',
 ];
 
 /** Free Bangla prose needs this. Nothing else does, so it must not gate install. */

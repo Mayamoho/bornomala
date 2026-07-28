@@ -15,6 +15,7 @@ import { blankFrame, isPaperSafe, mapLink, MAX_BATCH, MAX_HOURS_AGO } from './sr
 import { TEMPLATES, SLOTS, URGENCY, BLOOD, DEPTH, CAPACITY } from './src/phrasebook.js';
 import { DISTRICTS, inCoverage } from './src/geo.js';
 import { ALPHABETS, septetCost, gsm7Segments, ucs2Segments, group } from './src/gsm7.js';
+import { encodeQr, toSvg } from './src/qr.js';
 
 const el = (id) => document.getElementById(id);
 
@@ -147,6 +148,7 @@ function refreshCrisis() {
     el('crisis-note').textContent = 'অ্যাপ লাগবে, কিন্তু ছোট / needs the app, but shorter';
   }
   setCrisisButtons(true);
+  refreshQr('crisis-qr', payload);
 }
 
 function useLocation() {
@@ -210,6 +212,8 @@ function refreshRelay() {
     el('r-alone').textContent = '0';
     el('relay-send').disabled = true;
     el('relay-copy').disabled = true;
+    el('relay-qr-toggle').disabled = true;
+    el('relay-qr').hidden = true;
     el('relay-note').textContent = '';
     return;
   }
@@ -235,6 +239,8 @@ function refreshRelay() {
   el('r-alone').textContent = String(alone);
   el('relay-send').disabled = false;
   el('relay-copy').disabled = false;
+  el('relay-qr-toggle').disabled = false;
+  refreshQr('relay-qr', payload);
   el('relay-note').textContent =
     `${relay.length} জনের খবর ${segments} সেগমেন্টে — ` +
     `${relay.length} reports in ${segments} segment(s) instead of ${alone}`;
@@ -413,6 +419,48 @@ function renderCard() {
   );
 }
 
+/* ─────────────────────────── QR handoff ─────────────────────────── */
+
+/**
+ * What to put in the symbol.
+ *
+ * A link is worth the extra modules: the receiver's ordinary camera app opens
+ * it, the service worker serves the page from cache, and `?shared=` drops the
+ * payload straight into the decode tab. No network is involved at any point —
+ * the URL is a name for a cached page, not a request. Off a file:// origin
+ * there is nothing to link to, so send the raw payload instead.
+ */
+function qrContent(payload) {
+  const asLink = el('qr-link').checked && window.location.protocol.startsWith('http');
+  if (!asLink) return payload;
+  const { origin, pathname } = window.location;
+  return `${origin}${pathname}?shared=${encodeURIComponent(payload)}`;
+}
+
+function renderQr(hostId, payload) {
+  const host = el(hostId);
+  if (!payload) {
+    host.hidden = true;
+    return;
+  }
+  try {
+    const qr = encodeQr(qrContent(payload));
+    // The SVG is built entirely from our own numbers — the payload travels in
+    // the symbol's modules, never into the markup.
+    host.innerHTML = toSvg(qr, { scale: 4, quiet: 4 });
+    host.hidden = false;
+  } catch (error) {
+    host.hidden = true;
+    el(hostId === 'crisis-qr' ? 'crisis-note' : 'relay-note').textContent =
+      `QR বানানো গেল না / cannot build a QR: ${error.message}`;
+  }
+}
+
+/** Rebuilds a QR that is already on screen, so it tracks the message. */
+function refreshQr(hostId, payload) {
+  if (!el(hostId).hidden) renderQr(hostId, payload);
+}
+
 /* ──────────────────────────────── glue ──────────────────────────── */
 
 function sendBySms(payload) {
@@ -513,6 +561,21 @@ function wire() {
     refreshCrisis();
   });
   el('locate').addEventListener('click', useLocation);
+
+  el('crisis-qr-toggle').addEventListener('click', () => {
+    const host = el('crisis-qr');
+    if (host.hidden) renderQr('crisis-qr', crisisPayload);
+    else host.hidden = true;
+  });
+  el('relay-qr-toggle').addEventListener('click', () => {
+    const host = el('relay-qr');
+    if (host.hidden) renderQr('relay-qr', el('relay-payload').value);
+    else host.hidden = true;
+  });
+  el('qr-link').addEventListener('change', () => {
+    refreshQr('crisis-qr', crisisPayload);
+    refreshQr('relay-qr', el('relay-payload').value);
+  });
 
   el('crisis-send').addEventListener('click', () => sendBySms(crisisPayload));
   el('crisis-copy').addEventListener('click', () => copyText(crisisPayload, 'crisis-note'));

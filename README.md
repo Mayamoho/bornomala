@@ -66,6 +66,7 @@ here, not a disclaimer.
 | No GPS | Location degrades from a 32-bit coordinate (±10 m) to a 6-bit district index, in the same slot, behind one flag bit. |
 | **A button phone** | It cannot run the app, but it can carry the message: an `H` payload is plain GSM-7 that any handset can receive, store and forward verbatim. |
 | **No phone at all** | An `H` payload decodes by hand from the printed card in the app's last tab. Character values, the 32 messages, the field ladders and all 64 districts fit on one sheet. |
+| **No network whatsoever** | Show the QR, let the phone beside you point a camera. No radio, no operator, no pairing. |
 | A damaged message | CRC-8 on every payload. It refuses instead of decoding into fluent Bangla nobody wrote. |
 
 That last row is the one that matters most and is easiest to skip. Without a
@@ -85,6 +86,23 @@ around them and spends one SMS on all of it.
 
 Both numbers are asserted in `test/message.test.js`, so the claim in this
 README breaks the build if it ever stops being true.
+
+## The last transport: QR
+
+When there is no network at all — no data, no SMS, the tower itself down — two
+phones in the same room can still hand a message across. One shows a QR, the
+other points its ordinary camera app.
+
+The symbol encodes a link back to the app with the payload in `?shared=`, so
+scanning opens the decode tab directly. Nothing is fetched: the URL names a
+page the service worker already holds, which is why this works with the radio
+switched off entirely. A status report needs a version-1 symbol; a full 45-name
+relay batch still fits comfortably.
+
+`src/qr.js` is a complete encoder — Reed-Solomon over GF(256), all eight masks
+scored by the standard's penalty rules, error correction level M. Its output is
+verified against `zbarimg`, an outside decoder, in `test/qr.test.js`: whatever
+went in has to come back out, or the build fails.
 
 ## Results
 
@@ -126,6 +144,8 @@ compression**.
 - **`src/geo.js`** — the two location precisions, and the 64 districts.
 - **`src/crc.js`** — CRC-8/ATM, with the payload length folded in so the trailing
   zero bits the transport is free to add or drop cannot pass unnoticed.
+- **`src/qr.js`** — a self-contained QR encoder for the no-network handoff,
+  checked against an outside decoder rather than trusted.
 - **`src/gsm7.js`** — packs the bitstream into GSM 03.38 basic characters,
   excluding ESC, CR, LF and space (which composers mangle or trim). Three
   profiles: `full` (124 symbols, 6.95 bits each), `ascii` for gateways that

@@ -136,6 +136,17 @@
       .check { display: flex; align-items: center; gap: 9px; margin-top: 14px; font-size: 0.86rem; color: var(--muted); }
       .check input { width: 20px; min-height: 20px; height: 20px; flex: 0 0 auto; accent-color: var(--accent); }
 
+      .qr {
+        background: #fff;
+        padding: 12px;
+        border-radius: 12px;
+        margin-top: 14px;
+        display: inline-block;
+        line-height: 0;
+      }
+      .qr svg { display: block; width: 100%; max-width: 300px; height: auto; }
+      .qr[hidden] { display: none; }
+
       .note { color: var(--muted); font-size: 0.82rem; margin: 10px 0 0; }
       .warn { color: var(--warn); }
       .alarm { color: var(--alarm); }
@@ -272,6 +283,23 @@
             <button id="crisis-queue" type="button">রিলেতে যোগ করুন</button>
           </div>
           <p class="note" id="crisis-note"></p>
+
+          <h3>নেটওয়ার্ক একেবারেই নেই? — no network at all?</h3>
+          <p class="note">
+            পাশের ফোনে QR দেখান, ওরা ক্যামেরা ধরুক। কোনো রেডিও, অপারেটর বা অনুমতি লাগে না।
+            <br />Show the QR to the phone beside you and let them point a camera. No radio, no
+            operator, no permission.
+          </p>
+          <div class="check">
+            <input type="checkbox" id="qr-link" checked />
+            <label for="qr-link" style="margin: 0">
+              স্ক্যান করলে অ্যাপ খুলবে / scanning opens the app
+            </label>
+          </div>
+          <div class="row">
+            <button id="crisis-qr-toggle" type="button">QR দেখান / show QR</button>
+          </div>
+          <div class="qr" id="crisis-qr" hidden></div>
         </section>
       </div>
 
@@ -301,6 +329,10 @@
             <button id="relay-clear" type="button">সব মুছুন</button>
           </div>
           <p class="note" id="relay-note"></p>
+          <div class="row">
+            <button id="relay-qr-toggle" type="button" disabled>QR দেখান / show QR</button>
+          </div>
+          <div class="qr" id="relay-qr" hidden></div>
         </section>
       </div>
 
