@@ -6,7 +6,7 @@
     <title>বর্ণমালা — Bornomala</title>
     <meta
       name="description"
-      content="Offline Bangla SMS compression. Fits roughly 350 Bangla characters into one SMS segment, with no server and no internet."
+      content="Offline Bangla crisis messaging. A full status report in eight characters, forty-five of them in one SMS, and a paper fallback that needs no phone at all."
     />
     <meta name="theme-color" content="#0b0f0e" />
     <link rel="manifest" href="manifest.webmanifest" />
@@ -20,6 +20,7 @@
         --muted: #8ba099;
         --accent: #35d39a;
         --warn: #f2a93b;
+        --alarm: #f2685b;
         color-scheme: dark;
       }
       * { box-sizing: border-box; }
@@ -30,8 +31,8 @@
         font: 16px/1.55 system-ui, "Noto Sans Bengali", "SolaimanLipi", sans-serif;
         padding: max(16px, env(safe-area-inset-top)) 16px 48px;
       }
-      main { max-width: 640px; margin: 0 auto; }
-      header { padding: 8px 0 20px; }
+      main { max-width: 680px; margin: 0 auto; }
+      header { padding: 8px 0 16px; }
       h1 { font-size: 1.6rem; margin: 0 0 4px; letter-spacing: 0.01em; }
       .tagline { color: var(--muted); margin: 0; font-size: 0.95rem; }
       section {
@@ -42,38 +43,79 @@
         margin-bottom: 16px;
       }
       h2 { font-size: 1rem; margin: 0 0 12px; color: var(--muted); font-weight: 600; }
-      textarea {
+      h3 { font-size: 0.85rem; margin: 18px 0 8px; color: var(--muted); font-weight: 600; }
+
+      .tabs { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 16px; padding-bottom: 4px; }
+      .tabs button {
+        flex: 0 0 auto;
+        min-height: 42px;
+        padding: 0 14px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: #131a18;
+        color: var(--muted);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .tabs button[aria-selected="true"] {
+        background: var(--accent);
+        color: #05100c;
+        border-color: transparent;
+      }
+      .panel[hidden] { display: none; }
+
+      textarea, input[type="text"], select {
         width: 100%;
-        min-height: 116px;
-        resize: vertical;
         background: #0d1413;
         color: var(--ink);
         border: 1px solid var(--line);
         border-radius: 10px;
-        padding: 12px;
+        padding: 11px 12px;
         font: inherit;
+        min-height: 46px;
       }
-      textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+      textarea { min-height: 104px; resize: vertical; }
+      textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+      label { display: block; font-size: 0.8rem; color: var(--muted); margin: 12px 0 5px; }
+      .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 12px; }
+
       .payload {
         min-height: 74px;
         font-family: ui-monospace, "SF Mono", Menlo, monospace;
         font-size: 0.85rem;
         word-break: break-all;
       }
+      .code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 1.35rem;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        word-break: break-all;
+        margin: 6px 0 0;
+      }
+
+      .quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+      .quick button {
+        min-height: 58px;
+        text-align: left;
+        line-height: 1.25;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+      .quick button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+
       .stats {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
         gap: 10px;
         margin: 14px 0 4px;
       }
-      .stat {
-        background: #0d1413;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        padding: 10px 12px;
-      }
+      .stat { background: #0d1413; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
       .stat b { display: block; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
       .stat span { color: var(--muted); font-size: 0.78rem; }
+
       .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
       button {
         flex: 1 1 auto;
@@ -88,12 +130,52 @@
         cursor: pointer;
       }
       button.primary { background: var(--accent); color: #05100c; border-color: transparent; }
+      button.small { flex: 0 0 auto; min-height: 36px; padding: 0 12px; font-size: 0.82rem; }
       button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+      .check { display: flex; align-items: center; gap: 9px; margin-top: 14px; font-size: 0.86rem; color: var(--muted); }
+      .check input { width: 20px; min-height: 20px; height: 20px; flex: 0 0 auto; accent-color: var(--accent); }
+
       .note { color: var(--muted); font-size: 0.82rem; margin: 10px 0 0; }
       .warn { color: var(--warn); }
+      .alarm { color: var(--alarm); }
+
+      ul.list { list-style: none; margin: 0; padding: 0; }
+      ul.list li {
+        background: #0d1413;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.9rem;
+      }
+      ul.list li span { flex: 1 1 auto; }
+      .empty { color: var(--muted); font-size: 0.85rem; }
+
+      table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+      th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { color: var(--muted); font-weight: 600; }
+      td.k { font-family: ui-monospace, Menlo, monospace; color: var(--accent); white-space: nowrap; }
+      .cardcols { columns: 2; column-gap: 20px; }
+      .cardcols table { break-inside: avoid; }
+
       footer { color: var(--muted); font-size: 0.8rem; text-align: center; padding-top: 8px; }
       footer p { margin: 4px 0; }
       #status[hidden] { display: none; }
+
+      @media print {
+        :root { color-scheme: light; }
+        body { background: #fff; color: #000; padding: 0; font-size: 10pt; }
+        .tabs, footer, #status, .noprint, .panel[hidden] { display: none !important; }
+        section { border: none; background: none; padding: 0; }
+        th, td { border-bottom: 1px solid #ccc; }
+        td.k { color: #000; }
+        .cardcols { columns: 3; }
+      }
     </style>
   </head>
   <body>
@@ -101,56 +183,232 @@
       <header>
         <h1>বর্ণমালা <span aria-hidden="true">·</span> Bornomala</h1>
         <p class="tagline">
-          বাংলা এসএমএস সংকোচন — ইন্টারনেট ছাড়াই।
-          <br />Bangla SMS compression that runs with the network down.
+          নেটওয়ার্ক ভেঙে পড়লে যে বার্তাটা যায়।
+          <br />Crisis messaging for the network you have left.
         </p>
       </header>
 
       <p id="status" class="note warn" role="status">মডেল লোড হচ্ছে… loading model…</p>
 
-      <section aria-labelledby="compose-heading">
-        <h2 id="compose-heading">১. লিখুন — compose</h2>
-        <textarea
-          id="input"
-          lang="bn"
-          placeholder="এখানে বাংলায় লিখুন…"
-          autocomplete="off"
-          spellcheck="false"
-        ></textarea>
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tab-crisis" aria-controls="panel-crisis" aria-selected="true">
+          জরুরি বার্তা
+        </button>
+        <button role="tab" id="tab-relay" aria-controls="panel-relay" aria-selected="false">
+          রিলে <span id="relay-count"></span>
+        </button>
+        <button role="tab" id="tab-text" aria-controls="panel-text" aria-selected="false">
+          লিখুন
+        </button>
+        <button role="tab" id="tab-decode" aria-controls="panel-decode" aria-selected="false">
+          খুলুন
+        </button>
+        <button role="tab" id="tab-card" aria-controls="panel-card" aria-selected="false">
+          কাগজের কার্ড
+        </button>
+      </div>
 
-        <div class="stats">
-          <div class="stat"><b id="stat-chars">0</b><span>অক্ষর / characters</span></div>
-          <div class="stat"><b id="stat-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
-          <div class="stat"><b id="stat-ucs2">0</b><span>সেগমেন্ট আজ (UCS-2)</span></div>
-          <div class="stat"><b id="stat-ratio">—</b><span>সংকোচন / vs UCS-2</span></div>
-        </div>
+      <!-- ─────────────────────────── crisis frame ─────────────────────────── -->
+      <div class="panel" id="panel-crisis" role="tabpanel" aria-labelledby="tab-crisis">
+        <section>
+          <h2>১. কী হয়েছে — what has happened</h2>
+          <div class="quick" id="quick"></div>
 
-        <div class="row">
-          <button id="send" class="primary" type="button" disabled>এসএমএস পাঠান</button>
-          <button id="copy" type="button" disabled>কপি করুন</button>
-        </div>
-        <p class="note" id="compose-note"></p>
-      </section>
+          <label for="template">সব বার্তা — all messages</label>
+          <select id="template"></select>
 
-      <section aria-labelledby="payload-heading">
-        <h2 id="payload-heading">২. সংকুচিত বার্তা — compressed payload</h2>
-        <textarea id="payload" class="payload" readonly aria-live="polite"></textarea>
-      </section>
+          <div id="slots" class="grid2"></div>
 
-      <section aria-labelledby="decode-heading">
-        <h2 id="decode-heading">৩. পাওয়া বার্তা খুলুন — decode</h2>
-        <textarea
-          id="cipher"
-          class="payload"
-          placeholder="প্রাপ্ত সংকুচিত বার্তা এখানে পেস্ট করুন…"
-          autocomplete="off"
-          spellcheck="false"
-        ></textarea>
-        <textarea id="plain" lang="bn" readonly aria-live="polite"></textarea>
-        <p class="note" id="decode-note"></p>
-      </section>
+          <h3>কোথায় — where</h3>
+          <select id="loc-mode">
+            <option value="none">অবস্থান নেই / no location</option>
+            <option value="district" selected>জেলা / district (৬ বিট)</option>
+            <option value="gps">জিপিএস / precise GPS (৩২ বিট)</option>
+          </select>
+          <div id="district-wrap">
+            <label for="district">জেলা — district</label>
+            <select id="district"></select>
+          </div>
+          <div id="gps-wrap" hidden>
+            <div class="row">
+              <button id="locate" type="button" class="small">অবস্থান নিন / use my location</button>
+            </div>
+            <p class="note" id="gps-note">জিপিএস নেওয়া হয়নি / no fix yet</p>
+          </div>
 
-      <footer>
+          <h3>কখন — when</h3>
+          <select id="hours">
+            <option value="">সময় নেই / no time</option>
+          </select>
+
+          <h3>নাম বা নোট — name or note <span class="note">(ঐচ্ছিক / optional)</span></h3>
+          <input id="note" type="text" lang="bn" placeholder="যেমন: আয়েশা খাতুন" autocomplete="off" />
+          <p class="note">
+            নোট থাকলে প্রাপকের অ্যাপ লাগবে। নোট ছাড়া বার্তা কাগজেও পড়া যায়।
+            <br />A note needs the app at the other end. Without one, the message can be read off paper.
+          </p>
+
+          <div class="check">
+            <input type="checkbox" id="paper" checked />
+            <label for="paper" style="margin: 0">
+              কাগজে পড়া যায় এমন কোড / hand-decodable code (base-32)
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <h2>২. যা পাঠাবেন — the message</h2>
+          <p class="code" id="crisis-code">—</p>
+          <div class="stats">
+            <div class="stat"><b id="c-chars">0</b><span>অক্ষর / characters</span></div>
+            <div class="stat"><b id="c-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
+            <div class="stat"><b id="c-ucs2">0</b><span>আজ লাগত (UCS-2)</span></div>
+            <div class="stat"><b id="c-ratio">—</b><span>সাশ্রয় / saving</span></div>
+          </div>
+          <p class="note" id="crisis-plain"></p>
+          <div class="row">
+            <button id="crisis-send" class="primary" type="button">এসএমএস পাঠান</button>
+            <button id="crisis-copy" type="button">কপি</button>
+            <button id="crisis-queue" type="button">রিলেতে যোগ করুন</button>
+          </div>
+          <p class="note" id="crisis-note"></p>
+        </section>
+      </div>
+
+      <!-- ────────────────────────────── relay ─────────────────────────────── -->
+      <div class="panel" id="panel-relay" role="tabpanel" aria-labelledby="tab-relay" hidden>
+        <section>
+          <h2>রিলে — one SMS for many people</h2>
+          <p class="note">
+            একজনের হাতে নেটওয়ার্ক থাকলেই হয়। ৪৫ জনের খবর একটাই এসএমএসে যায়।
+            <br />One person with a bar of signal carries forty-five people's status in a single SMS.
+          </p>
+          <ul class="list" id="relay-list"></ul>
+          <p class="empty" id="relay-empty">
+            খালি — «জরুরি বার্তা» ট্যাব থেকে যোগ করুন / empty, add from the crisis tab
+          </p>
+
+          <div class="stats">
+            <div class="stat"><b id="r-count">0</b><span>বার্তা / reports</span></div>
+            <div class="stat"><b id="r-chars">0</b><span>অক্ষর / characters</span></div>
+            <div class="stat"><b id="r-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
+            <div class="stat"><b id="r-alone">0</b><span>আলাদা পাঠালে লাগত</span></div>
+          </div>
+          <textarea id="relay-payload" class="payload" readonly aria-live="polite"></textarea>
+          <div class="row">
+            <button id="relay-send" class="primary" type="button" disabled>এসএমএস পাঠান</button>
+            <button id="relay-copy" type="button" disabled>কপি</button>
+            <button id="relay-clear" type="button">সব মুছুন</button>
+          </div>
+          <p class="note" id="relay-note"></p>
+        </section>
+      </div>
+
+      <!-- ──────────────────────────── free text ───────────────────────────── -->
+      <div class="panel" id="panel-text" role="tabpanel" aria-labelledby="tab-text" hidden>
+        <section>
+          <h2>লিখুন — free Bangla text</h2>
+          <textarea
+            id="input"
+            lang="bn"
+            placeholder="এখানে বাংলায় লিখুন…"
+            autocomplete="off"
+            spellcheck="false"
+          ></textarea>
+
+          <div class="stats">
+            <div class="stat"><b id="stat-chars">0</b><span>অক্ষর / characters</span></div>
+            <div class="stat"><b id="stat-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
+            <div class="stat"><b id="stat-ucs2">0</b><span>সেগমেন্ট আজ (UCS-2)</span></div>
+            <div class="stat"><b id="stat-ratio">—</b><span>সংকোচন / vs UCS-2</span></div>
+          </div>
+
+          <div class="row">
+            <button id="send" class="primary" type="button" disabled>এসএমএস পাঠান</button>
+            <button id="copy" type="button" disabled>কপি করুন</button>
+          </div>
+          <p class="note" id="compose-note"></p>
+        </section>
+
+        <section>
+          <h2>সংকুচিত বার্তা — compressed payload</h2>
+          <textarea id="payload" class="payload" readonly aria-live="polite"></textarea>
+        </section>
+      </div>
+
+      <!-- ────────────────────────────── decode ────────────────────────────── -->
+      <div class="panel" id="panel-decode" role="tabpanel" aria-labelledby="tab-decode" hidden>
+        <section>
+          <h2>পাওয়া বার্তা খুলুন — decode</h2>
+          <textarea
+            id="cipher"
+            class="payload"
+            placeholder="প্রাপ্ত কোড এখানে পেস্ট করুন…  H-428R-H7E"
+            autocomplete="off"
+            spellcheck="false"
+          ></textarea>
+          <div class="row">
+            <button id="lang-bn" type="button" class="small primary">বাংলা</button>
+            <button id="lang-en" type="button" class="small">English</button>
+          </div>
+          <ul class="list" id="decoded"></ul>
+          <p class="note" id="decode-note"></p>
+        </section>
+      </div>
+
+      <!-- ─────────────────────────── printable card ───────────────────────── -->
+      <div class="panel" id="panel-card" role="tabpanel" aria-labelledby="tab-card" hidden>
+        <section>
+          <h2>কাগজের কার্ড — the paper decode card</h2>
+          <p class="note noprint">
+            ছাপিয়ে আশ্রয়কেন্দ্রে রাখুন। ফোন বা বিদ্যুৎ ছাড়াই <code>H</code> দিয়ে শুরু হওয়া কোড
+            এই কার্ড দেখে হাতে খোলা যায়।
+            <br />Print this and pin it up. A code beginning with <code>H</code> can be decoded by
+            hand from this card, with no phone and no power.
+          </p>
+          <div class="row noprint">
+            <button type="button" id="print" class="small">ছাপান / print</button>
+          </div>
+
+          <h3>কীভাবে পড়বেন — how to read a code by hand</h3>
+          <ol class="note" style="padding-left: 20px">
+            <li>
+              হাইফেন বাদ দিন। প্রথম অক্ষর <code>H</code> মানে হাতে-পড়ার কোড।
+              <br />Drop the hyphens. A leading <code>H</code> means hand-decodable.
+            </li>
+            <li>
+              বাকি অক্ষরগুলো নিচের তালিকা থেকে সংখ্যায় বদলান, প্রতিটির ৫ বিট পাশাপাশি লিখুন।
+              <br />Convert each remaining character to its number below, and write each as 5 bits.
+            </li>
+            <li>
+              প্রথম ১ বিট বাদ দিন (সেন্টিনেল), শেষ ৮ বিট বাদ দিন (চেকসাম)।
+              <br />Drop the first bit (sentinel) and the last 8 bits (checksum).
+            </li>
+            <li>
+              এবার শুরু থেকে: ৫ বিট = বার্তা নম্বর · ১ বিট অবস্থান আছে কি না · থাকলে ১ বিট ধরন
+              (০ = জেলা, তারপর ৬ বিট জেলা নম্বর) · ১ বিট সময় আছে কি না · থাকলে ৫ বিট = কত ঘণ্টা আগে
+              · তারপর বার্তার নিজস্ব ঘরগুলো · শেষ ১ বিট নোট আছে কি না।
+              <br />Then read left to right: 5 bits message number · 1 bit has-location · if set, 1
+              bit mode (0 = district, then 6 bits district number) · 1 bit has-time · if set, 5 bits
+              hours ago · then the message's own fields · a final bit saying whether a note follows.
+            </li>
+          </ol>
+
+          <h3>অক্ষর → সংখ্যা — character values (Crockford base-32)</h3>
+          <div id="card-base32"></div>
+
+          <h3>বার্তা — messages (৫ বিট / 5 bits)</h3>
+          <div id="card-templates" class="cardcols"></div>
+
+          <h3>ঘরের মান — field values</h3>
+          <div id="card-slots" class="cardcols"></div>
+
+          <h3>জেলা — districts (৬ বিট / 6 bits)</h3>
+          <div id="card-districts" class="cardcols"></div>
+        </section>
+      </div>
+
+      <footer class="noprint">
         <p>সব কিছু আপনার ফোনেই চলে — কোনো সার্ভার নেই।</p>
         <p>Everything runs on your phone. No server, no internet, no message leaves the device.</p>
       </footer>

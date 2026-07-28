@@ -9,26 +9,44 @@
  * Bump CACHE when any shell file or the model changes.
  */
 
-const CACHE = 'bornomala-v1';
+const CACHE = 'bornomala-v2';
 
+/**
+ * The shell is a few tens of kilobytes and covers every structured crisis
+ * message — templates, districts, frames, the paper profile, decoding. It has
+ * to install even on a connection that will never finish 1.7 MB.
+ */
 const SHELL = [
   './',
   './index.html',
   './app.js',
   './manifest.webmanifest',
   './icon.svg',
-  './model.bin',
+  './src/bitfield.js',
   './src/codec.js',
   './src/coder.js',
-  './src/model.js',
+  './src/crc.js',
+  './src/frame.js',
+  './src/geo.js',
   './src/gsm7.js',
+  './src/message.js',
+  './src/model.js',
+  './src/phrasebook.js',
 ];
+
+/** Free Bangla prose needs this. Nothing else does, so it must not gate install. */
+const OPTIONAL = ['./model.bin'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(SHELL))
+      .then(async (cache) => {
+        await cache.addAll(SHELL);
+        // Deliberately not awaited: a model download that times out must not
+        // leave the app uninstalled and the crisis path unavailable.
+        for (const url of OPTIONAL) cache.add(url).catch(() => {});
+      })
       .then(() => self.skipWaiting()),
   );
 });
