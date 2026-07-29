@@ -245,6 +245,70 @@ python3 -m http.server 8765
 The corpora themselves are not in the repo — they are 554 MB. `corpus/tools/`
 holds the scripts that clean them.
 
+## When your ordinary SMS app is enough
+
+Often. One short message, to one person, on a network that is working: send it
+normally. Bornomala adds nothing there, and pretending otherwise would be the
+fastest way to lose your trust on the day it matters.
+
+What it is for is narrower and worse. Bangla is not in the GSM-7 alphabet, so
+every Bangla SMS is carried as UCS-2 at 70 characters per segment against
+English's 160. A few lines of Bangla is three or four segments, billed as three
+or four messages — and a multi-segment message only arrives if *every* segment
+does. In the first hours after a cyclone or a shutdown, when everyone is texting
+at once, that is exactly the message a congested cell drops.
+
+Then there are the three things a phone's SMS app cannot do at all:
+
+- **Sixty families' status in one SMS.** Not a feature of any SMS client. It is
+  the difference between a shelter volunteer spending one message and sixty.
+- **A message that survives a dead phone.** A code beginning with `H` is
+  decodable by hand from a printed card, with no device and no power.
+- **A message with no network at any point.** Screen to camera over QR — no
+  tower, no Bluetooth, no pairing, no permission.
+
+So this is not an SMS replacement. It is what SMS degrades into when SMS is the
+only channel left and it is overloaded.
+
+## What belongs in the phrasebook, and who should decide
+
+The 32 messages are a guess, and the README has said so from the start. Reading
+against the humanitarian standards makes the shape of the gap concrete rather
+than vague.
+
+[Sphere](https://spherestandards.org/handbook/) organises life-saving response
+into four sectors — water/sanitation/hygiene, food security and nutrition,
+shelter and settlement, and health. Bornomala covers water, food, shelter and
+medicine, but health is thin: there is one entry for fever and diarrhoea and
+nothing for a pregnant woman needing evacuation, an unaccompanied child, or a
+cholera/AWD outbreak by name. [ICRC's Restoring Family
+Links](https://familylinks.icrc.org/) has run on short pre-printed messages for
+decades — *safe and well*, *anxious for news* — which is the same design as this
+phrasebook, arrived at independently and long before it. Bornomala has *someone
+is missing* but no way to say *I am searching for this person* or *anxious for
+news*, which is most of what families actually send.
+
+Bangladesh-specific gaps are sharper still: no Bangladesh Met Department signal
+number (মহাবিপদ সংকেত), which is the single most-repeated fact in a cyclone
+warning and is carried by the [Cyclone Preparedness
+Programme](https://bdrcs.org/cyclone-preparedness-programm-cpp/)'s 43,000
+volunteers; no landslide, which is what actually kills people in the Chittagong
+hills and Cox's Bazar; no *shelter is full*, no *water is receding*, no
+livestock, no body recovery.
+
+That is roughly twenty more messages, and the table holds exactly 32 because
+the template index is five bits. Going further means six bits: one more bit on
+every message, every printed card reprinted, and every payload changed. That is
+a deliberate version boundary, not a patch.
+
+It is also the wrong thing to do from a laptop. The list above is derived from
+standards documents; the list that belongs in the app comes from people who
+have run a shelter through a cyclone season, and from
+[TWB's](https://translatorswithoutborders.org/twb-glossaries/) work on which
+words survive translation into Chittagonian and Rohingya. The format is
+append-only precisely so that list can arrive later without breaking the
+messages already in flight.
+
 ## Limitations, honestly
 
 - **A free-text message needs the app at the other end.** A crisis frame does
