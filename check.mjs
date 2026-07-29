@@ -47,7 +47,17 @@ check('emergency: typed text alone is NOT enough, where and when required', () =
   return assert(el('em-send').disabled && el('em-note').textContent.includes('where'), el('em-note').textContent);
 });
 
+check('emergency: a ready sentence is now required too', () => {
+  el('em-loc').value = 'district';
+  fire(el('em-loc'), 'change');
+  el('em-hours').value = '3';
+  fire(el('em-hours'), 'change');
+  return assert(el('em-send').disabled && el('em-note').textContent.includes('ready sentence'), el('em-note').textContent);
+});
+
 check('emergency: ready once where and when are answered', () => {
+  el('em-template').value = '2';
+  fire(el('em-template'), 'change');
   el('em-loc').value = 'district';
   fire(el('em-loc'), 'change');
   el('em-hours').value = '3';
@@ -88,12 +98,11 @@ check('emergency: phrasebook sentence appends to the typed text', () => {
   return assert(s.startsWith('ছাদ ভেঙে') && s.includes('আটকে'), s);
 });
 
-check('emergency: tapping the active quick button clears the sentence', () => {
+check('emergency: quick button selects its sentence and stays selected', () => {
   const button = [...el('em-quick').querySelectorAll('button')][2];
   click(button);
-  const cleared = el('em-template').value === '';
-  click(button);
-  return assert(cleared && el('em-template').value === '2', `after clear="${el('em-template').value}"`);
+  return assert(el('em-template').value === '2' && button.getAttribute('aria-pressed') === 'true',
+    `value="${el('em-template').value}" pressed=${button.getAttribute('aria-pressed')}`);
 });
 
 check('emergency: slot dropdowns appear for that sentence', () =>
@@ -145,6 +154,49 @@ check('relay: clear empties everything', () => {
 check('tabs: switching hides the other panels', () => {
   click(el('tab-emergency'));
   return assert(!el('panel-emergency').hidden && el('panel-normal').hidden && el('panel-relay').hidden, 'emergency shown only');
+});
+
+
+/* ── what actually leaves the phone, and what comes back ── */
+
+check('send: sms: URI carries the whole emergency message', () => {
+  el('em-text').value = 'ছাদ ভেঙে পড়েছে';
+  fire(el('em-text'), 'input');
+  el('em-template').value = '2';
+  fire(el('em-template'), 'change');
+  el('em-loc').value = 'district';
+  fire(el('em-loc'), 'change');
+  el('em-hours').value = '1';
+  fire(el('em-hours'), 'change');
+
+  let href = '';
+  window.__openUri = (uri) => { href = uri; };
+  click(el('em-send'));
+  const body = decodeURIComponent(href.replace('sms:?body=', ''));
+  return assert(href.startsWith('sms:?body=') && body.includes('ছাদ ভেঙে পড়েছে') && body.includes('maps.google.com'), body.split('\n').join(' | '));
+});
+
+check('send: hotline SMS targets the short code', () => {
+  let href = '';
+  window.__openUri = (uri) => { href = uri; };
+  const smsButton = [...el('hotlines').querySelectorAll('button')][0];
+  click(smsButton);
+  return assert(href.startsWith('sms:999?body='), href.slice(0, 60));
+});
+
+check('hotlines: all six render with call links', () => {
+  const items = el('hotlines').querySelectorAll('li');
+  const numbers = [...el('hotlines').querySelectorAll('a')].map((a) => a.getAttribute('href'));
+  return assert(items.length === 6 && numbers.includes('tel:999') && numbers.includes('tel:1090'), numbers.join(' '));
+});
+
+check('receive: a coded payload pasted back decodes to the original', () => {
+  el('input').value = 'পানি বুক সমান, নৌকা পাঠান';
+  fire(el('input'), 'input');
+  const payload = el('payload').value;
+  el('cipher').value = payload;
+  fire(el('cipher'), 'input');
+  return assert(el('plain').value === 'পানি বুক সমান, নৌকা পাঠান', `${payload} -> ${el('plain').value}`);
 });
 
 for (const [ok, name, detail] of out) console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}\n        ${detail}`);

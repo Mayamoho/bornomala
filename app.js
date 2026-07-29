@@ -155,6 +155,22 @@ function consumeSharedText() {
 
 const MAX_HOURS = 31;
 
+/**
+ * Official national short codes.
+ *
+ * 999 is the one that matters and the one that is toll-free; the rest are for
+ * when the caller already knows which service they need. Short codes do not
+ * reliably accept SMS, so calling is offered first and stated plainly.
+ */
+const HOTLINES = [
+  { number: '999', bn: 'জাতীয় জরুরি সেবা', en: 'Police · Fire · Ambulance', icon: '🚨' },
+  { number: '1090', bn: 'দুর্যোগের আগাম বার্তা', en: 'Disaster warning', icon: '🌀' },
+  { number: '102', bn: 'ফায়ার সার্ভিস', en: 'Fire Service & Civil Defence', icon: '🚒' },
+  { number: '333', bn: 'সরকারি তথ্য ও সেবা', en: 'Government information', icon: 'ℹ️' },
+  { number: '16263', bn: 'স্বাস্থ্য বাতায়ন', en: 'DGHS health helpline', icon: '🏥' },
+  { number: '109', bn: 'নারী ও শিশু সহায়তা', en: 'Women and children', icon: '🛡️' },
+];
+
 /** The six a volunteer reaches for first. The icon carries the meaning. */
 const QUICK = [
   { id: 0, icon: '✅' },
@@ -209,6 +225,7 @@ function locationLines() {
 function missingFields() {
   const missing = [];
   if (!emEl.text().value.trim()) missing.push('বার্তা / your message');
+  if (emEl.template().value === '') missing.push('প্রস্তুত বাক্য / a ready sentence');
   const mode = emEl.loc().value;
   if (mode === '') missing.push('কোথায় / where you are');
   else if (mode === 'gps' && !emGpsFix) missing.push('অবস্থান নিন / tap use my live location');
@@ -363,6 +380,40 @@ function refreshRelay() {
         `${relay.length} reports in ${ucs2Segments(joined)} segment(s)`;
 }
 
+function buildHotlines() {
+  const host = el('hotlines');
+  host.replaceChildren();
+
+  for (const line of HOTLINES) {
+    const item = document.createElement('li');
+
+    const label = document.createElement('span');
+    label.textContent = `${line.icon}  ${line.number} — ${line.bn} / ${line.en}`;
+
+    const call = document.createElement('a');
+    call.href = `tel:${line.number}`;
+    call.className = 'maplink';
+    call.textContent = '📞 কল / call';
+
+    const sms = document.createElement('button');
+    sms.type = 'button';
+    sms.className = 'small';
+    sms.textContent = 'এসএমএস / SMS';
+    sms.addEventListener('click', () => {
+      const message = emergencyMessage();
+      if (!message) {
+        el('em-note').className = 'note warn';
+        el('em-note').textContent = `বাকি আছে / still needed: ${missingFields().join(', ')}`;
+        return;
+      }
+      smsWith(message, line.number);
+    });
+
+    item.append(label, call, sms);
+    host.append(item);
+  }
+}
+
 function buildEmergencyControls() {
   const templates = emEl.template();
   const none = document.createElement('option');
@@ -402,8 +453,7 @@ function buildEmergencyControls() {
     label.textContent = templateLabel(id, 'bn');
     button.append(glyph, label);
     button.addEventListener('click', () => {
-      // Tapping the active one clears it: the sentence is optional.
-      templates.value = templates.value === String(id) ? '' : String(id);
+      templates.value = String(id);
       renderEmergencySlots();
       markQuick();
       refreshEmergency();
@@ -458,9 +508,6 @@ function wireEmergency() {
     if (!message) return;
     relay.push(message);
     emEl.text().value = '';
-    emEl.template().value = '';
-    renderEmergencySlots();
-    markQuick();
     refreshEmergency();
     refreshRelay();
     selectTab('relay');
@@ -474,9 +521,19 @@ function wireEmergency() {
   });
 }
 
-function smsWith(body) {
+/**
+ * Hands a URI to the phone. The indirection exists so a test can watch what
+ * would have been opened: a headless DOM cannot navigate, and "does the send
+ * button actually carry the whole message" is worth being able to assert.
+ */
+function openUri(uri) {
+  if (typeof window.__openUri === 'function') window.__openUri(uri);
+  else window.location.href = uri;
+}
+
+function smsWith(body, number = '') {
   if (!body) return;
-  window.location.href = `sms:?body=${encodeURIComponent(body)}`;
+  openUri(`sms:${number}?body=${encodeURIComponent(body)}`);
 }
 
 async function copyPlain(text, noteId) {
@@ -491,6 +548,7 @@ async function copyPlain(text, noteId) {
 
 async function main() {
   buildEmergencyControls();
+  buildHotlines();
   renderEmergencySlots();
   markQuick();
   wireEmergency();
