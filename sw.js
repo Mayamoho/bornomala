@@ -6,13 +6,12 @@
  * never depend on the network at runtime. That is the point — the app has to
  * work on the day the network is gone.
  *
- * Bump CACHE when any shell file or the model changes. This is not optional
- * housekeeping: serving is cache-first with no revalidation, so an installed
- * copy keeps handing out the old files until the cache name changes. A deploy
- * that forgets this line reaches nobody who already has the app.
+ * Bump CACHE when the model changes, and on any deploy worth forcing: the
+ * activate handler deletes every other cache, which is what evicts a stale
+ * shell from a phone that has been offline for a week.
  */
 
-const CACHE = 'bornomala-v7';
+const CACHE = 'bornomala-v8';
 
 /**
  * The shell is a few tens of kilobytes and covers every structured crisis
@@ -67,9 +66,36 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+/**
+ * The shell is small and changes; the model is 1.7 MB and does not.
+ *
+ * So the shell is network-first: a refresh with any connection at all picks up
+ * a new build immediately, and falls back to the cache the moment the network
+ * is not there — which is the case this whole app exists for. The model stays
+ * cache-first, because re-downloading 1.7 MB on every load would be absurd.
+ */
+function isShell(url) {
+  return url.origin === self.location.origin && !url.pathname.endsWith('model.bin');
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
+
+  if (isShell(new URL(request.url))) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request, { ignoreSearch: true })),
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(request, { ignoreSearch: true }).then((hit) => {

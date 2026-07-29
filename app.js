@@ -50,7 +50,7 @@ const QUICK = [
 const inLang = (pair) => (getLang() === 'bn' ? pair.bn : pair.en);
 
 /** Bumped on every deploy, shown in the footer so a stale copy is visible. */
-const BUILD = 'v7';
+const BUILD = 'v8';
 
 /**
  * A tappable position for a plain-text recipient.
@@ -61,15 +61,53 @@ const BUILD = 'v7';
  * plain-text message is already making.
  */
 function mapsUrl(frame) {
-  if (!frame.location?.precise) return null;
-  const { lat, lon } = frame.location;
-  return `https://maps.google.com/?q=${lat.toFixed(5)},${lon.toFixed(5)}`;
+  if (!frame.location) return null;
+  if (frame.location.precise) {
+    const { lat, lon } = frame.location;
+    return `https://maps.google.com/?q=${lat.toFixed(5)},${lon.toFixed(5)}`;
+  }
+  // A district is a place with a name, so search for the name. Coarse, but it
+  // puts the receiver in the right district rather than nowhere.
+  const name = DISTRICTS[frame.location.district]?.en;
+  return name ? `https://maps.google.com/?q=${encodeURIComponent(`${name}, Bangladesh`)}` : null;
 }
 
-/** The sentence as it should leave the phone when nobody decodes it. */
+/**
+ * The sentence as it should leave the phone when nobody decodes it.
+ *
+ * The coordinates stay in the text *and* a link goes with them: the link needs
+ * data to open, the numbers do not, and a receiver on 2G with no data can
+ * still read them out or type them into an offline map.
+ */
 function readableMessage(frame) {
   const url = mapsUrl(frame);
   return url ? `${describe(frame, getLang())}\n${url}` : describe(frame, getLang());
+}
+
+/**
+ * What every outgoing message is signed with.
+ *
+ * Not authentication — nothing here proves who sent it. It tells a receiver
+ * who has never seen a Bornomala code what the string in front of them is, and
+ * where to go to read it.
+ */
+function withAttribution(text) {
+  return text ? `${text}\n${t('sentWith')}: ${window.location.origin}${window.location.pathname}` : text;
+}
+
+/**
+ * Strips everything a receiver's SMS app might have around the code: our own
+ * attribution line, map links, and blank lines. Without this, pasting a whole
+ * received SMS into the decode box fails on text we put there ourselves.
+ */
+function sanitizePayload(text) {
+  const lines = text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(
+      (line) => line !== '' && !line.startsWith('http') && !line.includes(t('sentWith')) && !line.includes('Bornomala'),
+    );
+  return lines.length > 0 ? lines[0] : text.trim();
 }
 
 let model = null;
@@ -387,7 +425,7 @@ function refreshCompose() {
 /* ─────────────────────────────── decode ─────────────────────────── */
 
 function refreshDecode() {
-  const payload = el('cipher').value.trim();
+  const payload = sanitizePayload(el('cipher').value);
   const list = el('decoded');
   list.replaceChildren();
 
@@ -768,8 +806,10 @@ function wire() {
     refreshQr('relay-qr', relayPayload);
   });
 
-  el('crisis-send').addEventListener('click', () => sendBySms(crisisPayload));
-  el('crisis-copy').addEventListener('click', () => copyText(crisisPayload, 'crisis-note'));
+  el('crisis-send').addEventListener('click', () => sendBySms(withAttribution(crisisPayload)));
+  el('crisis-copy').addEventListener('click', () =>
+    copyText(withAttribution(crisisPayload), 'crisis-note'),
+  );
   el('crisis-queue').addEventListener('click', () => {
     if (relay.length >= MAX_BATCH) return;
     relay.push(currentFrame());
@@ -779,9 +819,11 @@ function wire() {
     selectTab('relay');
   });
 
-  el('relay-send').addEventListener('click', () => sendBySms(el('relay-payload').value));
+  el('relay-send').addEventListener('click', () =>
+    sendBySms(withAttribution(el('relay-payload').value)),
+  );
   el('relay-copy').addEventListener('click', () =>
-    copyText(el('relay-payload').value, 'relay-note'),
+    copyText(withAttribution(el('relay-payload').value), 'relay-note'),
   );
   el('relay-clear').addEventListener('click', () => {
     relay.length = 0;

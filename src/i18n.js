@@ -129,6 +129,7 @@ export const STRINGS = {
     outsideGrid: 'Outside the Bangladesh grid — pick a district instead.',
     fix: (lat, lon) => `${lat}, ${lon} — ±10 m`,
     fixOk: 'Location captured, accurate to about 10 m',
+    sentWith: 'Sent with Bornomala',
     noFixError: (reason) => `No fix: ${reason}`,
     relayNote: (count, segments, alone) =>
       `${count} report(s) in ${segments} segment(s) instead of ${alone}.`,
@@ -249,6 +250,7 @@ export const STRINGS = {
     outsideGrid: 'বাংলাদেশের বাইরে — জেলা বেছে নিন।',
     fix: (lat, lon) => `${lat}, ${lon} — ±১০ মিটার`,
     fixOk: 'অবস্থান পাওয়া গেছে, প্রায় ১০ মিটার নির্ভুল',
+    sentWith: 'বর্ণমালা অ্যাপ দিয়ে পাঠানো',
     noFixError: (reason) => `পাওয়া গেল না: ${reason}`,
     relayNote: (count, segments, alone) =>
       `${count} জনের খবর ${segments} সেগমেন্টে — আলাদা পাঠালে লাগত ${alone}।`,
