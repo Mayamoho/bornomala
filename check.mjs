@@ -180,6 +180,35 @@ check('send: every hotline row is a live sms: link', () => {
   return assert(links.length === 9 && enabled && first.startsWith('sms:999?body='), `${links.length} links, first=${first.slice(0, 24)}`);
 });
 
+check('send: a typed recipient goes into the sms: link', () => {
+  el('em-to').value = '01712-345678';
+  fire(el('em-to'), 'input');
+  const href = el('em-send').getAttribute('href') ?? '';
+  return assert(href.startsWith('sms:01712345678?body='), href.slice(0, 40));
+});
+
+check('send: clearing the recipient falls back to the no-number form', () => {
+  el('em-to').value = '';
+  fire(el('em-to'), 'input');
+  const href = el('em-send').getAttribute('href') ?? '';
+  return assert(href.startsWith('sms:?body='), href.slice(0, 40));
+});
+
+check('send: relay takes its own recipient', () => {
+  el('em-to').value = '';
+  fire(el('em-to'), 'input');
+  click(el('em-queue'));
+  el('relay-to').value = '+8801812345678';
+  fire(el('relay-to'), 'input');
+  const href = el('relay-send').getAttribute('href') ?? '';
+  click(el('relay-clear'));
+  // Queueing empties the compose box by design; put it back or every later
+  // check runs against a message that is missing its typed line.
+  el('em-text').value = 'ছাদ ভেঙে পড়েছে';
+  fire(el('em-text'), 'input');
+  return assert(href.startsWith('sms:+8801812345678?body='), href.slice(0, 40));
+});
+
 check('qr: tapping with fields missing explains what is missing', () => {
   const text = el('em-text').value;
   el('em-text').value = '';
@@ -233,6 +262,36 @@ check('lang: the typed message and choices survive the switch', () =>
 check('lang: back to english', () => {
   click(el('lang-en'));
   return assert(el('tab-emergency').textContent.includes('Emergency'), el('tab-emergency').textContent.trim());
+});
+
+check('send: a personal contact number goes into the compose sms: link', () => {
+  el('input').value = 'আমরা নিরাপদ আছি';
+  fire(el('input'), 'input');
+  el('to').value = '01712-345678';
+  fire(el('to'), 'input');
+  const href = el('send').getAttribute('href') ?? '';
+  return assert(href.startsWith('sms:01712345678?body='), href.slice(0, 40));
+});
+
+check('send: compose falls back to the no-number form when cleared', () => {
+  el('to').value = '';
+  fire(el('to'), 'input');
+  const href = el('send').getAttribute('href') ?? '';
+  return assert(href.startsWith('sms:?body='), href.slice(0, 40));
+});
+
+check('attribution: every outgoing message names the app', () => {
+  el('input').value = 'আমরা নিরাপদ আছি';
+  fire(el('input'), 'input');
+  const compose = decodeURIComponent(el('send').getAttribute('href') ?? '');
+  const emergency = decodeURIComponent(el('em-send').getAttribute('href') ?? '');
+  const hotline = decodeURIComponent(document.querySelectorAll('.hotline-sms')[0].getAttribute('href') ?? '');
+  click(el('em-queue'));
+  const relayBody = decodeURIComponent(el('relay-send').getAttribute('href') ?? '');
+  click(el('relay-clear'));
+  const carries = (s) => s.includes('Bornomala') || s.includes('বর্ণমালা');
+  return assert([compose, emergency, hotline, relayBody].every(carries),
+    [compose, emergency, hotline, relayBody].map((s) => s.split('—').pop()?.slice(0, 30)).join(' | '));
 });
 
 check('receive: a coded payload pasted back decodes to the original', () => {

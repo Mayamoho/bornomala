@@ -231,6 +231,14 @@
           <div class="stat"><b id="stat-ratio">—</b><span data-i18n="statRatio">vs UCS-2</span></div>
         </div>
 
+        <label for="to" data-i18n="toNumber">Send to (phone number)</label>
+        <input id="to" type="tel" inputmode="tel" placeholder="01XXXXXXXXX"
+               data-i18n-placeholder="toPlaceholder" autocomplete="tel" />
+        <p class="note" data-i18n="toHint">
+          Leave empty to pick the contact in your SMS app. Some phones refuse an SMS link with no
+          number — if the button does nothing, type the number here.
+        </p>
+
         <div class="row">
           <a id="send" class="btn primary" role="button" aria-disabled="true" data-i18n="send">Send as SMS</a>
           <button id="copy" type="button" disabled data-i18n="copy">Copy</button>
@@ -305,6 +313,13 @@
 
         <section>
           <h2 data-i18n="emSend">5. What gets sent</h2>
+          <label for="em-to" data-i18n="toNumber">Send to (phone number)</label>
+          <input id="em-to" type="tel" inputmode="tel" placeholder="01XXXXXXXXX"
+                 data-i18n-placeholder="toPlaceholder" autocomplete="tel" />
+          <p class="note" data-i18n="toHint">
+            Leave empty to pick the contact in your SMS app. Some phones refuse an SMS link with no
+            number — if the button does nothing, type the number here.
+          </p>
           <p class="preview" id="em-preview" lang="bn" aria-live="polite">—</p>
           <div class="stats">
             <div class="stat"><b id="em-chars">0</b><span data-i18n="statChars">characters</span></div>
@@ -346,6 +361,9 @@
             <div class="stat"><b id="r-segments">0</b><span data-i18n="statSegments">SMS segments</span></div>
             <div class="stat"><b id="r-alone">0</b><span data-i18n="statAlone">sent separately</span></div>
           </div>
+          <label for="relay-to" data-i18n="toNumber">Send to (phone number)</label>
+          <input id="relay-to" type="tel" inputmode="tel" placeholder="01XXXXXXXXX"
+                 data-i18n-placeholder="toPlaceholder" autocomplete="tel" />
           <textarea id="relay-payload" class="payload" readonly aria-live="polite"></textarea>
           <div class="row">
             <a id="relay-send" class="btn primary" role="button" aria-disabled="true" data-i18n="send">Send as SMS</a>

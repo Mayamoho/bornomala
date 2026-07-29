@@ -78,6 +78,11 @@ export const STRINGS = {
     copied: 'Copied',
     copyManually: 'Select and copy',
     desktopHint: 'On a computer nothing will happen — SMS needs a phone. Use Copy instead.',
+    sentWith: 'Sent with Bornomala',
+    toNumber: 'Send to (phone number)',
+    toPlaceholder: '01XXXXXXXXX',
+    toHint:
+      'Leave empty to pick the contact in your SMS app. Some phones refuse an SMS link with no number — if the button does nothing, type the number here.',
 
     relayHead: 'Relay — many reports, one SMS',
     relayHint: 'Add messages from the Emergency tab and send them together. Plain text, no coding.',
@@ -157,6 +162,11 @@ export const STRINGS = {
     copied: 'কপি হয়েছে',
     copyManually: 'নিজে কপি করুন',
     desktopHint: 'কম্পিউটারে কিছুই হবে না — এসএমএস পাঠাতে ফোন লাগে। তখন কপি করুন।',
+    sentWith: 'বর্ণমালা অ্যাপ দিয়ে পাঠানো',
+    toNumber: 'কাকে পাঠাবেন (মোবাইল নম্বর)',
+    toPlaceholder: '01XXXXXXXXX',
+    toHint:
+      'খালি রাখলে এসএমএস অ্যাপে গিয়ে নম্বর বাছবেন। কোনো কোনো ফোন নম্বর ছাড়া এসএমএস লিংক নেয় না — বোতামে কিছু না হলে এখানে নম্বর লিখুন।',
 
     relayHead: 'রিলে — অনেকের খবর, এক এসএমএসে',
     relayHint: 'জরুরি ট্যাব থেকে বার্তা যোগ করুন, একসাথে পাঠান। সাধারণ লেখা, কোনো কোড নেই।',

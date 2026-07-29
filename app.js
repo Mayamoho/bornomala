@@ -30,6 +30,7 @@ const ui = {
   cipher: el('cipher'),
   plain: el('plain'),
   send: el('send'),
+  to: el('to'),
   copy: el('copy'),
   composeNote: el('compose-note'),
   decodeNote: el('decode-note'),
@@ -65,7 +66,7 @@ function refreshCompose() {
     ui.segments.textContent = '0';
     ui.ucs2.textContent = '0';
     ui.ratio.textContent = '—';
-    ui.send.disabled = true;
+    setSendLink('send', '');
     ui.copy.disabled = true;
     ui.composeNote.textContent = '';
     return;
@@ -90,7 +91,7 @@ function refreshCompose() {
   // Compare the bits instead: UCS-2 spends 16 per character, we spend what we
   // spend, and that ratio is honest at every length.
   ui.ratio.textContent = `${((chars * 16) / (septets * 7)).toFixed(1)}×`;
-  ui.send.disabled = false;
+  setSendLink('send', withAttribution(payload), cleanNumber(ui.to.value));
   ui.copy.disabled = false;
   ui.composeNote.textContent =
     `${septets} সেপ্টেট / septets · ${((septets * 7) / chars).toFixed(2)} bits per character` +
@@ -98,7 +99,7 @@ function refreshCompose() {
 }
 
 function refreshDecode() {
-  const payload = ui.cipher.value.trim();
+  const payload = sanitizePayload(ui.cipher.value);
   if (!model || payload === '') {
     ui.plain.value = '';
     ui.decodeNote.textContent = '';
@@ -109,27 +110,23 @@ function refreshDecode() {
     ui.decodeNote.textContent = '';
   } catch (error) {
     ui.plain.value = '';
-    ui.decodeNote.textContent = `খোলা গেল না / could not decode: ${error.message}`;
+    ui.decodeNote.textContent = t('couldNotDecode', error.message);
   }
 }
 
 function sendBySms() {
-  const payload = ui.payload.value;
-  if (!payload) return;
-  // No recipient: the composer opens with the body filled and the user picks
-  // who to send it to. `?body=` is the form Android and iOS both accept.
-  window.location.href = `sms:?body=${encodeURIComponent(payload)}`;
+  smsWith(withAttribution(ui.payload.value), cleanNumber(ui.to.value));
 }
 
 async function copyPayload() {
-  const payload = ui.payload.value;
+  const payload = withAttribution(ui.payload.value);
   if (!payload) return;
   try {
     await navigator.clipboard.writeText(payload);
-    ui.composeNote.textContent = 'কপি হয়েছে / copied';
+    ui.composeNote.textContent = t('copied');
   } catch {
     ui.payload.select();
-    ui.composeNote.textContent = 'নিজে কপি করুন / select and copy';
+    ui.composeNote.textContent = t('copyManually');
   }
 }
 
@@ -254,7 +251,7 @@ function emergencyMessage() {
   const hours = emEl.hours().value;
   parts.push(hours === '0' ? t('justNow') : t('hoursAgo', getLang() === 'bn' ? bnNum(hours) : hours));
 
-  return [parts.join(' · '), ...locationLines()].join('\n');
+  return withAttribution([parts.join(' · '), ...locationLines()].join('\n'));
 }
 
 function renderEmergencySlots() {
@@ -295,7 +292,7 @@ function refreshEmergency() {
   el('em-segments').textContent = String(message ? ucs2Segments(message) : 0);
 
   const ready = message !== '';
-  setSendLink('em-send', message);
+  setSendLink('em-send', message, cleanNumber(el('em-to').value));
   el('em-copy').disabled = !ready;
   el('em-queue').disabled = !ready;
   el('em-note').className = ready ? 'note' : 'note warn';
@@ -385,7 +382,7 @@ function refreshRelay() {
   // Sent one at a time, each report costs its own segments.
   el('r-alone').textContent = String(relay.reduce((n, m) => n + ucs2Segments(m), 0));
   el('relay-payload').value = joined;
-  setSendLink('relay-send', joined);
+  setSendLink('relay-send', joined, cleanNumber(el('relay-to').value));
   el('relay-copy').disabled = relay.length === 0;
   refreshQr('relay-qr', joined);
   el('relay-qr-toggle').disabled = relay.length === 0;
@@ -542,6 +539,8 @@ function wireEmergency() {
   }
 
   emEl.text().addEventListener('input', refreshEmergency);
+  el('em-to').addEventListener('input', refreshEmergency);
+  el('relay-to').addEventListener('input', refreshRelay);
   emEl.template().addEventListener('change', () => {
     renderEmergencySlots();
     markQuick();
@@ -640,6 +639,48 @@ function toggleQr(hostId, text, toggleId, noteId) {
 
 /* ──────────────────────────────── sending ───────────────────────────── */
 
+/**
+ * The line every outgoing message carries.
+ *
+ * Not proof of anything — nothing here signs a message, and it should not be
+ * read as authentication. It tells a receiver holding an unfamiliar string
+ * what it is and where to go to read it, which is the difference between a
+ * coded payload being acted on and being deleted as spam.
+ */
+function attributionLine() {
+  const { origin, pathname } = window.location;
+  const url = origin && origin !== 'null' ? `${origin}${pathname}` : 'mayamoho.github.io/bornomala/';
+  return `— ${t('sentWith')}: ${url}`;
+}
+
+function withAttribution(text) {
+  return text ? `${text}\n${attributionLine()}` : text;
+}
+
+/**
+ * Strips anything wrapped around a code before decoding: our own attribution,
+ * map links, blank lines. Without it, pasting a whole received SMS fails on
+ * text this app put there itself.
+ */
+function sanitizePayload(text) {
+  const lines = (text ?? '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(
+      (line) =>
+        line !== '' &&
+        !line.startsWith('http') &&
+        !line.startsWith('—') &&
+        !line.includes('Bornomala') &&
+        !line.includes('বর্ণমালা'),
+    );
+  return lines.length > 0 ? lines[0] : (text ?? '').trim();
+}
+
+function cleanNumber(raw) {
+  return (raw ?? '').replace(/[^\d+]/g, '');
+}
+
 function smsUri(body, number = '') {
   if (!body) return '';
   // iOS separates the number from the body with `&`, everything else with `?`.
@@ -684,7 +725,7 @@ async function main() {
   applyLang();
   markLangButtons();
   const stamp = el('build');
-  if (stamp) stamp.textContent = 'v20';
+  if (stamp) stamp.textContent = 'v22';
 
   buildEmergencyControls();
   buildHotlines();
@@ -695,8 +736,8 @@ async function main() {
   refreshRelay();
 
   ui.input.addEventListener('input', refreshCompose);
+  ui.to.addEventListener('input', refreshCompose);
   ui.cipher.addEventListener('input', refreshDecode);
-  ui.send.addEventListener('click', sendBySms);
   ui.copy.addEventListener('click', copyPayload);
 
   try {
