@@ -12,8 +12,8 @@ three things, all on your phone, with no server and no internet:
    batch as one SMS.
 
 **[Try it live](https://mayamoho.github.io/bornomala/) ·
-[Slide deck](https://mayamoho.github.io/bornomala/slides.html) ·
-[Submission pack](SUBMISSION.md)** — July Hackathon 2026, Track A (Crisis Tech).
+[Slide deck](https://mayamoho.github.io/bornomala/slides.html)** — July Hackathon
+2026, Track A (Crisis Tech).
 
 | | Bornomala | raw UCS-2 (phones today) | gzip -9 |
 |---|---|---|---|
@@ -27,20 +27,42 @@ Measured, not claimed — `npm run bench`, output in
 In July 2024 the state cut 3G and 4G in Bangladesh. Broadband went dark. What
 survived was 2G — voice and SMS. People fell back to text.
 
-But Bangla is not in the GSM-7 alphabet, so every Bangla SMS is forced into
-UCS-2: **70 characters per segment instead of English's 160**. Bangla costs 2.3×
-more to send, splits into more segments, and fails more often on a congested
-network — exactly when SMS is the only channel left.
+But text messages were never designed for Bangla. SMS was built around an old
+character set that covers English letters and little else. Write a single Bangla
+letter and the whole message switches to a heavier format: **70 characters per
+message instead of English's 160**. Speaking your own language costs more than
+twice as much to send, and fails more often when the towers are jammed — exactly
+when texting is all anyone has left.
 
 Bangladesh has fought this fight before. 1952 was the right to speak Bangla.
 2024 was the right to speak at all. This is the same fight one layer down, in
 the character encoding.
 
-## The thing that is actually different
+## Why not just build an offline mesh app?
 
-Most crisis messaging tries to build a new network. Bornomala assumes you
-cannot, and makes the message small enough that the broken network you still
-have is enough.
+This is the honest question, and it deserves a straight answer, because half of
+crisis tech is Bluetooth mesh messengers passing messages phone to phone.
+
+They are a good idea with three conditions attached. Both people must have
+installed the same app *before* the disaster. Both must be within roughly a
+hundred metres. And for a message to travel further, enough strangers in between
+must also have installed it and left their phones on.
+
+|  | a Bluetooth mesh app | Bornomala |
+| --- | --- | --- |
+| who needs the app | both people, installed beforehand | only the sender |
+| how far it reaches | about 100 metres | the whole country |
+| who it can reach | strangers nearby running the same app | any phone that can receive a text |
+| can it call 999 | no | yes, one tap |
+
+The people you actually need in a flood are not in the room. They are family in
+another district, or a rescue control room in Dhaka. Bluetooth will never reach
+them. Text messages and voice calls already do — every handset in the country,
+no install, across operators, on 2G, with the mobile internet switched off.
+
+So Bornomala does not build a network. It uses the one that already reaches
+everybody, and makes it cheaper to use. Where a mesh genuinely wins — two phones
+side by side with no tower at all — the app shows a QR code instead.
 
 ## What the app actually does
 
@@ -82,7 +104,8 @@ until the message is worth a responder's time:
 - **When** — just now, or up to 31 hours ago. Required.
 - **Nine official national hotlines** — 999, 1090, 102, 16263, 333, 109, 1098,
   16430, 106 — each one tap from a call, or from an SMS with your message
-  already written into it.
+  already written into it. Calls need no internet, so this works even when
+  texting is failing.
 
 A live preview shows the exact text that will leave the phone, with its
 character and segment count. Location always travels twice: a maps link *and*
@@ -238,11 +261,6 @@ compression**.
 - **`src/phrasebook.js`** — the 32 messages and their slot ladders. Append-only:
   the index *is* the wire value, so reordering it would silently change the
   meaning of every message already in flight.
-- **`src/frame.js`, `src/crc.js`** — a fixed-width bit-field frame format and its
-  CRC-8/ATM checksum. Written for a phrasebook-only wire format that the shipped
-  app does not use: the Emergency tab sends plain words instead, which needs
-  nothing of the receiver. Kept because the format is finished and tested, but
-  **nothing in `app.js` imports either file.** Treat them as library, not feature.
 - **`src/geo.js`** — the two location precisions, and the 64 districts.
 - **`src/qr.js`** — a self-contained QR encoder for the no-network handoff,
   checked against an outside decoder rather than trusted.

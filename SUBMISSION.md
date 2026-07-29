@@ -23,24 +23,24 @@ Track A — Crisis Tech.
 
 ## 3. Problem statement (limit: 200 words)
 
-> In July 2024 the state cut 3G and 4G across Bangladesh. Broadband went dark.
-> What survived was 2G — voice and SMS — and people fell back to text.
+> In July 2024 the government shut off mobile internet across Bangladesh.
+> Broadband went dark too. What kept working was the oldest part of the phone
+> network: voice calls and text messages.
 >
-> But Bangla is not in the GSM-7 alphabet. Every Bangla SMS is forced into UCS-2
-> encoding, which fits 70 characters per segment where English fits 160. Bangla
-> costs roughly 2.3× more to send, splits into more segments, and fails more often
-> on a congested network — exactly when SMS is the only channel left.
+> But text messages were never designed for Bangla. SMS uses an old character set
+> that only covers English. A single Bangla letter switches the whole message to a
+> heavier format: English fits 160 characters, Bangla only 70. Speaking your own
+> language costs more than twice as much, and fails more often when towers are
+> overloaded — exactly when texting is all anyone has left.
 >
-> The cost is not abstract. In the first hours of a flood or a blackout, the
-> messages people send are short, urgent, and repeated by thousands at once: we
-> are five, we are safe, the water is chest deep, do not come this way. Every one
-> of those pays the Bangla penalty. A relay volunteer coordinating forty
-> households pays it forty times, on a prepaid balance that does not refill and a
-> tower that is already saturated.
+> That cost lands on the people least able to carry it. A volunteer checking on
+> forty households pays it forty times, out of prepaid balance nobody can top up.
 >
-> Almost every crisis-communication project responds by building a new network —
-> mesh, Bluetooth, Wi-Fi Direct. That requires both phones to run the same app,
-> in range, with battery. In July, nobody could build a network.
+> Most crisis apps answer this by building their own network over Bluetooth. That
+> only helps if both people installed the app before the disaster and stand within
+> about a hundred metres of each other. The people you actually need — family in
+> another district, a rescue control room — are nowhere near that. In July, nobody
+> could build a network.
 
 *(195 words, limit 200.)*
 
@@ -48,44 +48,41 @@ Track A — Crisis Tech.
 
 ## 4. Solution description (limit: 400 words)
 
-> Bornomala does not try to replace the broken network. It makes the message small
-> enough that the network still standing is enough. It is an installable offline
-> app with three tabs.
+> Bornomala does not build a new network. It uses the one that already reaches
+> everybody — ordinary text messages and phone calls — and makes it cheaper. Every
+> phone in the country can already receive an SMS: nobody installs anything first,
+> nobody has to be nearby, and it works across operators and districts on 2G with
+> no internet. That is the difference from a Bluetooth mesh app. A mesh reaches the
+> room you are standing in. SMS reaches your mother in another district.
 >
-> **Normal — compress and decode.** Type Bangla and live counters show characters,
-> compressed segments, what the same text costs in UCS-2, and the ratio. A small
-> Bangla model trained offline drives a deterministic arithmetic coder; the bits
-> pack into GSM-7 septets, so the message rides the 160-character lane, not the
-> 70-character one. Send hands it to the phone's SMS composer. Paste back a code,
-> or the whole received SMS, and the Bangla returns.
+> **Normal — make a message smaller.** Type in Bangla and live counters show how
+> many messages it would cost to send today, and how many after compressing. A
+> small Bangla language model inside the app predicts what letter comes next, and
+> the better it predicts, the fewer bits are needed to write it down. The result is
+> a short code that fits the cheap 160-character lane. Press Send and your phone's
+> own SMS screen opens, filled in. Paste a code you received, and the Bangla comes
+> back out.
 >
-> Benchmarked on 5,000 held-out messages: 3.106 bits per character against UCS-2's
-> 16.000 — 361 Bangla characters per segment instead of 70, 5.15× more, with 100%
-> fitting one segment. gzip -9 does worse than doing nothing (21.002 bits per
-> character): a general compressor's dictionary never pays for itself at SMS length.
+> Tested on 5,000 messages the model had never seen, 361 Bangla characters now fit
+> in one SMS instead of 70 — 5.15× more. Ordinary compression like gzip does worse
+> than doing nothing, because it has no idea what Bangla looks like.
 >
-> **Emergency — plain text, nothing needed on the other end.** Compression needs
-> the app at both ends and a survivor will not have it, so this tab uses none of
-> the codec. It refuses to send until the report is useful: what is happening in
-> your own words; one of 32 ready sentences in four groups with fill-in values
-> (people, urgency, blood group, flood depth, shelter capacity); where you are, from
-> 64 districts or live GPS; and when, up to 31 hours ago. Nine official national
-> hotlines (999, 1090, 102, 16263, 333, 109, 1098, 16430, 106) are one tap from a
-> call or a pre-written SMS. Location travels twice, as a maps link and as bare
-> coordinates, because the numbers work when the link cannot load.
+> **Emergency — for people who do not have the app.** Compression needs Bornomala
+> on both sides, and someone on a roof will not have it. So this tab sends plain
+> Bangla words any phone can display. It asks what is happening in your own words,
+> one of 32 ready-made sentences you fill in (how many people, how urgent, blood
+> group, water depth, shelter space), where you are — a district or your live
+> location — and how long ago. It will not send until those are answered, because a
+> report without a place is not a report. Nine official national numbers including
+> 999 sit underneath: one tap to call, one to text with the message already written.
+> Calls need no internet either.
 >
-> **Relay — many reports, one SMS.** A volunteer adds each household's status with
-> one tap and sends the batch as a single message, against a counter showing what
-> sending them separately would have cost.
+> **Relay — forty families, one message.** A volunteer collects reports and sends
+> them together, with a counter showing how many messages that saved.
 >
-> It degrades in steps: no internet, an offline PWA; no data, SMS over 2G; no GPS,
-> a district instead of coordinates; no network, a QR shown screen to camera.
->
-> Fully bilingual. No framework, no dependency, no account. 81 automated checks
-> cover codec round trips, every send path, the offline shell and translations.
->
-> 1952 was the right to speak Bangla. 2024 was the right to speak at all. This is
-> the same fight one layer down, in the character encoding.
+> With no network at all, the message becomes a QR code the next phone can
+> photograph. Everything is bilingual, works offline once installed, and never
+> sends anything to us — there is no server to send it to.
 
 *(391 words, limit 400.)*
 
