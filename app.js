@@ -50,7 +50,7 @@ const QUICK = [
 const inLang = (pair) => (getLang() === 'bn' ? pair.bn : pair.en);
 
 /** Bumped on every deploy, shown in the footer so a stale copy is visible. */
-const BUILD = 'v11';
+const BUILD = 'v12';
 
 /**
  * A tappable position for a plain-text recipient.
@@ -191,13 +191,42 @@ function setCrisisButtons(on) {
 }
 
 function refreshCrisis() {
-  const paperBox = el('paper');
   const frame = currentFrame();
+  const plainText = el('crisis-plaintext').checked;
+  const paperBox = el('paper');
 
-  // A note cannot travel in the hand-decodable profile: say so, do not fail.
+  // A note cannot travel in the hand-decodable profile, and neither can plain
+  // text: say so by disabling the box, do not fail.
   const paperPossible = isPaperSafe([frame]);
-  paperBox.disabled = !paperPossible;
-  const paper = paperPossible && paperBox.checked;
+  paperBox.disabled = !paperPossible || plainText;
+  const paper = !plainText && paperPossible && paperBox.checked;
+
+  el('crisis-plain').textContent = describe(frame, getLang(), { coords: false });
+  el('code-label').textContent = t(plainText ? 'codeLabelPlain' : 'codeLabel');
+
+  // Plain text is sentences, not bits. It needs no model and no encoder, so it
+  // must be handled before anything that can fail for want of either — that is
+  // what used to leave a stale code on screen when someone typed a note.
+  if (plainText) {
+    const readable = readableMessage(frame);
+    crisisPayload = readable;
+    el('crisis-code').textContent = readable;
+    el('c-chars').textContent = String([...readable].length);
+    el('c-segments').textContent = String(ucs2Segments(readable));
+    el('c-ucs2').textContent = String(ucs2Segments(readable));
+    el('c-ratio').textContent = '1.0×';
+    el('crisis-note').textContent = t('plainOk');
+    setCrisisButtons(true);
+
+    // The QR stays coded; it is an app-to-app handoff. If the note cannot be
+    // encoded yet, there is simply no QR to show, and that is not an error.
+    try {
+      refreshQr('crisis-qr', encodeCrisis(frame, model, { paper: false }));
+    } catch {
+      el('crisis-qr').hidden = true;
+    }
+    return;
+  }
 
   if (frame.note && !model) {
     el('crisis-code').textContent = '—';
@@ -216,35 +245,17 @@ function refreshCrisis() {
     return;
   }
 
-  // Plain text is the escape hatch for a recipient who has never heard of this
-  // app — a thana, a relief office, a landline-era number. It costs segments
-  // and it is not less private: nothing here was ever secret.
-  const plainText = el('crisis-plaintext').checked;
-  const readable = readableMessage(frame);
-
+  crisisPayload = payload;
   const septets = septetCost(payload);
   // The baseline is always the Bangla sentence: that is what someone would
   // have typed today, whatever language the interface happens to be in.
   const today = [...describe(frame, 'bn')].length;
 
-  el('code-label').textContent = t(plainText ? 'codeLabelPlain' : 'codeLabel');
-
-  if (plainText) {
-    crisisPayload = readable;
-    el('crisis-code').textContent = readable;
-    el('c-chars').textContent = String([...readable].length);
-    el('c-segments').textContent = String(ucs2Segments(readable));
-    el('c-ucs2').textContent = String(ucs2Segments(readable));
-    el('c-ratio').textContent = '1.0×';
-  } else {
-    crisisPayload = payload;
-    el('crisis-code').textContent = paper ? group(payload) : payload;
-    el('c-chars').textContent = String([...payload].length);
-    el('c-segments').textContent = String(gsm7Segments(payload));
-    el('c-ucs2').textContent = String(today);
-    el('c-ratio').textContent = `${((today * 16) / (septets * 7)).toFixed(1)}×`;
-  }
-  el('crisis-plain').textContent = describe(frame, getLang(), { coords: false });
+  el('crisis-code').textContent = paper ? group(payload) : payload;
+  el('c-chars').textContent = String([...payload].length);
+  el('c-segments').textContent = String(gsm7Segments(payload));
+  el('c-ucs2').textContent = String(today);
+  el('c-ratio').textContent = `${((today * 16) / (septets * 7)).toFixed(1)}×`;
 
   if (!paperPossible) {
     el('crisis-note').textContent = t('carriesNote');
@@ -254,8 +265,6 @@ function refreshCrisis() {
     el('crisis-note').textContent = t('appNeeded');
   }
   setCrisisButtons(true);
-  // The QR always carries the coded form: it is an app-to-app handoff, and the
-  // symbol stays small enough to scan off a cracked screen.
   refreshQr('crisis-qr', payload);
 }
 

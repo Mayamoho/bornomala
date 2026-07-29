@@ -6,7 +6,11 @@
   "private": true,
   "scripts": {
     "test": "node --test \"test/*.test.js\"",
-    "bench": "node tools/benchmark.js"
+    "bench": "node tools/benchmark.js",
+    "test:ui": "node uitest.mjs"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "jsdom": "^30.0.1"
+  }
 }

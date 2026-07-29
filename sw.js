@@ -11,7 +11,7 @@
  * shell from a phone that has been offline for a week.
  */
 
-const CACHE = 'bornomala-v11';
+const CACHE = 'bornomala-v12';
 
 /**
  * The shell is a few tens of kilobytes and covers every structured crisis
@@ -92,7 +92,16 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match(request, { ignoreSearch: true })),
+        .catch(async () => {
+          // A cache miss with no network must still be a Response: returning
+          // undefined here is what surfaces as "network error when attempting
+          // to fetch resource" in the console.
+          const hit = await caches.match(request, { ignoreSearch: true });
+          if (hit) return hit;
+          const shell = await caches.match('./', { ignoreSearch: true });
+          if (shell && request.mode === 'navigate') return shell;
+          return new Response('', { status: 504, statusText: 'offline' });
+        }),
     );
     return;
   }
