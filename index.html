@@ -110,6 +110,23 @@
       }
       .panel[hidden] { display: none; }
       .req { color: var(--alarm); }
+      a.btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1 1 auto;
+        min-height: 52px;
+        padding: 0 18px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: #182320;
+        color: var(--ink);
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      a.btn.primary { background: var(--accent); color: #05100c; border-color: transparent; }
+      a.btn[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
       .qr { background: #fff; padding: 12px; border-radius: 12px; margin-top: 14px; display: inline-block; line-height: 0; }
       .qr svg { display: block; width: 100%; max-width: 300px; height: auto; }
       .qr[hidden] { display: none; }
@@ -215,7 +232,7 @@
         </div>
 
         <div class="row">
-          <button id="send" class="primary" type="button" disabled data-i18n="send">Send as SMS</button>
+          <a id="send" class="btn primary" role="button" aria-disabled="true" data-i18n="send">Send as SMS</a>
           <button id="copy" type="button" disabled data-i18n="copy">Copy</button>
         </div>
         <p class="note" id="compose-note"></p>
@@ -294,11 +311,12 @@
             <div class="stat"><b id="em-segments">0</b><span data-i18n="statSegments">SMS segments</span></div>
           </div>
           <div class="row">
-            <button id="em-send" class="primary" type="button" disabled data-i18n="send">Send as SMS</button>
+            <a id="em-send" class="btn primary" role="button" aria-disabled="true" data-i18n="send">Send as SMS</a>
             <button id="em-copy" type="button" disabled data-i18n="copy">Copy</button>
             <button id="em-queue" type="button" disabled data-i18n="queue">Add to relay</button>
           </div>
           <p class="note" id="em-note"></p>
+          <p class="note" data-i18n="desktopHint">On a computer nothing will happen — SMS needs a phone. Use Copy instead.</p>
 
           <div class="row">
             <button id="em-qr-toggle" type="button" data-i18n="showQr">Show QR</button>
@@ -330,7 +348,7 @@
           </div>
           <textarea id="relay-payload" class="payload" readonly aria-live="polite"></textarea>
           <div class="row">
-            <button id="relay-send" class="primary" type="button" disabled data-i18n="send">Send as SMS</button>
+            <a id="relay-send" class="btn primary" role="button" aria-disabled="true" data-i18n="send">Send as SMS</a>
             <button id="relay-copy" type="button" disabled data-i18n="copy">Copy</button>
             <button id="relay-clear" type="button" data-i18n="clear">Clear all</button>
           </div>

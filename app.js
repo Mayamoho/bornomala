@@ -295,11 +295,21 @@ function refreshEmergency() {
   el('em-segments').textContent = String(message ? ucs2Segments(message) : 0);
 
   const ready = message !== '';
-  el('em-send').disabled = !ready;
+  setSendLink('em-send', message);
   el('em-copy').disabled = !ready;
   el('em-queue').disabled = !ready;
   el('em-note').className = ready ? 'note' : 'note warn';
   el('em-note').textContent = ready ? t('plainOk') : t('stillNeeded', missing.join(', '));
+  for (const link of document.querySelectorAll('.hotline-sms')) {
+    const uri = smsUri(message, link.dataset.number);
+    if (uri) {
+      link.href = uri;
+      link.setAttribute('aria-disabled', 'false');
+    } else {
+      link.removeAttribute('href');
+      link.setAttribute('aria-disabled', 'true');
+    }
+  }
   refreshQr('em-qr', message);
 }
 
@@ -375,7 +385,7 @@ function refreshRelay() {
   // Sent one at a time, each report costs its own segments.
   el('r-alone').textContent = String(relay.reduce((n, m) => n + ucs2Segments(m), 0));
   el('relay-payload').value = joined;
-  el('relay-send').disabled = relay.length === 0;
+  setSendLink('relay-send', joined);
   el('relay-copy').disabled = relay.length === 0;
   refreshQr('relay-qr', joined);
   el('relay-qr-toggle').disabled = relay.length === 0;
@@ -447,19 +457,11 @@ function buildHotlines() {
     call.className = 'maplink';
     call.textContent = `📞 ${t('call')}`;
 
-    const sms = document.createElement('button');
-    sms.type = 'button';
-    sms.className = 'small';
+    const sms = document.createElement('a');
+    sms.className = 'maplink hotline-sms';
+    sms.dataset.number = line.number;
     sms.textContent = t('smsThem');
-    sms.addEventListener('click', () => {
-      const message = emergencyMessage();
-      if (!message) {
-        el('em-note').className = 'note warn';
-        el('em-note').textContent = t('stillNeeded', missingFields().join(', '));
-        return;
-      }
-      smsWith(message, line.number);
-    });
+    sms.setAttribute('aria-disabled', 'true');
 
     item.append(label, call, sms);
     host.append(item);
@@ -565,7 +567,6 @@ function wireEmergency() {
     el(`lang-${code}`).addEventListener('click', () => switchLang(code));
   }
 
-  el('em-send').addEventListener('click', () => smsWith(emergencyMessage()));
   el('em-copy').addEventListener('click', () => copyPlain(emergencyMessage(), 'em-note'));
   el('em-queue').addEventListener('click', () => {
     const message = emergencyMessage();
@@ -577,7 +578,6 @@ function wireEmergency() {
     selectTab('relay');
   });
 
-  el('relay-send').addEventListener('click', () => smsWith(el('relay-payload').value));
   el('relay-copy').addEventListener('click', () => copyPlain(el('relay-payload').value, 'relay-note'));
   el('relay-clear').addEventListener('click', () => {
     relay.length = 0;
@@ -628,6 +628,11 @@ function refreshQr(hostId, text) {
 
 function toggleQr(hostId, text, toggleId, noteId) {
   const host = el(hostId);
+  if (!text) {
+    // Silently doing nothing is how a button teaches someone it is broken.
+    if (noteId) el(noteId).textContent = t('stillNeeded', missingFields().join(', '));
+    return;
+  }
   if (host.hidden) renderQr(hostId, text, noteId);
   else host.hidden = true;
   el(toggleId).textContent = host.hidden ? t('showQr') : t('hideQr');
@@ -635,14 +640,33 @@ function toggleQr(hostId, text, toggleId, noteId) {
 
 /* ──────────────────────────────── sending ───────────────────────────── */
 
-function smsWith(body, number = '') {
-  if (!body) return;
+function smsUri(body, number = '') {
+  if (!body) return '';
   // iOS separates the number from the body with `&`, everything else with `?`.
   // A wrong separator opens the composer empty, or does nothing at all — which
   // is exactly how the hotline buttons failed.
   const ios = /iPad|iPhone|iPod/.test(navigator.userAgent ?? '');
   const separator = number && ios ? '&' : '?';
-  openUri(`sms:${number}${separator}body=${encodeURIComponent(body)}`);
+  return `sms:${number}${separator}body=${encodeURIComponent(body)}`;
+}
+
+function smsWith(body, number = '') {
+  const uri = smsUri(body, number);
+  if (uri) openUri(uri);
+}
+
+/** Points a send anchor at the current message, or disables it. */
+function setSendLink(id, body, number = '') {
+  const link = el(id);
+  if (!link) return;
+  const uri = smsUri(body, number);
+  if (uri) {
+    link.href = uri;
+    link.setAttribute('aria-disabled', 'false');
+  } else {
+    link.removeAttribute('href');
+    link.setAttribute('aria-disabled', 'true');
+  }
 }
 
 async function copyPlain(text, noteId) {
@@ -660,7 +684,7 @@ async function main() {
   applyLang();
   markLangButtons();
   const stamp = el('build');
-  if (stamp) stamp.textContent = 'v19';
+  if (stamp) stamp.textContent = 'v20';
 
   buildEmergencyControls();
   buildHotlines();

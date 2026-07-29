@@ -77,6 +77,7 @@ export const STRINGS = {
     smsThem: 'SMS',
     copied: 'Copied',
     copyManually: 'Select and copy',
+    desktopHint: 'On a computer nothing will happen — SMS needs a phone. Use Copy instead.',
 
     relayHead: 'Relay — many reports, one SMS',
     relayHint: 'Add messages from the Emergency tab and send them together. Plain text, no coding.',
@@ -155,6 +156,7 @@ export const STRINGS = {
     smsThem: 'এসএমএস',
     copied: 'কপি হয়েছে',
     copyManually: 'নিজে কপি করুন',
+    desktopHint: 'কম্পিউটারে কিছুই হবে না — এসএমএস পাঠাতে ফোন লাগে। তখন কপি করুন।',
 
     relayHead: 'রিলে — অনেকের খবর, এক এসএমএসে',
     relayHint: 'জরুরি ট্যাব থেকে বার্তা যোগ করুন, একসাথে পাঠান। সাধারণ লেখা, কোনো কোড নেই।',

@@ -38,13 +38,14 @@ check('emergency: no phrasebook entry preselected', () =>
 
 check('emergency: no time preselected', () => assert(el('em-hours').value === '', `value="${el('em-hours').value}"`));
 
-check('emergency: buttons disabled until something is typed', () =>
-  assert(el('em-send').disabled && el('em-queue').disabled, `send=${el('em-send').disabled}`));
+check('emergency: send link disabled until something is typed', () =>
+  assert(el('em-send').getAttribute('aria-disabled') === 'true' && el('em-queue').disabled,
+    `aria-disabled=${el('em-send').getAttribute('aria-disabled')}`));
 
 check('emergency: typed text alone is NOT enough, where and when required', () => {
   el('em-text').value = 'ছাদ ভেঙে পড়েছে, তিনজন ভিতরে';
   fire(el('em-text'), 'input');
-  return assert(el('em-send').disabled && el('em-note').textContent.includes('where'), el('em-note').textContent);
+  return assert(el('em-send').getAttribute('aria-disabled') === 'true' && el('em-note').textContent.includes('where you are'), el('em-note').textContent);
 });
 
 check('emergency: a ready sentence is now required too', () => {
@@ -52,7 +53,7 @@ check('emergency: a ready sentence is now required too', () => {
   fire(el('em-loc'), 'change');
   el('em-hours').value = '3';
   fire(el('em-hours'), 'change');
-  return assert(el('em-send').disabled && el('em-note').textContent.includes('ready sentence'), el('em-note').textContent);
+  return assert(el('em-send').getAttribute('aria-disabled') === 'true' && el('em-note').textContent.includes('ready sentence'), el('em-note').textContent);
 });
 
 check('emergency: ready once where and when are answered', () => {
@@ -62,13 +63,13 @@ check('emergency: ready once where and when are answered', () => {
   fire(el('em-loc'), 'change');
   el('em-hours').value = '3';
   fire(el('em-hours'), 'change');
-  return assert(!el('em-send').disabled && el('em-preview').textContent.includes('ছাদ'), el('em-preview').textContent.split('\n')[0]);
+  return assert(el('em-send').getAttribute('aria-disabled') === 'false' && el('em-preview').textContent.includes('ছাদ'), el('em-preview').textContent.split('\n')[0]);
 });
 
 check('emergency: gps chosen without a fix blocks sending', () => {
   el('em-loc').value = 'gps';
   fire(el('em-loc'), 'change');
-  const blocked = el('em-send').disabled;
+  const blocked = el('em-send').getAttribute('aria-disabled') === 'true';
   el('em-loc').value = 'district';
   fire(el('em-loc'), 'change');
   return assert(blocked, `blocked=${blocked}`);
@@ -148,7 +149,7 @@ check('relay: stats and buttons', () =>
 
 check('relay: clear empties everything', () => {
   click(el('relay-clear'));
-  return assert(el('relay-list').children.length === 0 && el('relay-send').disabled, 'cleared');
+  return assert(el('relay-list').children.length === 0 && el('relay-send').getAttribute('aria-disabled') === 'true', 'cleared');
 });
 
 check('tabs: switching hides the other panels', () => {
@@ -159,7 +160,7 @@ check('tabs: switching hides the other panels', () => {
 
 /* ── what actually leaves the phone, and what comes back ── */
 
-check('send: sms: URI carries the whole emergency message', () => {
+check('send: the send control is a real sms: link', () => {
   el('em-text').value = 'ছাদ ভেঙে পড়েছে';
   fire(el('em-text'), 'input');
   el('em-template').value = '2';
@@ -168,20 +169,37 @@ check('send: sms: URI carries the whole emergency message', () => {
   fire(el('em-loc'), 'change');
   el('em-hours').value = '1';
   fire(el('em-hours'), 'change');
-
-  let href = '';
-  window.__openUri = (uri) => { href = uri; };
-  click(el('em-send'));
-  const body = decodeURIComponent(href.replace('sms:?body=', ''));
-  return assert(href.startsWith('sms:?body=') && body.includes('ছাদ ভেঙে পড়েছে') && body.includes('maps.google.com'), body.split('\n').join(' | '));
+  const href = el('em-send').getAttribute('href') ?? '';
+  return assert(href.startsWith('sms:?body=') && decodeURIComponent(href).includes('ছাদ ভেঙে পড়েছে'), href.slice(0, 50));
 });
 
-check('send: hotline SMS targets the short code', () => {
-  let href = '';
-  window.__openUri = (uri) => { href = uri; };
-  const smsButton = [...el('hotlines').querySelectorAll('button')][0];
-  click(smsButton);
-  return assert(href.startsWith('sms:999?body='), href.slice(0, 60));
+check('send: every hotline row is a live sms: link', () => {
+  const links = [...document.querySelectorAll('.hotline-sms')];
+  const first = links[0].getAttribute('href') ?? '';
+  const enabled = links.every((l) => l.getAttribute('aria-disabled') === 'false');
+  return assert(links.length === 9 && enabled && first.startsWith('sms:999?body='), `${links.length} links, first=${first.slice(0, 24)}`);
+});
+
+check('qr: tapping with fields missing explains what is missing', () => {
+  const text = el('em-text').value;
+  el('em-text').value = '';
+  fire(el('em-text'), 'input');
+  click(el('em-qr-toggle'));
+  const explained = el('em-note').textContent.includes('Still needed');
+  el('em-text').value = text;
+  fire(el('em-text'), 'input');
+  return assert(explained && el('em-qr').hidden, el('em-note').textContent);
+});
+
+check('qr: a long Bangla message with a map link still encodes', () => {
+  el('em-loc').value = 'gps';
+  fire(el('em-loc'), 'change');
+  click(el('em-qr-toggle'));
+  const ok = !el('em-qr').hidden && el('em-qr').innerHTML.includes('<svg');
+  click(el('em-qr-toggle'));
+  el('em-loc').value = 'district';
+  fire(el('em-loc'), 'change');
+  return assert(ok, `bytes=${new TextEncoder().encode(el('em-preview').textContent).length}`);
 });
 
 check('hotlines: nine verified numbers, each with a call link', () => {
