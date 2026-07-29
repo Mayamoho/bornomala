@@ -50,7 +50,7 @@ const QUICK = [
 const inLang = (pair) => (getLang() === 'bn' ? pair.bn : pair.en);
 
 /** Bumped on every deploy, shown in the footer so a stale copy is visible. */
-const BUILD = 'v12';
+const BUILD = 'v13';
 
 /**
  * A tappable position for a plain-text recipient.
@@ -814,9 +814,20 @@ async function loadModel() {
         'cannot run from file://, serve the folder over http (python3 -m http.server 8765)',
     );
   }
-  const response = await fetch('model.bin', { cache: 'force-cache' });
-  if (!response.ok) throw new Error(`model.bin: HTTP ${response.status}`);
-  return Model.fromBuffer(await response.arrayBuffer());
+  // One retry: on a slow or interrupted connection the first attempt dying is
+  // ordinary, and the difference between prose working and not is one retry.
+  let lastError;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await fetch('model.bin', { cache: 'force-cache' });
+      if (!response.ok) throw new Error(`model.bin: HTTP ${response.status}`);
+      return Model.fromBuffer(await response.arrayBuffer());
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    }
+  }
+  throw lastError;
 }
 
 function main() {
@@ -856,12 +867,13 @@ function main() {
     // `updateViaCache: 'none'` matters more than it looks: without it the
     // browser serves sw.js from its own HTTP cache, the worker never notices
     // it changed, and a deployed fix reaches nobody who already has the app.
+    // Only a *replacement* worker means the page is stale. The very first
+    // install also fires controllerchange, and reloading there kills the
+    // in-flight model download — which is what "operation aborted" was.
+    const hadController = Boolean(navigator.serviceWorker.controller);
     let reloading = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      // A new worker took over mid-session: the page in front of the user is
-      // the old build. Reload once, and guard against the loop that a second
-      // controllerchange would otherwise cause.
-      if (reloading) return;
+      if (!hadController || reloading) return;
       reloading = true;
       window.location.reload();
     });
