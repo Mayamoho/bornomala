@@ -53,17 +53,16 @@ Track A — Crisis Tech.
 > app with three tabs.
 >
 > **Normal — compress and decode.** Type Bangla and live counters show characters,
-> compressed segments, what the same text costs today in UCS-2, and the ratio. A
-> small Bangla model trained offline drives a deterministic arithmetic coder; the
-> bits pack into GSM-7 septets, so the message rides the 160-character lane instead
-> of the 70-character one. Send hands it to the phone's own SMS composer. Paste back
-> a code — or the whole received SMS — and the Bangla returns.
+> compressed segments, what the same text costs in UCS-2, and the ratio. A small
+> Bangla model trained offline drives a deterministic arithmetic coder; the bits
+> pack into GSM-7 septets, so the message rides the 160-character lane, not the
+> 70-character one. Send hands it to the phone's SMS composer. Paste back a code,
+> or the whole received SMS, and the Bangla returns.
 >
-> Benchmarked on 5,000 held-out messages never seen in training: 3.106 bits per
-> character against UCS-2's 16.000 — 361 Bangla characters per segment instead of
-> 70, 5.15× more, with 100% fitting one segment. gzip -9 does worse than doing
-> nothing (21.002 bits per character): a general compressor's dictionary never pays
-> for itself at SMS length.
+> Benchmarked on 5,000 held-out messages: 3.106 bits per character against UCS-2's
+> 16.000 — 361 Bangla characters per segment instead of 70, 5.15× more, with 100%
+> fitting one segment. gzip -9 does worse than doing nothing (21.002 bits per
+> character): a general compressor's dictionary never pays for itself at SMS length.
 >
 > **Emergency — plain text, nothing needed on the other end.** Compression needs
 > the app at both ends and a survivor will not have it, so this tab uses none of
