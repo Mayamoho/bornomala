@@ -50,7 +50,7 @@ const QUICK = [
 const inLang = (pair) => (getLang() === 'bn' ? pair.bn : pair.en);
 
 /** Bumped on every deploy, shown in the footer so a stale copy is visible. */
-const BUILD = 'v13';
+const BUILD = 'v14';
 
 /**
  * A tappable position for a plain-text recipient.
@@ -354,31 +354,61 @@ function refreshRelay() {
     return;
   }
 
-  let payload;
+  // Plain text first, for the same reason as the crisis tab: it is sentences,
+  // it needs no model, and a frame the encoder cannot take yet must not stop
+  // the readable form from being sent.
+  const plainText = el('relay-plaintext').checked;
+  const readable = relay.map(readableMessage).join('\n');
+
+  // The coded batch is still wanted for the QR, but it is allowed to fail.
+  let payload = '';
+  let codedError = null;
   try {
     payload = encodeRelay(relay, model, { paper: isPaperSafe(relay) });
   } catch (error) {
-    el('relay-note').textContent = t('cannotEncode', error.message);
+    codedError = error;
+  }
+  relayPayload = payload;
+
+  if (plainText) {
+    el('relay-payload').value = readable;
+    el('r-chars').textContent = String([...readable].length);
+    el('r-segments').textContent = String(ucs2Segments(readable));
+    // Sent one at a time, each report is its own SMS at minimum.
+    el('r-alone').textContent = String(relay.length);
+    el('relay-send').disabled = false;
+    el('relay-copy').disabled = false;
+    el('relay-qr-toggle').disabled = payload === '';
+    if (payload === '') el('relay-qr').hidden = true;
+    else refreshQr('relay-qr', payload);
+    el('relay-note').textContent = t('plainOk');
+    return;
+  }
+
+  if (codedError) {
+    el('relay-payload').value = '';
+    el('relay-send').disabled = true;
+    el('relay-copy').disabled = true;
+    el('relay-qr-toggle').disabled = true;
+    el('relay-qr').hidden = true;
+    el('relay-note').textContent = t('cannotEncode', codedError.message);
     return;
   }
 
   // What the same reports would cost sent one at a time — the honest baseline.
-  const alone = relay.reduce(
-    (n, frame) => n + gsm7Segments(encodeCrisis(frame, model, { paper: isPaperSafe([frame]) })),
-    0,
-  );
+  // A frame the encoder refuses counts as one segment rather than throwing.
+  const alone = relay.reduce((n, frame) => {
+    try {
+      return n + gsm7Segments(encodeCrisis(frame, model, { paper: isPaperSafe([frame]) }));
+    } catch {
+      return n + 1;
+    }
+  }, 0);
   const segments = gsm7Segments(payload);
 
-  // Same escape hatch as the crisis tab: sixty reports as sentences is many
-  // segments, but it lands on a phone that has never seen this app.
-  const plainText = el('relay-plaintext').checked;
-  const readable = relay.map(readableMessage).join('\n');
-  const sending = plainText ? readable : payload;
-
-  relayPayload = payload;
-  el('relay-payload').value = sending;
-  el('r-chars').textContent = String([...sending].length);
-  el('r-segments').textContent = String(plainText ? ucs2Segments(readable) : segments);
+  el('relay-payload').value = payload;
+  el('r-chars').textContent = String([...payload].length);
+  el('r-segments').textContent = String(segments);
   el('r-alone').textContent = String(alone);
   el('relay-send').disabled = false;
   el('relay-copy').disabled = false;

@@ -7,7 +7,8 @@
   "scripts": {
     "test": "node --test \"test/*.test.js\"",
     "bench": "node tools/benchmark.js",
-    "test:ui": "node uitest.mjs"
+    "test:ui": "node uitest.mjs",
+    "audit": "node audit.mjs"
   },
   "license": "MIT",
   "devDependencies": {
