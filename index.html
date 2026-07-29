@@ -110,6 +110,32 @@
       }
       .panel[hidden] { display: none; }
       .req { color: var(--alarm); }
+      .preview {
+        font-size: 1.1rem;
+        line-height: 1.5;
+        margin: 6px 0 0;
+        padding: 12px 14px;
+        border-left: 3px solid var(--accent);
+        background: #0d1413;
+        border-radius: 0 10px 10px 0;
+        white-space: pre-line;
+        word-break: break-word;
+      }
+      .quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+      .quick button {
+        min-height: 74px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-align: left;
+        line-height: 1.25;
+        padding: 10px 12px;
+        font-size: 0.92rem;
+      }
+      .quick .icon { font-size: 1.6rem; line-height: 1; }
+      .quick button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+      #panel-emergency select, #panel-emergency textarea { min-height: 50px; font-size: 1rem; }
+      #panel-emergency button.primary { min-height: 54px; font-size: 1.05rem; }
       .maplink {
         display: inline-flex;
         align-items: center;
@@ -234,13 +260,15 @@
           </p>
 
           <h2>২. প্রস্তুত বাক্য যোগ করুন — add a ready sentence</h2>
-          <label for="em-template">ঐচ্ছিক / optional</label>
+          <p class="note">ঐচ্ছিক / optional. একটায় চাপ দিন / tap one.</p>
+          <div class="quick" id="em-quick"></div>
+          <label for="em-template">অথবা তালিকা থেকে / or pick from the list</label>
           <select id="em-template"></select>
           <div id="em-slots" class="grid2"></div>
 
-          <h2>৩. আপনি কোথায় — where are you</h2>
+          <h2>৩. আপনি কোথায় — where are you <span class="req">*</span></h2>
           <select id="em-loc">
-            <option value="none" selected>অবস্থান পাঠাব না / do not send location</option>
+            <option value="" selected>বেছে নিন / choose…</option>
             <option value="district">আমার জেলা / my district</option>
             <option value="gps">আমার সঠিক অবস্থান / my live location</option>
           </select>
@@ -257,15 +285,15 @@
             <p class="note" id="em-gps-note">জিপিএস নেওয়া হয়নি / no fix yet</p>
           </div>
 
-          <h2>৪. কখন — when</h2>
+          <h2>৪. কখন — when <span class="req">*</span></h2>
           <select id="em-hours">
-            <option value="" selected>সময় নেই / no time</option>
+            <option value="" selected>বেছে নিন / choose…</option>
           </select>
         </section>
 
         <section>
           <h2>৫. যা পাঠাবেন — what gets sent</h2>
-          <textarea id="em-preview" lang="bn" readonly aria-live="polite"></textarea>
+          <p class="preview" id="em-preview" lang="bn" aria-live="polite">—</p>
           <div class="stats">
             <div class="stat"><b id="em-chars">0</b><span>অক্ষর / characters</span></div>
             <div class="stat"><b id="em-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>

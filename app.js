@@ -9,7 +9,14 @@
 import { Model } from './src/model.js';
 import { encode, decode } from './src/codec.js';
 import { septetCost, gsm7Segments, ucs2Segments } from './src/gsm7.js';
-import { TEMPLATES, SLOTS, renderTemplate, bnNum } from './src/phrasebook.js';
+import {
+  TEMPLATES,
+  TEMPLATE_GROUPS,
+  SLOTS,
+  renderTemplate,
+  templateLabel,
+  bnNum,
+} from './src/phrasebook.js';
 import { DISTRICTS, inCoverage } from './src/geo.js';
 
 const el = (id) => document.getElementById(id);
@@ -147,6 +154,16 @@ function consumeSharedText() {
  */
 
 const MAX_HOURS = 31;
+
+/** The six a volunteer reaches for first. The icon carries the meaning. */
+const QUICK = [
+  { id: 0, icon: '✅' },
+  { id: 1, icon: '🆘' },
+  { id: 2, icon: '⚠️' },
+  { id: 3, icon: '🚑' },
+  { id: 4, icon: '💧' },
+  { id: 20, icon: '🏃' },
+];
 let emGpsFix = null;
 const relay = [];
 
@@ -189,9 +206,19 @@ function locationLines() {
 }
 
 /** The whole message, exactly as it will leave the phone. */
+function missingFields() {
+  const missing = [];
+  if (!emEl.text().value.trim()) missing.push('বার্তা / your message');
+  const mode = emEl.loc().value;
+  if (mode === '') missing.push('কোথায় / where you are');
+  else if (mode === 'gps' && !emGpsFix) missing.push('অবস্থান নিন / tap use my live location');
+  if (emEl.hours().value === '') missing.push('কখন / when');
+  return missing;
+}
+
 function emergencyMessage() {
   const typed = emEl.text().value.trim();
-  if (!typed) return '';
+  if (missingFields().length > 0) return '';
 
   const parts = [typed];
 
@@ -203,9 +230,7 @@ function emergencyMessage() {
   }
 
   const hours = emEl.hours().value;
-  if (hours !== '') {
-    parts.push(hours === '0' ? 'এইমাত্র / just now' : `${bnNum(hours)} ঘণ্টা আগে / ${hours}h ago`);
-  }
+  parts.push(hours === '0' ? 'এইমাত্র / just now' : `${bnNum(hours)} ঘণ্টা আগে / ${hours}h ago`);
 
   return [parts.join(' · '), ...locationLines()].join('\n');
 }
@@ -239,11 +264,11 @@ function renderEmergencySlots() {
 }
 
 function refreshEmergency() {
+  const missing = missingFields();
   const message = emergencyMessage();
-  const typed = emEl.text().value.trim();
 
-  el('em-required').hidden = typed !== '';
-  emEl.preview().value = message;
+  el('em-required').hidden = emEl.text().value.trim() !== '';
+  emEl.preview().textContent = message || '—';
   el('em-chars').textContent = String([...message].length);
   el('em-segments').textContent = String(message ? ucs2Segments(message) : 0);
 
@@ -251,9 +276,17 @@ function refreshEmergency() {
   el('em-send').disabled = !ready;
   el('em-copy').disabled = !ready;
   el('em-queue').disabled = !ready;
+  el('em-note').className = ready ? 'note' : 'note warn';
   el('em-note').textContent = ready
     ? 'সাধারণ লেখা — যে কেউ পড়তে পারবে / plain text, readable by anyone'
-    : '';
+    : `বাকি আছে / still needed: ${missing.join(', ')}`;
+}
+
+function markQuick() {
+  const current = emEl.template().value;
+  el('em-quick')
+    .querySelectorAll('button')
+    .forEach((button, i) => button.setAttribute('aria-pressed', String(String(QUICK[i].id) === current)));
 }
 
 function useEmergencyLocation() {
@@ -337,12 +370,46 @@ function buildEmergencyControls() {
   none.selected = true;
   none.textContent = 'কোনোটি নয় / none';
   templates.append(none);
-  TEMPLATES.forEach((template, i) => {
-    const option = document.createElement('option');
-    option.value = String(i);
-    option.textContent = `${template.bn} — ${template.en}`;
-    templates.append(option);
-  });
+
+  // Grouped, and with slot placeholders shown as blanks: `{0}` is markup for
+  // the renderer, not something to put in front of a person.
+  for (const group of TEMPLATE_GROUPS) {
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = group.key
+      .replace('groupStatus', 'আমরা… / we are…')
+      .replace('groupNeed', 'দরকার… / we need…')
+      .replace('groupDanger', 'বিপদ / danger here')
+      .replace('groupHelp', 'সাহায্য আছে / help is here');
+    for (const id of group.ids) {
+      const option = document.createElement('option');
+      option.value = String(id);
+      option.textContent = `${templateLabel(id, 'bn')} — ${templateLabel(id, 'en')}`;
+      optgroup.append(option);
+    }
+    templates.append(optgroup);
+  }
+
+  const quick = el('em-quick');
+  quick.replaceChildren();
+  for (const { id, icon } of QUICK) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    const glyph = document.createElement('span');
+    glyph.className = 'icon';
+    glyph.setAttribute('aria-hidden', 'true');
+    glyph.textContent = icon;
+    const label = document.createElement('span');
+    label.textContent = templateLabel(id, 'bn');
+    button.append(glyph, label);
+    button.addEventListener('click', () => {
+      // Tapping the active one clears it: the sentence is optional.
+      templates.value = templates.value === String(id) ? '' : String(id);
+      renderEmergencySlots();
+      markQuick();
+      refreshEmergency();
+    });
+    quick.append(button);
+  }
 
   const districts = emEl.district();
   DISTRICTS.forEach((district, i) => {
@@ -371,6 +438,7 @@ function wireEmergency() {
   emEl.text().addEventListener('input', refreshEmergency);
   emEl.template().addEventListener('change', () => {
     renderEmergencySlots();
+    markQuick();
     refreshEmergency();
   });
   emEl.district().addEventListener('change', refreshEmergency);
@@ -390,6 +458,9 @@ function wireEmergency() {
     if (!message) return;
     relay.push(message);
     emEl.text().value = '';
+    emEl.template().value = '';
+    renderEmergencySlots();
+    markQuick();
     refreshEmergency();
     refreshRelay();
     selectTab('relay');
@@ -421,6 +492,7 @@ async function copyPlain(text, noteId) {
 async function main() {
   buildEmergencyControls();
   renderEmergencySlots();
+  markQuick();
   wireEmergency();
   refreshEmergency();
   refreshRelay();

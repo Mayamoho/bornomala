@@ -41,20 +41,59 @@ check('emergency: no time preselected', () => assert(el('em-hours').value === ''
 check('emergency: buttons disabled until something is typed', () =>
   assert(el('em-send').disabled && el('em-queue').disabled, `send=${el('em-send').disabled}`));
 
-check('emergency: typed message alone is enough', () => {
+check('emergency: typed text alone is NOT enough, where and when required', () => {
   el('em-text').value = 'ছাদ ভেঙে পড়েছে, তিনজন ভিতরে';
   fire(el('em-text'), 'input');
-  return assert(el('em-preview').value === 'ছাদ ভেঙে পড়েছে, তিনজন ভিতরে' && !el('em-send').disabled, el('em-preview').value);
+  return assert(el('em-send').disabled && el('em-note').textContent.includes('where'), el('em-note').textContent);
 });
 
+check('emergency: ready once where and when are answered', () => {
+  el('em-loc').value = 'district';
+  fire(el('em-loc'), 'change');
+  el('em-hours').value = '3';
+  fire(el('em-hours'), 'change');
+  return assert(!el('em-send').disabled && el('em-preview').textContent.includes('ছাদ'), el('em-preview').textContent.split('\n')[0]);
+});
+
+check('emergency: gps chosen without a fix blocks sending', () => {
+  el('em-loc').value = 'gps';
+  fire(el('em-loc'), 'change');
+  const blocked = el('em-send').disabled;
+  el('em-loc').value = 'district';
+  fire(el('em-loc'), 'change');
+  return assert(blocked, `blocked=${blocked}`);
+});
+
+check('emergency: quick icon buttons render with blanks, no {0}', () => {
+  const labels = [...el('em-quick').querySelectorAll('button')].map((b) => b.textContent);
+  return assert(labels.length === 6 && !labels.join(' ').includes('{0}'), labels[0]);
+});
+
+check('emergency: dropdown options carry no {n} placeholders', () => {
+  const bad = [...el('em-template').querySelectorAll('option')].filter((o) => /\{\d\}/.test(o.textContent));
+  return assert(bad.length === 0, `options with placeholders: ${bad.length}`);
+});
+
+check('emergency: options are grouped', () =>
+  assert(el('em-template').querySelectorAll('optgroup').length === 4,
+    `${el('em-template').querySelectorAll('optgroup').length} groups`));
+
 check('emergency: preview is plain text, never a code', () =>
-  assert(!/^[A-Z]-/.test(el('em-preview').value) && el('em-preview').value.includes('ছাদ'), el('em-preview').value));
+  assert(!/^[A-Z]-/.test(el('em-preview').textContent) && el('em-preview').textContent.includes('ছাদ'), el('em-preview').textContent));
 
 check('emergency: phrasebook sentence appends to the typed text', () => {
   el('em-template').value = '2';
   fire(el('em-template'), 'change');
-  const s = el('em-preview').value;
+  const s = el('em-preview').textContent;
   return assert(s.startsWith('ছাদ ভেঙে') && s.includes('আটকে'), s);
+});
+
+check('emergency: tapping the active quick button clears the sentence', () => {
+  const button = [...el('em-quick').querySelectorAll('button')][2];
+  click(button);
+  const cleared = el('em-template').value === '';
+  click(button);
+  return assert(cleared && el('em-template').value === '2', `after clear="${el('em-template').value}"`);
 });
 
 check('emergency: slot dropdowns appear for that sentence', () =>
@@ -63,7 +102,7 @@ check('emergency: slot dropdowns appear for that sentence', () =>
 check('emergency: district adds a name and a maps link', () => {
   el('em-loc').value = 'district';
   fire(el('em-loc'), 'change');
-  const s = el('em-preview').value;
+  const s = el('em-preview').textContent;
   return assert(s.includes('https://maps.google.com') && s.includes('Dhaka'), s.split('\n').slice(-2).join(' | '));
 });
 
@@ -75,15 +114,12 @@ check('emergency: live location gives bare coordinates AND a link', () => {
   el('em-loc').value = 'gps';
   fire(el('em-loc'), 'change');
   click(el('em-locate'));
-  const s = el('em-preview').value;
+  const s = el('em-preview').textContent;
   return assert(s.includes('23.79780, 90.36600') && s.includes('https://maps.google.com/?q=23.79780,90.36600'), s.split('\n').slice(-2).join(' | '));
 });
 
-check('emergency: time appends', () => {
-  el('em-hours').value = '3';
-  fire(el('em-hours'), 'change');
-  return assert(el('em-preview').value.includes('3h ago'), el('em-preview').value.split('\n')[0]);
-});
+check('emergency: time appears in the message', () =>
+  assert(el('em-preview').textContent.includes('3h ago'), el('em-preview').textContent.split('\n')[0]));
 
 check('emergency: segment count is UCS-2, not compressed', () =>
   assert(Number(el('em-segments').textContent) >= 1, `segments=${el('em-segments').textContent} chars=${el('em-chars').textContent}`));
