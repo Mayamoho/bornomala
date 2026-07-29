@@ -12,7 +12,7 @@
  * that forgets this line reaches nobody who already has the app.
  */
 
-const CACHE = 'bornomala-v6';
+const CACHE = 'bornomala-v7';
 
 /**
  * The shell is a few tens of kilobytes and covers every structured crisis

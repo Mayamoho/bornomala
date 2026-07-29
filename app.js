@@ -50,7 +50,7 @@ const QUICK = [
 const inLang = (pair) => (getLang() === 'bn' ? pair.bn : pair.en);
 
 /** Bumped on every deploy, shown in the footer so a stale copy is visible. */
-const BUILD = 'v6';
+const BUILD = 'v7';
 
 /**
  * A tappable position for a plain-text recipient.
@@ -232,11 +232,18 @@ function useLocation() {
         gpsFix = null;
       } else {
         gpsFix = { lat: coords.latitude, lon: coords.longitude };
-        el('gps-note').textContent = t(
-          'fix',
-          coords.latitude.toFixed(4),
-          coords.longitude.toFixed(4),
-        );
+        // Confirm the fix in words and offer to show it. The numbers behind it
+        // are not something anyone checks by reading.
+        const note = el('gps-note');
+        note.replaceChildren(document.createTextNode(`${t('fixOk')} `));
+
+        const open = document.createElement('a');
+        open.href = `https://maps.google.com/?q=${gpsFix.lat.toFixed(5)},${gpsFix.lon.toFixed(5)}`;
+        open.target = '_blank';
+        open.rel = 'noopener';
+        open.className = 'maplink';
+        open.textContent = t('seeOnMap');
+        note.append(open);
       }
       refreshCrisis();
     },

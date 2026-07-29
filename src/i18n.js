@@ -128,6 +128,7 @@ export const STRINGS = {
     locating: 'Locating…',
     outsideGrid: 'Outside the Bangladesh grid — pick a district instead.',
     fix: (lat, lon) => `${lat}, ${lon} — ±10 m`,
+    fixOk: 'Location captured, accurate to about 10 m',
     noFixError: (reason) => `No fix: ${reason}`,
     relayNote: (count, segments, alone) =>
       `${count} report(s) in ${segments} segment(s) instead of ${alone}.`,
@@ -247,6 +248,7 @@ export const STRINGS = {
     locating: 'খোঁজা হচ্ছে…',
     outsideGrid: 'বাংলাদেশের বাইরে — জেলা বেছে নিন।',
     fix: (lat, lon) => `${lat}, ${lon} — ±১০ মিটার`,
+    fixOk: 'অবস্থান পাওয়া গেছে, প্রায় ১০ মিটার নির্ভুল',
     noFixError: (reason) => `পাওয়া গেল না: ${reason}`,
     relayNote: (count, segments, alone) =>
       `${count} জনের খবর ${segments} সেগমেন্টে — আলাদা পাঠালে লাগত ${alone}।`,
