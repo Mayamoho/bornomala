@@ -91,11 +91,16 @@ function refreshCompose() {
   // Compare the bits instead: UCS-2 spends 16 per character, we spend what we
   // spend, and that ratio is honest at every length.
   ui.ratio.textContent = `${((chars * 16) / (septets * 7)).toFixed(1)}×`;
-  setSendLink('send', withAttribution(payload), cleanNumber(ui.to.value));
+  const number = validNumber(ui.to.value);
+  setSendLink('send', number ? withAttribution(payload) : '', number);
   ui.copy.disabled = false;
-  ui.composeNote.textContent =
+  const stats =
     `${septets} সেপ্টেট / septets · ${((septets * 7) / chars).toFixed(2)} bits per character` +
     (segments === 1 ? ' · এক সেগমেন্টেই যাচ্ছে' : ` · ${segments} সেগমেন্ট`);
+  // Copy still works without a number; only the SMS link needs one.
+  ui.composeNote.textContent = number
+    ? stats
+    : `${stats} · ${ui.to.value.trim() === '' ? t('stillNeeded', t('needNumber')) : t('badNumber')}`;
 }
 
 function refreshDecode() {
@@ -115,7 +120,9 @@ function refreshDecode() {
 }
 
 function sendBySms() {
-  smsWith(withAttribution(ui.payload.value), cleanNumber(ui.to.value));
+  const number = validNumber(ui.to.value);
+  if (!number) return;
+  smsWith(withAttribution(ui.payload.value), number);
 }
 
 async function copyPayload() {
@@ -292,11 +299,18 @@ function refreshEmergency() {
   el('em-segments').textContent = String(message ? ucs2Segments(message) : 0);
 
   const ready = message !== '';
-  setSendLink('em-send', message, cleanNumber(el('em-to').value));
+  // The hotline rows carry their own numbers and stay live; only the personal
+  // send needs a recipient, so a missing number never blocks calling 999.
+  const number = validNumber(el('em-to').value);
+  setSendLink('em-send', ready && number ? message : '', number);
   el('em-copy').disabled = !ready;
   el('em-queue').disabled = !ready;
-  el('em-note').className = ready ? 'note' : 'note warn';
-  el('em-note').textContent = ready ? t('plainOk') : t('stillNeeded', missing.join(', '));
+  const typedNumber = el('em-to').value.trim() !== '';
+  el('em-note').className = ready && number ? 'note' : 'note warn';
+  if (!ready) el('em-note').textContent = t('stillNeeded', missing.join(', '));
+  else if (!number && typedNumber) el('em-note').textContent = t('badNumber');
+  else if (!number) el('em-note').textContent = t('stillNeeded', t('needNumber'));
+  else el('em-note').textContent = t('plainOk');
   for (const link of document.querySelectorAll('.hotline-sms')) {
     const uri = smsUri(message, link.dataset.number);
     if (uri) {
@@ -382,14 +396,18 @@ function refreshRelay() {
   // Sent one at a time, each report costs its own segments.
   el('r-alone').textContent = String(relay.reduce((n, m) => n + ucs2Segments(m), 0));
   el('relay-payload').value = joined;
-  setSendLink('relay-send', joined, cleanNumber(el('relay-to').value));
+  const number = validNumber(el('relay-to').value);
+  setSendLink('relay-send', number ? joined : '', number);
   el('relay-copy').disabled = relay.length === 0;
   refreshQr('relay-qr', joined);
   el('relay-qr-toggle').disabled = relay.length === 0;
   el('relay-note').textContent =
     relay.length === 0
       ? ''
-      : t('relayNote', relay.length, ucs2Segments(joined));
+      : `${t('relayNote', relay.length, ucs2Segments(joined))}` +
+        (number
+          ? ''
+          : ` · ${el('relay-to').value.trim() === '' ? t('stillNeeded', t('needNumber')) : t('badNumber')}`);
 }
 
 function markLangButtons() {
@@ -681,6 +699,23 @@ function cleanNumber(raw) {
   return (raw ?? '').replace(/[^\d+]/g, '');
 }
 
+/**
+ * A recipient is required, because `sms:?body=…` with no number is refused by
+ * most composers — the send button looked alive and did nothing, which in an
+ * emergency is worse than a button that is plainly off.
+ *
+ * Bangladesh mobiles are 01 plus nine digits, written locally as 01XXXXXXXXX
+ * and internationally as +8801XXXXXXXXX. Any other country code is accepted at
+ * face value: a relay volunteer may well be texting abroad.
+ */
+function validNumber(raw) {
+  const n = cleanNumber(raw);
+  if (/^01\d{9}$/.test(n)) return n;
+  if (/^\+?8801\d{9}$/.test(n)) return n.startsWith('+') ? n : `+${n}`;
+  if (/^\+\d{8,15}$/.test(n)) return n;
+  return '';
+}
+
 function smsUri(body, number = '') {
   if (!body) return '';
   // iOS separates the number from the body with `&`, everything else with `?`.
@@ -725,7 +760,7 @@ async function main() {
   applyLang();
   markLangButtons();
   const stamp = el('build');
-  if (stamp) stamp.textContent = 'v22';
+  if (stamp) stamp.textContent = 'v23';
 
   buildEmergencyControls();
   buildHotlines();

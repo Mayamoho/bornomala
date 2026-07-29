@@ -56,7 +56,9 @@ check('emergency: a ready sentence is now required too', () => {
   return assert(el('em-send').getAttribute('aria-disabled') === 'true' && el('em-note').textContent.includes('ready sentence'), el('em-note').textContent);
 });
 
-check('emergency: ready once where and when are answered', () => {
+check('emergency: ready once where, when and a recipient are answered', () => {
+  el('em-to').value = '01712345678';
+  fire(el('em-to'), 'input');
   el('em-template').value = '2';
   fire(el('em-template'), 'change');
   el('em-loc').value = 'district';
@@ -170,7 +172,7 @@ check('send: the send control is a real sms: link', () => {
   el('em-hours').value = '1';
   fire(el('em-hours'), 'change');
   const href = el('em-send').getAttribute('href') ?? '';
-  return assert(href.startsWith('sms:?body=') && decodeURIComponent(href).includes('ছাদ ভেঙে পড়েছে'), href.slice(0, 50));
+  return assert(href.startsWith('sms:01712345678?body=') && decodeURIComponent(href).includes('ছাদ ভেঙে পড়েছে'), href.slice(0, 50));
 });
 
 check('send: every hotline row is a live sms: link', () => {
@@ -187,11 +189,36 @@ check('send: a typed recipient goes into the sms: link', () => {
   return assert(href.startsWith('sms:01712345678?body='), href.slice(0, 40));
 });
 
-check('send: clearing the recipient falls back to the no-number form', () => {
+check('send: clearing the recipient turns the send control off', () => {
   el('em-to').value = '';
   fire(el('em-to'), 'input');
+  return assert(el('em-send').getAttribute('aria-disabled') === 'true' && !el('em-send').getAttribute('href')
+    && el('em-note').textContent.includes('phone number'), el('em-note').textContent);
+});
+
+check('send: a half-typed number is refused, and says so', () => {
+  el('em-to').value = '0171234';
+  fire(el('em-to'), 'input');
+  const off = el('em-send').getAttribute('aria-disabled') === 'true';
+  const warned = el('em-note').textContent.includes('Check the number');
+  el('em-to').value = '';
+  fire(el('em-to'), 'input');
+  return assert(off && warned, el('em-note').textContent);
+});
+
+check('send: +8801 international form is accepted', () => {
+  el('em-to').value = '+8801712345678';
+  fire(el('em-to'), 'input');
   const href = el('em-send').getAttribute('href') ?? '';
-  return assert(href.startsWith('sms:?body='), href.slice(0, 40));
+  el('em-to').value = '';
+  fire(el('em-to'), 'input');
+  return assert(href.startsWith('sms:+8801712345678?body='), href.slice(0, 40));
+});
+
+check('send: a missing recipient never disables the hotlines', () => {
+  const links = [...document.querySelectorAll('.hotline-sms')];
+  return assert(links.every((l) => l.getAttribute('aria-disabled') === 'false'),
+    `em-to="${el('em-to').value}" hotlines live=${links.filter((l) => l.getAttribute('aria-disabled') === 'false').length}`);
 });
 
 check('send: relay takes its own recipient', () => {
@@ -273,16 +300,41 @@ check('send: a personal contact number goes into the compose sms: link', () => {
   return assert(href.startsWith('sms:01712345678?body='), href.slice(0, 40));
 });
 
-check('send: compose falls back to the no-number form when cleared', () => {
+check('send: compose refuses to send with no recipient', () => {
   el('to').value = '';
   fire(el('to'), 'input');
-  const href = el('send').getAttribute('href') ?? '';
-  return assert(href.startsWith('sms:?body='), href.slice(0, 40));
+  return assert(el('send').getAttribute('aria-disabled') === 'true' && !el('send').getAttribute('href')
+    && el('compose-note').textContent.includes('phone number'), el('compose-note').textContent);
+});
+
+check('send: compose copy still works without a recipient', () =>
+  assert(!el('copy').disabled && el('payload').value !== '', `payload="${el('payload').value.slice(0, 12)}"`));
+
+check('send: relay refuses to send with no recipient', () => {
+  el('relay-to').value = '';
+  fire(el('relay-to'), 'input');
+  click(el('em-queue'));
+  const off = el('relay-send').getAttribute('aria-disabled') === 'true';
+  const warned = el('relay-note').textContent.includes('phone number');
+  click(el('relay-clear'));
+  el('em-text').value = 'ছাদ ভেঙে পড়েছে';
+  fire(el('em-text'), 'input');
+  return assert(off && warned, el('relay-note').textContent);
+});
+
+check('required: all three recipient fields are marked required', () => {
+  const ids = ['to', 'em-to', 'relay-to'];
+  const marked = ids.filter((id) => el(id).required && el(id).getAttribute('aria-required') === 'true');
+  return assert(marked.length === 3, marked.join(', '));
 });
 
 check('attribution: every outgoing message names the app', () => {
   el('input').value = 'আমরা নিরাপদ আছি';
   fire(el('input'), 'input');
+  for (const id of ['to', 'em-to', 'relay-to']) {
+    el(id).value = '01712345678';
+    fire(el(id), 'input');
+  }
   const compose = decodeURIComponent(el('send').getAttribute('href') ?? '');
   const emergency = decodeURIComponent(el('em-send').getAttribute('href') ?? '');
   const hotline = decodeURIComponent(document.querySelectorAll('.hotline-sms')[0].getAttribute('href') ?? '');

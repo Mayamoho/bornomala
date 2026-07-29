@@ -79,10 +79,12 @@ export const STRINGS = {
     copyManually: 'Select and copy',
     desktopHint: 'On a computer nothing will happen — SMS needs a phone. Use Copy instead.',
     sentWith: 'Sent with Bornomala',
-    toNumber: 'Send to (phone number)',
+    toNumber: 'Send to (phone number) — required',
     toPlaceholder: '01XXXXXXXXX',
     toHint:
-      'Leave empty to pick the contact in your SMS app. Some phones refuse an SMS link with no number — if the button does nothing, type the number here.',
+      'Required. An SMS link with no number is refused by most phones, so the button stays off until a number is here. 01XXXXXXXXX, or +8801XXXXXXXXX.',
+    needNumber: 'a phone number',
+    badNumber: 'Check the number — 11 digits starting 01, or +8801 and nine more.',
 
     relayHead: 'Relay — many reports, one SMS',
     relayHint: 'Add messages from the Emergency tab and send them together. Plain text, no coding.',
@@ -163,10 +165,12 @@ export const STRINGS = {
     copyManually: 'নিজে কপি করুন',
     desktopHint: 'কম্পিউটারে কিছুই হবে না — এসএমএস পাঠাতে ফোন লাগে। তখন কপি করুন।',
     sentWith: 'বর্ণমালা অ্যাপ দিয়ে পাঠানো',
-    toNumber: 'কাকে পাঠাবেন (মোবাইল নম্বর)',
+    toNumber: 'কাকে পাঠাবেন (মোবাইল নম্বর) — লাগবেই',
     toPlaceholder: '01XXXXXXXXX',
     toHint:
-      'খালি রাখলে এসএমএস অ্যাপে গিয়ে নম্বর বাছবেন। কোনো কোনো ফোন নম্বর ছাড়া এসএমএস লিংক নেয় না — বোতামে কিছু না হলে এখানে নম্বর লিখুন।',
+      'নম্বর দিতেই হবে। নম্বর ছাড়া এসএমএস লিংক বেশির ভাগ ফোন নেয় না, তাই নম্বর না দিলে বোতাম বন্ধ থাকে। 01XXXXXXXXX, বা +8801XXXXXXXXX।',
+    needNumber: 'মোবাইল নম্বর',
+    badNumber: 'নম্বরটা দেখুন — 01 দিয়ে ১১ সংখ্যা, বা +8801 এর পরে আরও নয়টি।',
 
     relayHead: 'রিলে — অনেকের খবর, এক এসএমএসে',
     relayHint: 'জরুরি ট্যাব থেকে বার্তা যোগ করুন, একসাথে পাঠান। সাধারণ লেখা, কোনো কোড নেই।',

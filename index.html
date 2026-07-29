@@ -232,7 +232,7 @@
         </div>
 
         <label for="to" data-i18n="toNumber">Send to (phone number)</label>
-        <input id="to" type="tel" inputmode="tel" placeholder="01XXXXXXXXX"
+        <input id="to" type="tel" inputmode="tel" placeholder="01XXXXXXXXX" required aria-required="true"
                data-i18n-placeholder="toPlaceholder" autocomplete="tel" />
         <p class="note" data-i18n="toHint">
           Leave empty to pick the contact in your SMS app. Some phones refuse an SMS link with no
@@ -314,7 +314,7 @@
         <section>
           <h2 data-i18n="emSend">5. What gets sent</h2>
           <label for="em-to" data-i18n="toNumber">Send to (phone number)</label>
-          <input id="em-to" type="tel" inputmode="tel" placeholder="01XXXXXXXXX"
+          <input id="em-to" type="tel" inputmode="tel" placeholder="01XXXXXXXXX" required aria-required="true"
                  data-i18n-placeholder="toPlaceholder" autocomplete="tel" />
           <p class="note" data-i18n="toHint">
             Leave empty to pick the contact in your SMS app. Some phones refuse an SMS link with no
@@ -362,8 +362,12 @@
             <div class="stat"><b id="r-alone">0</b><span data-i18n="statAlone">sent separately</span></div>
           </div>
           <label for="relay-to" data-i18n="toNumber">Send to (phone number)</label>
-          <input id="relay-to" type="tel" inputmode="tel" placeholder="01XXXXXXXXX"
+          <input id="relay-to" type="tel" inputmode="tel" placeholder="01XXXXXXXXX" required aria-required="true"
                  data-i18n-placeholder="toPlaceholder" autocomplete="tel" />
+          <p class="note" data-i18n="toHint">
+            Required. An SMS link with no number is refused by most phones, so the button stays off
+            until a number is here. 01XXXXXXXXX, or +8801XXXXXXXXX.
+          </p>
           <textarea id="relay-payload" class="payload" readonly aria-live="polite"></textarea>
           <div class="row">
             <a id="relay-send" class="btn primary" role="button" aria-disabled="true" data-i18n="send">Send as SMS</a>
