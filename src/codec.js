@@ -31,26 +31,11 @@ export function decode(payload, model) {
 }
 
 export function encodeToBits(text, model) {
+  const normalised = text.normalize('NFC');
   const encoder = new Encoder();
-  writeText(encoder, model, text);
-  return encoder.finish();
-}
-
-export function decodeFromBits(bits, model) {
-  return readText(new Decoder(bits), model);
-}
-
-/**
- * Writes one end-of-message-terminated string into an open arithmetic stream.
- *
- * Exposed so structured frames (src/frame.js) can append several notes to a
- * single stream. Each string carries its own terminator, so the reader
- * recovers them one after another without a length field.
- */
-export function writeText(encoder, model, text) {
   const history = new Array(model.maxOrder).fill(EOM);
 
-  for (const char of text.normalize('NFC')) {
+  for (const char of normalised) {
     const id = model.index.has(char) ? model.index.get(char) : model.literalId;
     if (id === EOM) continue; // a literal newline would truncate the message
     encodeSymbol(encoder, model, history, id);
@@ -61,10 +46,11 @@ export function writeText(encoder, model, text) {
   }
 
   encodeSymbol(encoder, model, history, EOM);
+  return encoder.finish();
 }
 
-/** Reads back one string written by `writeText`. */
-export function readText(decoder, model) {
+export function decodeFromBits(bits, model) {
+  const decoder = new Decoder(bits);
   const history = new Array(model.maxOrder).fill(EOM);
   const out = [];
 

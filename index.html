@@ -6,7 +6,7 @@
     <title>বর্ণমালা — Bornomala</title>
     <meta
       name="description"
-      content="Offline Bangla crisis messaging. A full status report in eight characters, forty-five of them in one SMS, and a paper fallback that needs no phone at all."
+      content="Offline Bangla SMS compression. Fits roughly 350 Bangla characters into one SMS segment, with no server and no internet."
     />
     <meta name="theme-color" content="#0b0f0e" />
     <link rel="manifest" href="manifest.webmanifest" />
@@ -20,7 +20,6 @@
         --muted: #8ba099;
         --accent: #35d39a;
         --warn: #f2a93b;
-        --alarm: #f2685b;
         color-scheme: dark;
       }
       * { box-sizing: border-box; }
@@ -31,8 +30,8 @@
         font: 16px/1.55 system-ui, "Noto Sans Bengali", "SolaimanLipi", sans-serif;
         padding: max(16px, env(safe-area-inset-top)) 16px 48px;
       }
-      main { max-width: 680px; margin: 0 auto; }
-      header { padding: 8px 0 16px; }
+      main { max-width: 640px; margin: 0 auto; }
+      header { padding: 8px 0 20px; }
       h1 { font-size: 1.6rem; margin: 0 0 4px; letter-spacing: 0.01em; }
       .tagline { color: var(--muted); margin: 0; font-size: 0.95rem; }
       section {
@@ -43,113 +42,38 @@
         margin-bottom: 16px;
       }
       h2 { font-size: 1rem; margin: 0 0 12px; color: var(--muted); font-weight: 600; }
-      h3 { font-size: 0.85rem; margin: 18px 0 8px; color: var(--muted); font-weight: 600; }
-
-      .tabs { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 16px; padding-bottom: 4px; }
-      .tabs button {
-        flex: 0 0 auto;
-        min-height: 42px;
-        padding: 0 14px;
-        border-radius: 10px;
-        border: 1px solid var(--line);
-        background: #131a18;
-        color: var(--muted);
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
-        white-space: nowrap;
-      }
-      .tabs button[aria-selected="true"] {
-        background: var(--accent);
-        color: #05100c;
-        border-color: transparent;
-      }
-      .panel[hidden] { display: none; }
-
-      textarea, input[type="text"], select {
+      textarea {
         width: 100%;
+        min-height: 116px;
+        resize: vertical;
         background: #0d1413;
         color: var(--ink);
         border: 1px solid var(--line);
         border-radius: 10px;
-        padding: 11px 12px;
+        padding: 12px;
         font: inherit;
-        min-height: 46px;
       }
-      textarea { min-height: 104px; resize: vertical; }
-      textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-      label { display: block; font-size: 0.8rem; color: var(--muted); margin: 12px 0 5px; }
-      .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 12px; }
-
+      textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
       .payload {
         min-height: 74px;
         font-family: ui-monospace, "SF Mono", Menlo, monospace;
         font-size: 0.85rem;
         word-break: break-all;
       }
-      .code {
-        font-family: ui-monospace, "SF Mono", Menlo, monospace;
-        font-size: 1.35rem;
-        letter-spacing: 0.08em;
-        color: var(--accent);
-        word-break: break-all;
-        margin: 6px 0 0;
-      }
-
-      /* The sentence the receiver sees, in the size that says it is the point. */
-      .preview {
-        font-size: 1.15rem;
-        line-height: 1.45;
-        margin: 6px 0 0;
-        padding: 12px 14px;
-        border-left: 3px solid var(--accent);
-        background: #0d1413;
-        border-radius: 0 10px 10px 0;
-      }
-
-      .quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
-      /* Thumb-sized, icon first: this is the control someone uses one-handed,
-         in the dark, possibly without reading the label at all. */
-      .quick button {
-        min-height: 76px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-align: left;
-        line-height: 1.25;
-        padding: 10px 12px;
-        font-size: 0.95rem;
-      }
-      .quick .icon { font-size: 1.7rem; line-height: 1; }
-
-      /* A map link is a destination, not a footnote: thumb-sized and legible
-         at arm's length, because it is read in bad light by someone in a hurry. */
-      .maplink {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        min-height: 40px;
-        padding: 6px 14px;
-        border: 1px solid var(--accent);
-        border-radius: 999px;
-        color: var(--accent);
-        font-size: 1rem;
-        font-weight: 600;
-        text-decoration: none;
-        white-space: nowrap;
-      }
-      .quick button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
-
       .stats {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
         gap: 10px;
         margin: 14px 0 4px;
       }
-      .stat { background: #0d1413; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+      .stat {
+        background: #0d1413;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
       .stat b { display: block; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
       .stat span { color: var(--muted); font-size: 0.78rem; }
-
       .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
       button {
         flex: 1 1 auto;
@@ -164,329 +88,71 @@
         cursor: pointer;
       }
       button.primary { background: var(--accent); color: #05100c; border-color: transparent; }
-      button.small { flex: 0 0 auto; min-height: 36px; padding: 0 12px; font-size: 0.82rem; }
       button:disabled { opacity: 0.45; cursor: not-allowed; }
-
-      .check { display: flex; align-items: center; gap: 9px; margin-top: 14px; font-size: 0.86rem; color: var(--muted); }
-      .check input { width: 20px; min-height: 20px; height: 20px; flex: 0 0 auto; accent-color: var(--accent); }
-
-      .qr {
-        background: #fff;
-        padding: 12px;
-        border-radius: 12px;
-        margin-top: 14px;
-        display: inline-block;
-        line-height: 0;
-      }
-      .qr svg { display: block; width: 100%; max-width: 300px; height: auto; }
-      .qr[hidden] { display: none; }
-
       .note { color: var(--muted); font-size: 0.82rem; margin: 10px 0 0; }
       .warn { color: var(--warn); }
-      .alarm { color: var(--alarm); }
-
-      ul.list { list-style: none; margin: 0; padding: 0; }
-      ul.list li {
-        background: #0d1413;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        padding: 10px 12px;
-        margin-bottom: 8px;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 0.9rem;
-      }
-      ul.list li span { flex: 1 1 auto; }
-      .empty { color: var(--muted); font-size: 0.85rem; }
-
-      table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-      th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
-      th { color: var(--muted); font-weight: 600; }
-      td.k { font-family: ui-monospace, Menlo, monospace; color: var(--accent); white-space: nowrap; }
-      .cardcols { columns: 2; column-gap: 20px; }
-      .cardcols table { break-inside: avoid; }
-
       footer { color: var(--muted); font-size: 0.8rem; text-align: center; padding-top: 8px; }
       footer p { margin: 4px 0; }
       #status[hidden] { display: none; }
-
-      /* Sized for the hand this is actually in: a cheap phone, held by someone
-         who is not going to squint at a 13px label to find the send button. */
-      body { font-size: 17px; }
-      select, input[type="text"], textarea { min-height: 48px; font-size: 1rem; }
-      button.primary { min-height: 54px; font-size: 1.05rem; font-weight: 600; }
-      .check { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
-      .check input[type="checkbox"] { width: 24px; height: 24px; flex: none; }
-      label { display: block; margin: 14px 0 6px; font-size: 0.95rem; }
-
-      @media print {
-        :root { color-scheme: light; }
-        body { background: #fff; color: #000; padding: 0; font-size: 10pt; }
-        .tabs, footer, #status, .noprint, .panel[hidden] { display: none !important; }
-        section { border: none; background: none; padding: 0; }
-        th, td { border-bottom: 1px solid #ccc; }
-        td.k { color: #000; }
-        .cardcols { columns: 3; }
-      }
     </style>
   </head>
   <body>
     <main>
       <header>
         <h1>বর্ণমালা <span aria-hidden="true">·</span> Bornomala</h1>
-        <p class="tagline" data-i18n="tagline">
-          Crisis messaging for the network you have left.
+        <p class="tagline">
+          বাংলা এসএমএস সংকোচন — ইন্টারনেট ছাড়াই।
+          <br />Bangla SMS compression that runs with the network down.
         </p>
-        <div class="row noprint" role="group" aria-label="Language / ভাষা">
-          <button id="lang-en" type="button" class="small primary" lang="en">English</button>
-          <button id="lang-bn" type="button" class="small" lang="bn">বাংলা</button>
-        </div>
       </header>
 
-      <p id="status" class="note warn" role="status">loading model…</p>
+      <p id="status" class="note warn" role="status">মডেল লোড হচ্ছে… loading model…</p>
 
-      <div class="tabs" role="tablist">
-        <button role="tab" id="tab-crisis" aria-controls="panel-crisis" aria-selected="true">
-          <span data-i18n="tabCrisis">Crisis</span>
-        </button>
-        <button role="tab" id="tab-relay" aria-controls="panel-relay" aria-selected="false">
-          <span data-i18n="tabRelay">Relay</span> <span id="relay-count"></span>
-        </button>
-        <button role="tab" id="tab-decode" aria-controls="panel-decode" aria-selected="false">
-          <span data-i18n="tabDecode">Decode</span>
-        </button>
-        <button role="tab" id="tab-card" aria-controls="panel-card" aria-selected="false">
-          <span data-i18n="tabCard">Paper card</span>
-        </button>
-      </div>
+      <section aria-labelledby="compose-heading">
+        <h2 id="compose-heading">১. লিখুন — compose</h2>
+        <textarea
+          id="input"
+          lang="bn"
+          placeholder="এখানে বাংলায় লিখুন…"
+          autocomplete="off"
+          spellcheck="false"
+        ></textarea>
 
-      <!-- ─────────────────────────── crisis frame ─────────────────────────── -->
-      <div class="panel" id="panel-crisis" role="tabpanel" aria-labelledby="tab-crisis">
-        <section>
-          <h2 data-i18n="yourMessage">1. Your message</h2>
-          <textarea
-            id="note"
-            lang="bn"
-            placeholder="Write here, in your own words…"
-            data-i18n-placeholder="messagePlaceholder"
-            autocomplete="off"
-            spellcheck="false"
-          ></textarea>
-          <p class="note" data-i18n="messageHint">
-            Optional. Your words travel compressed against the Bangla model, so they need the model
-            downloaded — and a message carrying words cannot be read off the paper card.
-          </p>
+        <div class="stats">
+          <div class="stat"><b id="stat-chars">0</b><span>অক্ষর / characters</span></div>
+          <div class="stat"><b id="stat-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
+          <div class="stat"><b id="stat-ucs2">0</b><span>সেগমেন্ট আজ (UCS-2)</span></div>
+          <div class="stat"><b id="stat-ratio">—</b><span>সংকোচন / vs UCS-2</span></div>
+        </div>
 
-          <h2 data-i18n="crisisWhat">2. What has happened</h2>
-          <p class="note" data-i18n="quickHint">Tap one. These are the six most common.</p>
-          <div class="quick" id="quick"></div>
+        <div class="row">
+          <button id="send" class="primary" type="button" disabled>এসএমএস পাঠান</button>
+          <button id="copy" type="button" disabled>কপি করুন</button>
+        </div>
+        <p class="note" id="compose-note"></p>
+      </section>
 
-          <label for="template" data-i18n="allMessages">Or choose from all 32 messages</label>
-          <select id="template"></select>
+      <section aria-labelledby="payload-heading">
+        <h2 id="payload-heading">২. সংকুচিত বার্তা — compressed payload</h2>
+        <textarea id="payload" class="payload" readonly aria-live="polite"></textarea>
+      </section>
 
-          <div id="slots" class="grid2"></div>
+      <section aria-labelledby="decode-heading">
+        <h2 id="decode-heading">৩. পাওয়া বার্তা খুলুন — decode</h2>
+        <textarea
+          id="cipher"
+          class="payload"
+          placeholder="প্রাপ্ত সংকুচিত বার্তা এখানে পেস্ট করুন…"
+          autocomplete="off"
+          spellcheck="false"
+        ></textarea>
+        <textarea id="plain" lang="bn" readonly aria-live="polite"></textarea>
+        <p class="note" id="decode-note"></p>
+      </section>
 
-          <h3 data-i18n="where">Where are you</h3>
-          <select id="loc-mode">
-            <option value="none" data-i18n="locNone">Do not send my location</option>
-            <option value="district" selected data-i18n="locDistrict">My district</option>
-            <option value="gps" data-i18n="locGps">My exact position</option>
-          </select>
-          <p class="note" data-i18n="locHint">
-            A district costs 6 bits. An exact position costs 32.
-          </p>
-          <div id="district-wrap">
-            <label for="district" data-i18n="district">District</label>
-            <select id="district"></select>
-          </div>
-          <div id="gps-wrap" hidden>
-            <div class="row">
-              <button id="locate" type="button" class="small" data-i18n="useLocation">
-                Use my location
-              </button>
-            </div>
-            <p class="note" id="gps-note">No GPS fix yet</p>
-          </div>
-
-          <h3 data-i18n="when">When</h3>
-          <select id="hours">
-            <option value="" data-i18n="noTime">No time</option>
-          </select>
-
-          <div class="check">
-            <input type="checkbox" id="paper" checked />
-            <label for="paper" style="margin: 0" data-i18n="paperCheck">
-              Hand-decodable code (base-32)
-            </label>
-          </div>
-
-          <div class="check">
-            <input type="checkbox" id="crisis-plaintext" />
-            <label for="crisis-plaintext" style="margin: 0" data-i18n="plainTextCheck">
-              Send as plain text — no app needed at the other end
-            </label>
-          </div>
-          <p class="note" data-i18n="plainTextHint">
-            Anyone can read it, including an office that has never heard of this app. It costs more
-            SMS segments, and nothing here is secret either way.
-          </p>
-        </section>
-
-        <section>
-          <h2 data-i18n="crisisMessage">2. The message</h2>
-          <h3 data-i18n="willRead">What they will read</h3>
-          <p class="preview" id="crisis-plain"></p>
-          <h3 id="code-label" data-i18n="codeLabel">What actually gets sent</h3>
-          <p class="code" id="crisis-code">—</p>
-          <div class="stats">
-            <div class="stat"><b id="c-chars">0</b><span data-i18n="statChars">Characters</span></div>
-            <div class="stat">
-              <b id="c-segments">0</b><span data-i18n="statSegments">SMS segments</span>
-            </div>
-            <div class="stat">
-              <b id="c-ucs2">0</b><span data-i18n="statUcs2Today">Cost today (UCS-2)</span>
-            </div>
-            <div class="stat"><b id="c-ratio">—</b><span data-i18n="statSaving">Saving</span></div>
-          </div>
-          <div class="row">
-            <button id="crisis-send" class="primary" type="button" data-i18n="send">
-              Send as SMS
-            </button>
-            <button id="crisis-copy" type="button" data-i18n="copy">Copy</button>
-            <button id="crisis-queue" type="button" data-i18n="queue">Add to relay</button>
-          </div>
-          <p class="note" id="crisis-note"></p>
-
-          <h3 data-i18n="noNetworkHead">No network at all?</h3>
-          <p class="note" data-i18n="noNetworkHelp">
-            Show the QR to the phone beside you and let them point a camera. No radio, no operator,
-            no permission.
-          </p>
-          <div class="check">
-            <input type="checkbox" id="qr-link" checked />
-            <label for="qr-link" style="margin: 0" data-i18n="qrLinkCheck">
-              Scanning opens the app
-            </label>
-          </div>
-          <div class="row">
-            <button id="crisis-qr-toggle" type="button" data-i18n="showQr">Show QR</button>
-          </div>
-          <div class="qr" id="crisis-qr" hidden></div>
-        </section>
-      </div>
-
-      <!-- ────────────────────────────── relay ─────────────────────────────── -->
-      <div class="panel" id="panel-relay" role="tabpanel" aria-labelledby="tab-relay" hidden>
-        <section>
-          <h2 data-i18n="relayHead">Relay — one SMS for many people</h2>
-          <p class="note" data-i18n="relayHelp">
-            One person with a bar of signal carries forty-five people's status in a single SMS.
-          </p>
-          <ul class="list" id="relay-list"></ul>
-          <p class="empty" id="relay-empty" data-i18n="relayEmpty">
-            Empty — add reports from the Crisis tab
-          </p>
-
-          <div class="stats">
-            <div class="stat"><b id="r-count">0</b><span data-i18n="statReports">Reports</span></div>
-            <div class="stat"><b id="r-chars">0</b><span data-i18n="statChars">Characters</span></div>
-            <div class="stat">
-              <b id="r-segments">0</b><span data-i18n="statSegments">SMS segments</span>
-            </div>
-            <div class="stat">
-              <b id="r-alone">0</b><span data-i18n="statAlone">Sent separately</span>
-            </div>
-          </div>
-          <div class="check">
-            <input type="checkbox" id="relay-plaintext" />
-            <label for="relay-plaintext" style="margin: 0" data-i18n="plainTextCheck">
-              Send as plain text — no app needed at the other end
-            </label>
-          </div>
-          <textarea id="relay-payload" class="payload" readonly aria-live="polite"></textarea>
-          <div class="row">
-            <button id="relay-send" class="primary" type="button" disabled data-i18n="send">
-              Send as SMS
-            </button>
-            <button id="relay-copy" type="button" disabled data-i18n="copy">Copy</button>
-            <button id="relay-clear" type="button" data-i18n="clear">Clear all</button>
-          </div>
-          <p class="note" id="relay-note"></p>
-          <div class="row">
-            <button id="relay-qr-toggle" type="button" disabled data-i18n="showQr">Show QR</button>
-          </div>
-          <div class="qr" id="relay-qr" hidden></div>
-        </section>
-      </div>
-
-      <!-- ────────────────────────────── decode ────────────────────────────── -->
-      <div class="panel" id="panel-decode" role="tabpanel" aria-labelledby="tab-decode" hidden>
-        <section>
-          <h2 data-i18n="decodeHead">Open a message you received</h2>
-          <textarea
-            id="cipher"
-            class="payload"
-            placeholder="Paste the code you received…  H-428R-H7E"
-            data-i18n-placeholder="decodePlaceholder"
-            autocomplete="off"
-            spellcheck="false"
-          ></textarea>
-          <ul class="list" id="decoded"></ul>
-          <p class="note" id="decode-note"></p>
-        </section>
-      </div>
-
-      <!-- ─────────────────────────── printable card ───────────────────────── -->
-      <div class="panel" id="panel-card" role="tabpanel" aria-labelledby="tab-card" hidden>
-        <section>
-          <h2 data-i18n="cardHead">The paper decode card</h2>
-          <p class="note noprint" data-i18n="cardHelpHtml">
-            Print this and pin it up. A code beginning with <code>H</code> can be decoded by hand
-            from this card, with no phone and no power.
-          </p>
-          <div class="row noprint">
-            <button type="button" id="print" class="small" data-i18n="print">Print</button>
-          </div>
-
-          <h3 data-i18n="cardHowHead">How to read a code by hand</h3>
-          <ol class="note" style="padding-left: 20px">
-            <li data-i18n="cardStep1Html">
-              Drop the hyphens. A leading <code>H</code> means hand-decodable.
-            </li>
-            <li data-i18n="cardStep2">
-              Convert each remaining character to its number below, and write each as 5 bits.
-            </li>
-            <li data-i18n="cardStep3">
-              Drop the first bit (sentinel) and the last 8 bits (checksum).
-            </li>
-            <li data-i18n="cardStep4">
-              Then read left to right: 5 bits message number · 1 bit has-location · if set, 1 bit
-              mode (0 = district, then 6 bits district number) · 1 bit has-time · if set, 5 bits
-              hours ago · then the message's own fields · a final bit saying whether a note follows.
-            </li>
-          </ol>
-
-          <h3 data-i18n="cardBase32Head">Character values (Crockford base-32)</h3>
-          <div id="card-base32"></div>
-
-          <h3 data-i18n="cardMessagesHead">Messages (5 bits)</h3>
-          <div id="card-templates" class="cardcols"></div>
-
-          <h3 data-i18n="cardFieldsHead">Field values</h3>
-          <div id="card-slots" class="cardcols"></div>
-
-          <h3 data-i18n="cardDistrictsHead">Districts (6 bits)</h3>
-          <div id="card-districts" class="cardcols"></div>
-        </section>
-      </div>
-
-      <footer class="noprint">
-        <p data-i18n="footer">
-          Everything runs on your phone. No server, no internet, no message leaves the device.
-        </p>
-        <p class="note">Bornomala <span id="build">—</span></p>
+      <footer>
+        <p>সব কিছু আপনার ফোনেই চলে — কোনো সার্ভার নেই।</p>
+        <p>Everything runs on your phone. No server, no internet, no message leaves the device.</p>
       </footer>
     </main>
 
