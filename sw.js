@@ -6,10 +6,13 @@
  * never depend on the network at runtime. That is the point — the app has to
  * work on the day the network is gone.
  *
- * Bump CACHE when any shell file or the model changes.
+ * Bump CACHE when any shell file or the model changes. This is not optional
+ * housekeeping: serving is cache-first with no revalidation, so an installed
+ * copy keeps handing out the old files until the cache name changes. A deploy
+ * that forgets this line reaches nobody who already has the app.
  */
 
-const CACHE = 'bornomala-v3';
+const CACHE = 'bornomala-v4';
 
 /**
  * The shell is a few tens of kilobytes and covers every structured crisis

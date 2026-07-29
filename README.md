@@ -104,6 +104,63 @@ scored by the standard's penalty rules, error correction level M. Its output is
 verified against `zbarimg`, an outside decoder, in `test/qr.test.js`: whatever
 went in has to come back out, or the build fails.
 
+## Using it, step by step
+
+Open **https://mayamoho.github.io/bornomala/**. Nothing to sign up for, nothing
+to install first, no permissions asked until you ask for a location.
+
+**Install it before you need it.** On Android Chrome, the three-dot menu →
+*Add to Home screen*. On iPhone, in Safari, the share icon → *Add to Home
+Screen*. On a desktop, the install icon at the right of the address bar. After
+that first visit the app runs with the network off. Doing this on a calm day is
+the entire point; on the day of, the download may not finish.
+
+**Choose your language.** English and বাংলা sit at the top of the page. English
+is the default. The choice is remembered.
+
+**Send a status report — the Crisis tab.**
+
+1. **Tap what happened.** Six icons cover the common cases: ✅ we are safe,
+   🆘 need help, ⚠️ trapped, 🚑 injured, 💧 water needed, 🏃 evacuate. For
+   anything else, the dropdown below holds all 32, grouped under *We are… /
+   We need… / Danger here / Help is here*. A blank like `____` in an option is
+   a value you are about to fill in.
+2. **Fill the boxes that appear.** How many people, how urgent, how deep the
+   water — whatever that message needs. They are dropdowns, never typing.
+3. **Say where.** *My district* is one tap and costs almost nothing to send.
+   *My exact position* asks the phone for GPS and is worth it when a boat has
+   to find you. *Do not send my location* is a real choice.
+4. **Say when**, in hours ago, up to 31. Leave it on *just now* if it is now.
+5. **Add a name or note** only if you need to — it is optional, it needs the
+   text model to have finished downloading, and it stops the message from being
+   readable off paper.
+6. **Read the big sentence** under *What they will read*. That is what arrives
+   on the other phone. Under it, *What actually gets sent* shows the short code
+   that travels, with what it costs and what the same message would have cost
+   as ordinary Bangla SMS.
+7. **Press Send as SMS.** Your normal messaging app opens with the code already
+   written. Pick who it goes to and send it. *Copy* puts it on the clipboard
+   instead, for any app you like.
+
+**Carry other people's reports — the Relay tab.** Instead of sending, press
+*Add to relay*, then build the next report. Up to 64. Open the Relay tab and
+send once: everyone's status in a single SMS. This is the tab for a shelter
+volunteer with one bar of signal and a notebook full of families.
+
+**Read a message you were sent — the Decode tab.** Paste the code in. The
+sentence appears in your language. A message sent with GPS gives you a map
+link. If the code arrived damaged, the app says so and refuses — it will not
+invent a sentence nobody wrote.
+
+**When there is no network at all — the QR button.** Press *Show QR*, hold the
+screen up, and let the other phone's camera read it. Nothing is transmitted:
+no tower, no Bluetooth, no pairing, no permission.
+
+**When there is no phone at all — the Paper card tab.** Press *Print* and keep
+the sheet. A code that begins with `H` can be decoded by hand from those
+tables, with no device and no power. It is slow — a minute or two per message —
+and it is the floor under everything else.
+
 ## Results
 
 Free-text compression, measured on 5,000 held-out messages — every 50th corpus
