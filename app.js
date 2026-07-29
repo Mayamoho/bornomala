@@ -50,7 +50,7 @@ const QUICK = [
 const inLang = (pair) => (getLang() === 'bn' ? pair.bn : pair.en);
 
 /** Bumped on every deploy, shown in the footer so a stale copy is visible. */
-const BUILD = 'v9';
+const BUILD = 'v10';
 
 /**
  * A tappable position for a plain-text recipient.
@@ -732,9 +732,11 @@ function wire() {
   });
   el('district').addEventListener('change', refreshCrisis);
   el('hours').addEventListener('change', refreshCrisis);
-  el('paper').addEventListener('change', refreshCrisis);
-  el('crisis-plaintext').addEventListener('change', refreshCrisis);
-  el('relay-plaintext').addEventListener('change', refreshRelay);
+  for (const event of ['change', 'click', 'input']) {
+    el('crisis-plaintext').addEventListener(event, refreshCrisis);
+    el('relay-plaintext').addEventListener(event, refreshRelay);
+    el('paper').addEventListener(event, refreshCrisis);
+  }
   el('note').addEventListener('input', refreshCrisis);
   el('loc-mode').addEventListener('change', () => {
     const mode = el('loc-mode').value;
@@ -836,7 +838,8 @@ function main() {
     },
   );
 
-  el('build').textContent = BUILD;
+  const stamp = el('build');
+  if (stamp) stamp.textContent = BUILD;
 
   if ('serviceWorker' in navigator) {
     // `updateViaCache: 'none'` matters more than it looks: without it the

@@ -11,7 +11,7 @@
  * shell from a phone that has been offline for a week.
  */
 
-const CACHE = 'bornomala-v9';
+const CACHE = 'bornomala-v10';
 
 /**
  * The shell is a few tens of kilobytes and covers every structured crisis
