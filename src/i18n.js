@@ -24,20 +24,24 @@ export const STRINGS = {
   en: {
     tagline: 'Crisis messaging for the network you have left.',
 
-    tabCrisis: 'Crisis',
+    tabCrisis: 'Send',
     tabRelay: 'Relay',
     tabText: 'Write',
     tabDecode: 'Decode',
     tabCard: 'Paper card',
 
-    crisisWhat: '1. What has happened',
+    yourMessage: '1. Your message',
+    messagePlaceholder: 'Write here, in your own words…',
+    messageHint:
+      'Optional. Your words travel compressed against the Bangla model, so they need the model downloaded — and a message carrying words cannot be read off the paper card.',
+    crisisWhat: '2. What has happened',
     quickHint: 'Tap one. These are the six most common.',
     allMessages: 'Or choose from all 32 messages',
     groupStatus: 'We are…',
     groupNeed: 'We need…',
     groupDanger: 'Danger here',
     groupHelp: 'Help is here',
-    where: 'Where are you',
+    where: '3. Where are you',
     locNone: 'Do not send my location',
     locDistrict: 'My district',
     locGps: 'My exact position',
@@ -45,7 +49,7 @@ export const STRINGS = {
     district: 'District',
     useLocation: 'Use my location',
     noFix: 'No GPS fix yet',
-    when: 'When did it happen',
+    when: '4. When did it happen',
     noTime: 'No time',
     justNow: 'Just now',
     hoursAgo: (h) => `${h}h ago`,
@@ -59,7 +63,7 @@ export const STRINGS = {
     plainTextHint:
       'Anyone can read it, including an office that has never heard of this app. It costs more SMS segments, and nothing here is secret either way.',
 
-    crisisMessage: '2. The message',
+    crisisMessage: '5. Ready to send',
     willRead: 'What they will read',
     codeLabel: 'What actually gets sent',
     statChars: 'Characters',
@@ -147,20 +151,24 @@ export const STRINGS = {
   bn: {
     tagline: 'নেটওয়ার্ক ভেঙে পড়লে যে বার্তাটা যায়।',
 
-    tabCrisis: 'জরুরি বার্তা',
+    tabCrisis: 'বার্তা পাঠান',
     tabRelay: 'রিলে',
     tabText: 'লিখুন',
     tabDecode: 'খুলুন',
     tabCard: 'কাগজের কার্ড',
 
-    crisisWhat: '১. কী হয়েছে',
+    yourMessage: '১. আপনার বার্তা',
+    messagePlaceholder: 'এখানে নিজের ভাষায় লিখুন…',
+    messageHint:
+      'ঐচ্ছিক। আপনার লেখা বাংলা মডেল দিয়ে সংকুচিত হয়, তাই মডেল নামা থাকতে হবে — আর লেখা থাকলে বার্তাটি কাগজের কার্ড দিয়ে পড়া যাবে না।',
+    crisisWhat: '২. কী হয়েছে',
     quickHint: 'একটায় চাপ দিন। সবচেয়ে বেশি লাগে এই ছয়টা।',
     allMessages: 'অথবা ৩২টি বার্তা থেকে বেছে নিন',
     groupStatus: 'আমরা…',
     groupNeed: 'আমাদের দরকার…',
     groupDanger: 'এখানে বিপদ',
     groupHelp: 'এখানে সাহায্য আছে',
-    where: 'আপনি কোথায়',
+    where: '৩. আপনি কোথায়',
     locNone: 'অবস্থান পাঠাব না',
     locDistrict: 'আমার জেলা',
     locGps: 'আমার সঠিক অবস্থান',
@@ -168,7 +176,7 @@ export const STRINGS = {
     district: 'জেলা',
     useLocation: 'অবস্থান নিন',
     noFix: 'জিপিএস নেওয়া হয়নি',
-    when: 'কখন ঘটেছে',
+    when: '৪. কখন ঘটেছে',
     noTime: 'সময় নেই',
     justNow: 'এইমাত্র',
     hoursAgo: (h) => `${h} ঘণ্টা আগে`,
@@ -181,7 +189,7 @@ export const STRINGS = {
     plainTextHint:
       'যে কেউ পড়তে পারবে, এই অ্যাপের কথা না জানলেও। বেশি এসএমএস সেগমেন্ট লাগবে, আর কোনো ক্ষেত্রেই বার্তা গোপন নয়।',
 
-    crisisMessage: '২. যা পাঠাবেন',
+    crisisMessage: '৫. পাঠানোর জন্য প্রস্তুত',
     willRead: 'ওরা যা পড়বে',
     codeLabel: 'যা আসলে যাচ্ছে',
     statChars: 'অক্ষর',

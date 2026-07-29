@@ -254,9 +254,6 @@
         <button role="tab" id="tab-relay" aria-controls="panel-relay" aria-selected="false">
           <span data-i18n="tabRelay">Relay</span> <span id="relay-count"></span>
         </button>
-        <button role="tab" id="tab-text" aria-controls="panel-text" aria-selected="false">
-          <span data-i18n="tabText">Write</span>
-        </button>
         <button role="tab" id="tab-decode" aria-controls="panel-decode" aria-selected="false">
           <span data-i18n="tabDecode">Decode</span>
         </button>
@@ -268,7 +265,21 @@
       <!-- ─────────────────────────── crisis frame ─────────────────────────── -->
       <div class="panel" id="panel-crisis" role="tabpanel" aria-labelledby="tab-crisis">
         <section>
-          <h2 data-i18n="crisisWhat">1. What has happened</h2>
+          <h2 data-i18n="yourMessage">1. Your message</h2>
+          <textarea
+            id="note"
+            lang="bn"
+            placeholder="Write here, in your own words…"
+            data-i18n-placeholder="messagePlaceholder"
+            autocomplete="off"
+            spellcheck="false"
+          ></textarea>
+          <p class="note" data-i18n="messageHint">
+            Optional. Your words travel compressed against the Bangla model, so they need the model
+            downloaded — and a message carrying words cannot be read off the paper card.
+          </p>
+
+          <h2 data-i18n="crisisWhat">2. What has happened</h2>
           <p class="note" data-i18n="quickHint">Tap one. These are the six most common.</p>
           <div class="quick" id="quick"></div>
 
@@ -303,22 +314,6 @@
           <select id="hours">
             <option value="" data-i18n="noTime">No time</option>
           </select>
-
-          <h3>
-            <span data-i18n="noteHead">Name or note</span>
-            <span class="note" data-i18n="optional">(optional)</span>
-          </h3>
-          <input
-            id="note"
-            type="text"
-            lang="bn"
-            placeholder="e.g. Ayesha Khatun"
-            data-i18n-placeholder="notePlaceholder"
-            autocomplete="off"
-          />
-          <p class="note" data-i18n="noteHelp">
-            A note needs the app at the other end. Without one, the message can be read off paper.
-          </p>
 
           <div class="check">
             <input type="checkbox" id="paper" checked />
@@ -423,49 +418,6 @@
             <button id="relay-qr-toggle" type="button" disabled data-i18n="showQr">Show QR</button>
           </div>
           <div class="qr" id="relay-qr" hidden></div>
-        </section>
-      </div>
-
-      <!-- ──────────────────────────── free text ───────────────────────────── -->
-      <div class="panel" id="panel-text" role="tabpanel" aria-labelledby="tab-text" hidden>
-        <section>
-          <h2 data-i18n="textHead">Write freely in Bangla</h2>
-          <textarea
-            id="input"
-            lang="bn"
-            placeholder="Type in Bangla here…"
-            data-i18n-placeholder="textPlaceholder"
-            autocomplete="off"
-            spellcheck="false"
-          ></textarea>
-
-          <div class="stats">
-            <div class="stat">
-              <b id="stat-chars">0</b><span data-i18n="statChars">Characters</span>
-            </div>
-            <div class="stat">
-              <b id="stat-segments">0</b><span data-i18n="statSegments">SMS segments</span>
-            </div>
-            <div class="stat">
-              <b id="stat-ucs2">0</b><span data-i18n="statUcs2Segments">Segments today (UCS-2)</span>
-            </div>
-            <div class="stat">
-              <b id="stat-ratio">—</b><span data-i18n="statCompression">vs UCS-2</span>
-            </div>
-          </div>
-
-          <div class="row">
-            <button id="send" class="primary" type="button" disabled data-i18n="send">
-              Send as SMS
-            </button>
-            <button id="copy" type="button" disabled data-i18n="copy">Copy</button>
-          </div>
-          <p class="note" id="compose-note"></p>
-        </section>
-
-        <section>
-          <h2 data-i18n="payloadHead">Compressed payload</h2>
-          <textarea id="payload" class="payload" readonly aria-live="polite"></textarea>
         </section>
       </div>
 

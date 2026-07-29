@@ -10,7 +10,7 @@
  */
 
 import { Model } from './src/model.js';
-import { encodeText, encodeCrisis, encodeRelay, decodeMessage, describe } from './src/message.js';
+import { encodeCrisis, encodeRelay, decodeMessage, describe } from './src/message.js';
 import { blankFrame, isPaperSafe, mapLink, MAX_BATCH, MAX_HOURS_AGO } from './src/frame.js';
 import {
   TEMPLATES,
@@ -50,7 +50,7 @@ const QUICK = [
 const inLang = (pair) => (getLang() === 'bn' ? pair.bn : pair.en);
 
 /** Bumped on every deploy, shown in the footer so a stale copy is visible. */
-const BUILD = 'v8';
+const BUILD = 'v9';
 
 /**
  * A tappable position for a plain-text recipient.
@@ -374,52 +374,6 @@ function refreshRelay() {
   el('relay-qr-toggle').disabled = false;
   refreshQr('relay-qr', payload);
   el('relay-note').textContent = t('relayNote', relay.length, segments, alone);
-}
-
-/* ─────────────────────────────── free text ──────────────────────── */
-
-function refreshCompose() {
-  const text = el('input').value;
-  const chars = [...text].length;
-  el('stat-chars').textContent = String(chars);
-
-  if (!model || chars === 0) {
-    el('payload').value = '';
-    el('stat-segments').textContent = '0';
-    el('stat-ucs2').textContent = '0';
-    el('stat-ratio').textContent = '—';
-    el('send').disabled = true;
-    el('copy').disabled = true;
-    el('compose-note').textContent = model ? '' : t('waitingModel');
-    return;
-  }
-
-  let payload;
-  try {
-    payload = encodeText(text, model);
-  } catch (error) {
-    el('compose-note').textContent = t('compressionFailed', error.message);
-    return;
-  }
-
-  const septets = septetCost(payload);
-  const segments = gsm7Segments(payload);
-
-  el('payload').value = payload;
-  el('stat-segments').textContent = String(segments);
-  el('stat-ucs2').textContent = String(ucs2Segments(text));
-  // Segment counts both round up, so on short messages they hide the gain.
-  // Compare the bits instead: UCS-2 spends 16 per character, we spend what we
-  // spend, and that ratio is honest at every length.
-  el('stat-ratio').textContent = `${((chars * 16) / (septets * 7)).toFixed(1)}×`;
-  el('send').disabled = false;
-  el('copy').disabled = false;
-  el('compose-note').textContent = t(
-    'composeNote',
-    septets,
-    ((septets * 7) / chars).toFixed(2),
-    segments,
-  );
 }
 
 /* ─────────────────────────────── decode ─────────────────────────── */
@@ -763,7 +717,6 @@ function switchLang(code) {
 
   refreshCrisis();
   refreshRelay();
-  refreshCompose();
   refreshDecode();
 }
 
@@ -831,10 +784,6 @@ function wire() {
     refreshCrisis();
   });
 
-  el('input').addEventListener('input', refreshCompose);
-  el('send').addEventListener('click', () => sendBySms(el('payload').value));
-  el('copy').addEventListener('click', () => copyText(el('payload').value, 'compose-note'));
-
   el('cipher').addEventListener('input', refreshDecode);
   for (const code of ['en', 'bn']) {
     el(`lang-${code}`).addEventListener('click', () => switchLang(code));
@@ -879,7 +828,6 @@ function main() {
     (loaded) => {
       model = loaded;
       el('status').hidden = true;
-      refreshCompose();
       refreshCrisis();
       refreshDecode();
     },
@@ -894,6 +842,16 @@ function main() {
     // `updateViaCache: 'none'` matters more than it looks: without it the
     // browser serves sw.js from its own HTTP cache, the worker never notices
     // it changed, and a deployed fix reaches nobody who already has the app.
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      // A new worker took over mid-session: the page in front of the user is
+      // the old build. Reload once, and guard against the loop that a second
+      // controllerchange would otherwise cause.
+      if (reloading) return;
+      reloading = true;
+      window.location.reload();
+    });
+
     navigator.serviceWorker
       .register('sw.js', { updateViaCache: 'none' })
       .then((registration) => registration.update())
