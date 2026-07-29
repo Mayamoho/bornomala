@@ -49,6 +49,29 @@ const QUICK = [
 /** Message content carries its own bn/en pair; pick the side the UI is on. */
 const inLang = (pair) => (getLang() === 'bn' ? pair.bn : pair.en);
 
+/** Bumped on every deploy, shown in the footer so a stale copy is visible. */
+const BUILD = 'v6';
+
+/**
+ * A tappable position for a plain-text recipient.
+ *
+ * `geo:` is the right URI and the wrong one to put in an SMS: it opens a map
+ * on a phone that understands it and does nothing at all on a phone that does
+ * not. An https link is longer and works everywhere, which is the trade a
+ * plain-text message is already making.
+ */
+function mapsUrl(frame) {
+  if (!frame.location?.precise) return null;
+  const { lat, lon } = frame.location;
+  return `https://maps.google.com/?q=${lat.toFixed(5)},${lon.toFixed(5)}`;
+}
+
+/** The sentence as it should leave the phone when nobody decodes it. */
+function readableMessage(frame) {
+  const url = mapsUrl(frame);
+  return url ? `${describe(frame, getLang())}\n${url}` : describe(frame, getLang());
+}
+
 let model = null;
 let gpsFix = null;
 let crisisPayload = '';
@@ -159,7 +182,7 @@ function refreshCrisis() {
   // app — a thana, a relief office, a landline-era number. It costs segments
   // and it is not less private: nothing here was ever secret.
   const plainText = el('crisis-plaintext').checked;
-  const readable = describe(frame, getLang());
+  const readable = readableMessage(frame);
 
   const septets = septetCost(payload);
   // The baseline is always the Bangla sentence: that is what someone would
@@ -293,7 +316,7 @@ function refreshRelay() {
   // Same escape hatch as the crisis tab: sixty reports as sentences is many
   // segments, but it lands on a phone that has never seen this app.
   const plainText = el('relay-plaintext').checked;
-  const readable = relay.map((frame) => describe(frame, getLang())).join('\n');
+  const readable = relay.map(readableMessage).join('\n');
   const sending = plainText ? readable : payload;
 
   relayPayload = payload;
@@ -816,10 +839,18 @@ function main() {
     },
   );
 
+  el('build').textContent = BUILD;
+
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {
-      // Offline caching is a bonus; the app still works for this session.
-    });
+    // `updateViaCache: 'none'` matters more than it looks: without it the
+    // browser serves sw.js from its own HTTP cache, the worker never notices
+    // it changed, and a deployed fix reaches nobody who already has the app.
+    navigator.serviceWorker
+      .register('sw.js', { updateViaCache: 'none' })
+      .then((registration) => registration.update())
+      .catch(() => {
+        // Offline caching is a bonus; the app still works for this session.
+      });
   }
 }
 
