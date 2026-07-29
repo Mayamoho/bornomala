@@ -208,6 +208,40 @@ holds the scripts that clean them.
 - **Some SMS gateways transliterate.** The `ascii` profile exists for that case
   and costs about 7% capacity.
 
+## Development timeline, disclosed
+
+The commit log shows work on 27 July, a day before the sprint window opened.
+That is stated here rather than left for a judge to find. All times are
+Bangladesh Standard Time (UTC+6).
+
+**27 July — registration day, before the sprint window.** Five commits building
+the compression core: the arithmetic coder and GSM-7 transport, the PPM model
+and its trainer, the message codec, the offline PWA shell, the benchmark
+harness, and a first README. This was written after registration on the same
+day, as a working prototype of the compression idea. It is outside the 28–30
+July window and is not claimed as sprint work.
+
+**29 July — inside the sprint window.** Six commits, and everything that makes
+this a crisis-tech entry rather than a compression demo: the crisis phrasebook
+and structured frames, CRC-8 integrity, the paper profile, relay batching, the
+crisis/relay/paper-card UI, graceful degradation when the model will not load,
+the QR handoff for when there is no network at all, and this README.
+
+**Repository and push times.** The work was developed in a local git repository
+from the start. The public GitHub repository was created on **29 July at
+14:05:43**, and commits were pushed from **14:15** onward on the same day, in
+batches. So every push timestamp is 29 July even where a commit's author date
+is 27 July — the repository was published once the entry was ready to be seen,
+not incrementally as it was written.
+
+**Nothing has been backdated or rewritten to fit the window.** Commit dates are
+the real ones. The only history rewrite in this repository corrected a
+placeholder git identity (`Your Name <you@example.com>`) to the author's actual
+name and email; timestamps were left untouched by that rewrite.
+
+This disclosure is submitted with the entry. Whether the 27 July commits affect
+eligibility is the organisers' call, not a claim made here.
+
 ## Related work
 
 Bangla text compression has been studied for decades — dictionary methods,
