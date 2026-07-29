@@ -18,6 +18,8 @@ import {
   bnNum,
 } from './src/phrasebook.js';
 import { DISTRICTS, inCoverage } from './src/geo.js';
+import { encodeQr, toSvg } from './src/qr.js';
+import { initLang, getLang, setLang, applyLang, t } from './src/i18n.js';
 
 const el = (id) => document.getElementById(id);
 
@@ -163,12 +165,15 @@ const MAX_HOURS = 31;
  * reliably accept SMS, so calling is offered first and stated plainly.
  */
 const HOTLINES = [
-  { number: '999', bn: 'জাতীয় জরুরি সেবা', en: 'Police · Fire · Ambulance', icon: '🚨' },
+  { number: '999', bn: 'জাতীয় জরুরি সেবা — পুলিশ, ফায়ার, অ্যাম্বুলেন্স', en: 'National emergency — police, fire, ambulance', icon: '🚨' },
   { number: '1090', bn: 'দুর্যোগের আগাম বার্তা', en: 'Disaster warning', icon: '🌀' },
-  { number: '102', bn: 'ফায়ার সার্ভিস', en: 'Fire Service & Civil Defence', icon: '🚒' },
-  { number: '333', bn: 'সরকারি তথ্য ও সেবা', en: 'Government information', icon: 'ℹ️' },
+  { number: '102', bn: 'ফায়ার সার্ভিস ও সিভিল ডিফেন্স', en: 'Fire Service & Civil Defence', icon: '🚒' },
   { number: '16263', bn: 'স্বাস্থ্য বাতায়ন', en: 'DGHS health helpline', icon: '🏥' },
-  { number: '109', bn: 'নারী ও শিশু সহায়তা', en: 'Women and children', icon: '🛡️' },
+  { number: '333', bn: 'সরকারি তথ্য ও সেবা', en: 'Government information & services', icon: 'ℹ️' },
+  { number: '109', bn: 'নারী ও শিশু নির্যাতন প্রতিরোধ', en: 'Violence against women and children', icon: '🛡️' },
+  { number: '1098', bn: 'শিশু সহায়তা', en: 'Child helpline', icon: '🧒' },
+  { number: '16430', bn: 'জাতীয় আইনগত সহায়তা', en: 'National legal aid', icon: '⚖️' },
+  { number: '106', bn: 'দুর্নীতি দমন কমিশন', en: 'Anti-Corruption Commission', icon: '📋' },
 ];
 
 /** The six a volunteer reaches for first. The icon carries the meaning. */
@@ -208,7 +213,7 @@ function locationLines() {
     const district = DISTRICTS[Number(emEl.district().value)];
     if (!district) return [];
     return [
-      `${district.bn} / ${district.en}`,
+      getLang() === 'bn' ? district.bn : district.en,
       `https://maps.google.com/?q=${encodeURIComponent(`${district.en}, Bangladesh`)}`,
     ];
   }
@@ -224,12 +229,12 @@ function locationLines() {
 /** The whole message, exactly as it will leave the phone. */
 function missingFields() {
   const missing = [];
-  if (!emEl.text().value.trim()) missing.push('বার্তা / your message');
-  if (emEl.template().value === '') missing.push('প্রস্তুত বাক্য / a ready sentence');
+  if (!emEl.text().value.trim()) missing.push(t('yourMessage'));
+  if (emEl.template().value === '') missing.push(t('aSentence'));
   const mode = emEl.loc().value;
-  if (mode === '') missing.push('কোথায় / where you are');
-  else if (mode === 'gps' && !emGpsFix) missing.push('অবস্থান নিন / tap use my live location');
-  if (emEl.hours().value === '') missing.push('কখন / when');
+  if (mode === '') missing.push(t('whereYouAre'));
+  else if (mode === 'gps' && !emGpsFix) missing.push(t('tapLocate'));
+  if (emEl.hours().value === '') missing.push(t('whenIt'));
   return missing;
 }
 
@@ -243,11 +248,11 @@ function emergencyMessage() {
   if (chosen !== '') {
     const template = TEMPLATES[Number(chosen)];
     const values = template.slots.map((slot, i) => Number(el(`em-slot-${i}`)?.value ?? 0));
-    parts.push(renderTemplate(Number(chosen), values, 'bn'));
+    parts.push(renderTemplate(Number(chosen), values, getLang()));
   }
 
   const hours = emEl.hours().value;
-  parts.push(hours === '0' ? 'এইমাত্র / just now' : `${bnNum(hours)} ঘণ্টা আগে / ${hours}h ago`);
+  parts.push(hours === '0' ? t('justNow') : t('hoursAgo', getLang() === 'bn' ? bnNum(hours) : hours));
 
   return [parts.join(' · '), ...locationLines()].join('\n');
 }
@@ -262,14 +267,14 @@ function renderEmergencySlots() {
     const spec = SLOTS[slot];
     const label = document.createElement('label');
     label.htmlFor = `em-slot-${i}`;
-    label.textContent = `${spec.bn} / ${spec.en}`;
+    label.textContent = getLang() === 'bn' ? spec.bn : spec.en;
 
     const select = document.createElement('select');
     select.id = `em-slot-${i}`;
     for (let v = 0; v < 2 ** spec.bits; v += 1) {
       const option = document.createElement('option');
       option.value = String(v);
-      option.textContent = `${spec.render(v, 'bn')} / ${spec.render(v, 'en')}`;
+      option.textContent = spec.render(v, getLang());
       select.append(option);
     }
     select.addEventListener('change', refreshEmergency);
@@ -294,9 +299,8 @@ function refreshEmergency() {
   el('em-copy').disabled = !ready;
   el('em-queue').disabled = !ready;
   el('em-note').className = ready ? 'note' : 'note warn';
-  el('em-note').textContent = ready
-    ? 'সাধারণ লেখা — যে কেউ পড়তে পারবে / plain text, readable by anyone'
-    : `বাকি আছে / still needed: ${missing.join(', ')}`;
+  el('em-note').textContent = ready ? t('plainOk') : t('stillNeeded', missing.join(', '));
+  refreshQr('em-qr', message);
 }
 
 function markQuick() {
@@ -309,30 +313,30 @@ function markQuick() {
 function useEmergencyLocation() {
   const note = el('em-gps-note');
   if (!navigator.geolocation) {
-    note.textContent = 'এই ফোনে জিপিএস নেই / no geolocation on this device';
+    note.textContent = t('noGeolocation');
     return;
   }
-  note.textContent = 'খোঁজা হচ্ছে… / locating…';
+  note.textContent = t('locating');
   navigator.geolocation.getCurrentPosition(
     ({ coords }) => {
       emGpsFix = { lat: coords.latitude, lon: coords.longitude };
       note.replaceChildren(
-        document.createTextNode('অবস্থান পাওয়া গেছে / location captured — '),
+        document.createTextNode(`${t('locationCaptured')} — `),
       );
       const open = document.createElement('a');
       open.className = 'maplink';
       open.target = '_blank';
       open.rel = 'noopener';
       open.href = `https://maps.google.com/?q=${coords.latitude.toFixed(5)},${coords.longitude.toFixed(5)}`;
-      open.textContent = '📍 মানচিত্রে দেখুন / see on map';
+      open.textContent = '📍 ' + (getLang() === 'bn' ? 'মানচিত্রে দেখুন' : 'See on map');
       note.append(open);
       if (!inCoverage(coords.latitude, coords.longitude)) {
-        note.append(document.createTextNode(' — বাংলাদেশের বাইরে / outside Bangladesh'));
+        note.append(document.createTextNode(` — ${t('outsideBd')}`));
       }
       refreshEmergency();
     },
     (error) => {
-      note.textContent = `পাওয়া গেল না / no fix: ${error.message}`;
+      note.textContent = t('noFixError', error.message);
     },
     { enableHighAccuracy: true, timeout: 10_000 },
   );
@@ -352,7 +356,7 @@ function refreshRelay() {
     const remove = document.createElement('button');
     remove.type = 'button';
     remove.className = 'small';
-    remove.textContent = 'বাদ / remove';
+    remove.textContent = t('remove');
     remove.addEventListener('click', () => {
       relay.splice(i, 1);
       refreshRelay();
@@ -373,11 +377,59 @@ function refreshRelay() {
   el('relay-payload').value = joined;
   el('relay-send').disabled = relay.length === 0;
   el('relay-copy').disabled = relay.length === 0;
+  refreshQr('relay-qr', joined);
+  el('relay-qr-toggle').disabled = relay.length === 0;
   el('relay-note').textContent =
     relay.length === 0
       ? ''
-      : `${relay.length} জনের খবর ${ucs2Segments(joined)} সেগমেন্টে / ` +
-        `${relay.length} reports in ${ucs2Segments(joined)} segment(s)`;
+      : t('relayNote', relay.length, ucs2Segments(joined));
+}
+
+function markLangButtons() {
+  for (const code of ['en', 'bn']) {
+    el(`lang-${code}`).className = `small${getLang() === code ? ' primary' : ''}`;
+    el(`lang-${code}`).setAttribute('aria-pressed', String(getLang() === code));
+  }
+}
+
+/** Everything that carries language: markup, options, hotlines, live output. */
+function switchLang(code) {
+  if (code === getLang()) return;
+  const kept = {
+    text: emEl.text().value,
+    template: emEl.template().value,
+    slots: [...emEl.slots().querySelectorAll('select')].map((sel) => sel.value),
+    loc: emEl.loc().value,
+    district: emEl.district().value,
+    hours: emEl.hours().value,
+  };
+
+  setLang(code);
+  applyLang();
+  markLangButtons();
+
+  emEl.template().replaceChildren();
+  emEl.district().replaceChildren();
+  emEl.hours().replaceChildren();
+  buildEmergencyControls();
+  buildHotlines();
+
+  emEl.text().value = kept.text;
+  emEl.template().value = kept.template;
+  renderEmergencySlots();
+  kept.slots.forEach((value, i) => {
+    const control = el(`em-slot-${i}`);
+    if (control) control.value = value;
+  });
+  emEl.loc().value = kept.loc;
+  emEl.district().value = kept.district;
+  emEl.hours().value = kept.hours;
+
+  markQuick();
+  refreshEmergency();
+  refreshRelay();
+  refreshCompose();
+  refreshDecode();
 }
 
 function buildHotlines() {
@@ -388,22 +440,22 @@ function buildHotlines() {
     const item = document.createElement('li');
 
     const label = document.createElement('span');
-    label.textContent = `${line.icon}  ${line.number} — ${line.bn} / ${line.en}`;
+    label.textContent = `${line.icon}  ${line.number} — ${getLang() === 'bn' ? line.bn : line.en}`;
 
     const call = document.createElement('a');
     call.href = `tel:${line.number}`;
     call.className = 'maplink';
-    call.textContent = '📞 কল / call';
+    call.textContent = `📞 ${t('call')}`;
 
     const sms = document.createElement('button');
     sms.type = 'button';
     sms.className = 'small';
-    sms.textContent = 'এসএমএস / SMS';
+    sms.textContent = t('smsThem');
     sms.addEventListener('click', () => {
       const message = emergencyMessage();
       if (!message) {
         el('em-note').className = 'note warn';
-        el('em-note').textContent = `বাকি আছে / still needed: ${missingFields().join(', ')}`;
+        el('em-note').textContent = t('stillNeeded', missingFields().join(', '));
         return;
       }
       smsWith(message, line.number);
@@ -419,22 +471,24 @@ function buildEmergencyControls() {
   const none = document.createElement('option');
   none.value = '';
   none.selected = true;
-  none.textContent = 'কোনোটি নয় / none';
+  none.textContent = t('chooseOne');
   templates.append(none);
 
   // Grouped, and with slot placeholders shown as blanks: `{0}` is markup for
   // the renderer, not something to put in front of a person.
   for (const group of TEMPLATE_GROUPS) {
     const optgroup = document.createElement('optgroup');
-    optgroup.label = group.key
-      .replace('groupStatus', 'আমরা… / we are…')
-      .replace('groupNeed', 'দরকার… / we need…')
-      .replace('groupDanger', 'বিপদ / danger here')
-      .replace('groupHelp', 'সাহায্য আছে / help is here');
+    const groupNames = {
+      groupStatus: { bn: 'আমরা…', en: 'We are…' },
+      groupNeed: { bn: 'দরকার…', en: 'We need…' },
+      groupDanger: { bn: 'বিপদ', en: 'Danger here' },
+      groupHelp: { bn: 'সাহায্য আছে', en: 'Help is here' },
+    }[group.key];
+    optgroup.label = getLang() === 'bn' ? groupNames.bn : groupNames.en;
     for (const id of group.ids) {
       const option = document.createElement('option');
       option.value = String(id);
-      option.textContent = `${templateLabel(id, 'bn')} — ${templateLabel(id, 'en')}`;
+      option.textContent = templateLabel(id, getLang());
       optgroup.append(option);
     }
     templates.append(optgroup);
@@ -450,7 +504,7 @@ function buildEmergencyControls() {
     glyph.setAttribute('aria-hidden', 'true');
     glyph.textContent = icon;
     const label = document.createElement('span');
-    label.textContent = templateLabel(id, 'bn');
+    label.textContent = templateLabel(id, getLang());
     button.append(glyph, label);
     button.addEventListener('click', () => {
       templates.value = String(id);
@@ -465,7 +519,7 @@ function buildEmergencyControls() {
   DISTRICTS.forEach((district, i) => {
     const option = document.createElement('option');
     option.value = String(i);
-    option.textContent = `${district.bn} — ${district.en}`;
+    option.textContent = getLang() === 'bn' ? district.bn : district.en;
     districts.append(option);
   });
   districts.value = '17'; // Dhaka, the likeliest single answer
@@ -474,7 +528,7 @@ function buildEmergencyControls() {
   for (let h = 0; h <= MAX_HOURS; h += 1) {
     const option = document.createElement('option');
     option.value = String(h);
-    option.textContent = h === 0 ? 'এইমাত্র / just now' : `${h} ঘণ্টা আগে / ${h}h ago`;
+    option.textContent = h === 0 ? t('justNow') : t('hoursAgo', getLang() === 'bn' ? bnNum(h) : h);
     hours.append(option);
   }
   hours.value = ''; // nothing preselected
@@ -500,6 +554,16 @@ function wireEmergency() {
     refreshEmergency();
   });
   el('em-locate').addEventListener('click', useEmergencyLocation);
+  el('em-qr-toggle').addEventListener('click', () =>
+    toggleQr('em-qr', emergencyMessage(), 'em-qr-toggle', 'em-note'),
+  );
+  el('relay-qr-toggle').addEventListener('click', () =>
+    toggleQr('relay-qr', el('relay-payload').value, 'relay-qr-toggle', 'relay-note'),
+  );
+
+  for (const code of ['en', 'bn']) {
+    el(`lang-${code}`).addEventListener('click', () => switchLang(code));
+  }
 
   el('em-send').addEventListener('click', () => smsWith(emergencyMessage()));
   el('em-copy').addEventListener('click', () => copyPlain(emergencyMessage(), 'em-note'));
@@ -531,22 +595,73 @@ function openUri(uri) {
   else window.location.href = uri;
 }
 
+/* ────────────────────────────── QR handoff ──────────────────────────── */
+
+/**
+ * The message as a symbol on the glass.
+ *
+ * Nothing is transmitted: the other phone reads light off a screen. It is the
+ * last transport left when there is no tower, no operator and no pairing — and
+ * because an emergency message is plain text, whatever camera app they already
+ * have will show it to them.
+ */
+function renderQr(hostId, text, noteId) {
+  const host = el(hostId);
+  if (!text) {
+    host.hidden = true;
+    host.replaceChildren();
+    return;
+  }
+  try {
+    host.innerHTML = toSvg(encodeQr(text), { scale: 4, quiet: 4 });
+    host.hidden = false;
+  } catch (error) {
+    host.hidden = true;
+    if (noteId) el(noteId).textContent = t('qrFailed', error.message);
+  }
+}
+
+/** Redraws a QR that is already on screen, so it tracks the message. */
+function refreshQr(hostId, text) {
+  if (!el(hostId).hidden) renderQr(hostId, text, hostId === 'em-qr' ? 'em-note' : 'relay-note');
+}
+
+function toggleQr(hostId, text, toggleId, noteId) {
+  const host = el(hostId);
+  if (host.hidden) renderQr(hostId, text, noteId);
+  else host.hidden = true;
+  el(toggleId).textContent = host.hidden ? t('showQr') : t('hideQr');
+}
+
+/* ──────────────────────────────── sending ───────────────────────────── */
+
 function smsWith(body, number = '') {
   if (!body) return;
-  openUri(`sms:${number}?body=${encodeURIComponent(body)}`);
+  // iOS separates the number from the body with `&`, everything else with `?`.
+  // A wrong separator opens the composer empty, or does nothing at all — which
+  // is exactly how the hotline buttons failed.
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent ?? '');
+  const separator = number && ios ? '&' : '?';
+  openUri(`sms:${number}${separator}body=${encodeURIComponent(body)}`);
 }
 
 async function copyPlain(text, noteId) {
   if (!text) return;
   try {
     await navigator.clipboard.writeText(text);
-    el(noteId).textContent = 'কপি হয়েছে / copied';
+    el(noteId).textContent = t('copied');
   } catch {
-    el(noteId).textContent = 'নিজে কপি করুন / select and copy';
+    el(noteId).textContent = t('copyManually');
   }
 }
 
 async function main() {
+  initLang();
+  applyLang();
+  markLangButtons();
+  const stamp = el('build');
+  if (stamp) stamp.textContent = 'v19';
+
   buildEmergencyControls();
   buildHotlines();
   renderEmergencySlots();

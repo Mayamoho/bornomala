@@ -110,6 +110,9 @@
       }
       .panel[hidden] { display: none; }
       .req { color: var(--alarm); }
+      .qr { background: #fff; padding: 12px; border-radius: 12px; margin-top: 14px; display: inline-block; line-height: 0; }
+      .qr svg { display: block; width: 100%; max-width: 300px; height: auto; }
+      .qr[hidden] { display: none; }
       .preview {
         font-size: 1.1rem;
         line-height: 1.5;
@@ -176,62 +179,59 @@
     <main>
       <header>
         <h1>বর্ণমালা <span aria-hidden="true">·</span> Bornomala</h1>
-        <p class="tagline">
-          বাংলা এসএমএস সংকোচন — ইন্টারনেট ছাড়াই।
-          <br />Bangla SMS compression that runs with the network down.
-        </p>
+        <p class="tagline" data-i18n="tagline">Bangla SMS compression that runs with the network down.</p>
+        <div class="row noprint" role="group" aria-label="Language">
+          <button id="lang-en" type="button" class="small primary" lang="en">English</button>
+          <button id="lang-bn" type="button" class="small" lang="bn">বাংলা</button>
+        </div>
       </header>
 
-      <p id="status" class="note warn" role="status">মডেল লোড হচ্ছে… loading model…</p>
+      <p id="status" class="note warn" role="status" data-i18n="modelLoading">Loading the language model…</p>
 
       <div class="tabs" role="tablist">
-        <button role="tab" id="tab-normal" aria-controls="panel-normal" aria-selected="true">
-          সাধারণ বার্তা / Normal
-        </button>
-        <button role="tab" id="tab-emergency" aria-controls="panel-emergency" aria-selected="false">
-          জরুরি বার্তা / Emergency
-        </button>
+        <button role="tab" id="tab-normal" aria-controls="panel-normal" aria-selected="true"><span data-i18n="tabNormal">Normal</span></button>
+        <button role="tab" id="tab-emergency" aria-controls="panel-emergency" aria-selected="false"><span data-i18n="tabEmergency">Emergency</span></button>
         <button role="tab" id="tab-relay" aria-controls="panel-relay" aria-selected="false">
-          রিলে / Relay <span id="relay-count"></span>
+          <span data-i18n="tabRelay">Relay</span> <span id="relay-count"></span>
         </button>
       </div>
 
       <div class="panel" id="panel-normal" role="tabpanel" aria-labelledby="tab-normal">
       <section aria-labelledby="compose-heading">
-        <h2 id="compose-heading">১. লিখুন — compose</h2>
+        <h2 id="compose-heading" data-i18n="compose">1. Write</h2>
         <textarea
           id="input"
           lang="bn"
-          placeholder="এখানে বাংলায় লিখুন…"
+          placeholder="Write in Bangla here…" data-i18n-placeholder="composePlaceholder"
           autocomplete="off"
           spellcheck="false"
         ></textarea>
 
         <div class="stats">
-          <div class="stat"><b id="stat-chars">0</b><span>অক্ষর / characters</span></div>
-          <div class="stat"><b id="stat-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
-          <div class="stat"><b id="stat-ucs2">0</b><span>সেগমেন্ট আজ (UCS-2)</span></div>
-          <div class="stat"><b id="stat-ratio">—</b><span>সংকোচন / vs UCS-2</span></div>
+          <div class="stat"><b id="stat-chars">0</b><span data-i18n="statChars">characters</span></div>
+          <div class="stat"><b id="stat-segments">0</b><span data-i18n="statSegments">SMS segments</span></div>
+          <div class="stat"><b id="stat-ucs2">0</b><span data-i18n="statUcs2">segments today (UCS-2)</span></div>
+          <div class="stat"><b id="stat-ratio">—</b><span data-i18n="statRatio">vs UCS-2</span></div>
         </div>
 
         <div class="row">
-          <button id="send" class="primary" type="button" disabled>এসএমএস পাঠান</button>
-          <button id="copy" type="button" disabled>কপি করুন</button>
+          <button id="send" class="primary" type="button" disabled data-i18n="send">Send as SMS</button>
+          <button id="copy" type="button" disabled data-i18n="copy">Copy</button>
         </div>
         <p class="note" id="compose-note"></p>
       </section>
 
       <section aria-labelledby="payload-heading">
-        <h2 id="payload-heading">২. সংকুচিত বার্তা — compressed payload</h2>
+        <h2 id="payload-heading" data-i18n="payloadHead">2. Compressed message</h2>
         <textarea id="payload" class="payload" readonly aria-live="polite"></textarea>
       </section>
 
       <section aria-labelledby="decode-heading">
-        <h2 id="decode-heading">৩. পাওয়া বার্তা খুলুন — decode</h2>
+        <h2 id="decode-heading" data-i18n="decodeHead">3. Open a message you received</h2>
         <textarea
           id="cipher"
           class="payload"
-          placeholder="প্রাপ্ত সংকুচিত বার্তা এখানে পেস্ট করুন…"
+          placeholder="Paste a compressed message here…" data-i18n-placeholder="decodePlaceholder"
           autocomplete="off"
           spellcheck="false"
         ></textarea>
@@ -243,74 +243,73 @@
       <!-- ─────────────── emergency: plain text, never coded ─────────────── -->
       <div class="panel" id="panel-emergency" role="tabpanel" aria-labelledby="tab-emergency" hidden>
         <section>
-          <h2>১. আপনার বার্তা — your message <span class="req">*</span></h2>
-          <p class="note">
-            এই ট্যাবের বার্তা সংকুচিত হয় না। যে কেউ পড়তে পারবে, প্রাপকের অ্যাপ লাগবে না।
-            <br />Nothing here is compressed or coded. Anyone can read it — the receiver needs no app.
-          </p>
+          <h2><span data-i18n="emHead">1. Your message</span> <span class="req">*</span></h2>
+          <p class="note" data-i18n="emIntro">Nothing here is compressed or coded. Anyone can read it — the receiver needs no app.</p>
           <textarea
             id="em-text"
             lang="bn"
-            placeholder="কী হয়েছে, নিজের ভাষায় লিখুন…"
+            placeholder="What has happened? Write in your own words…" data-i18n-placeholder="emTextPlaceholder"
             autocomplete="off"
             spellcheck="false"
           ></textarea>
-          <p class="note alarm" id="em-required" hidden>
-            বার্তা লিখতেই হবে / a typed message is required
-          </p>
+          <p class="note alarm" id="em-required" hidden data-i18n="emRequired">A typed message is required</p>
 
-          <h2>২. প্রস্তুত বাক্য যোগ করুন — add a ready sentence</h2>
-          <p class="note">ঐচ্ছিক / optional. একটায় চাপ দিন / tap one.</p>
+          <h2><span data-i18n="emSentence">2. Add a ready sentence</span> <span class="req">*</span></h2>
+          <p class="note" data-i18n="emSentenceHint">Tap one, or pick from the list.</p>
           <div class="quick" id="em-quick"></div>
-          <label for="em-template">অথবা তালিকা থেকে / or pick from the list</label>
+          <label for="em-template" data-i18n="emSentenceList">Or pick from the list</label>
           <select id="em-template"></select>
           <div id="em-slots" class="grid2"></div>
 
-          <h2>৩. আপনি কোথায় — where are you <span class="req">*</span></h2>
+          <h2><span data-i18n="emWhere">3. Where are you</span> <span class="req">*</span></h2>
           <select id="em-loc">
-            <option value="" selected>বেছে নিন / choose…</option>
-            <option value="district">আমার জেলা / my district</option>
-            <option value="gps">আমার সঠিক অবস্থান / my live location</option>
+            <option value="" selected data-i18n="chooseOne">Choose…</option>
+            <option value="district" data-i18n="myDistrict">My district</option>
+            <option value="gps" data-i18n="myLocation">My live location</option>
           </select>
           <div id="em-district-wrap" hidden>
-            <label for="em-district">জেলা / district</label>
+            <label for="em-district" data-i18n="district">District</label>
             <select id="em-district"></select>
           </div>
           <div id="em-gps-wrap" hidden>
             <div class="row">
               <button id="em-locate" type="button" class="small">
-                অবস্থান নিন / use my live location
+                <span data-i18n="useLocation">Use my live location</span>
               </button>
             </div>
-            <p class="note" id="em-gps-note">জিপিএস নেওয়া হয়নি / no fix yet</p>
+            <p class="note" id="em-gps-note" data-i18n="noFix">No GPS fix yet</p>
           </div>
 
-          <h2>৪. কখন — when <span class="req">*</span></h2>
+          <h2><span data-i18n="emWhen">4. When</span> <span class="req">*</span></h2>
           <select id="em-hours">
-            <option value="" selected>বেছে নিন / choose…</option>
+            <option value="" selected data-i18n="chooseOne">Choose…</option>
           </select>
         </section>
 
         <section>
-          <h2>৫. যা পাঠাবেন — what gets sent</h2>
+          <h2 data-i18n="emSend">5. What gets sent</h2>
           <p class="preview" id="em-preview" lang="bn" aria-live="polite">—</p>
           <div class="stats">
-            <div class="stat"><b id="em-chars">0</b><span>অক্ষর / characters</span></div>
-            <div class="stat"><b id="em-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
+            <div class="stat"><b id="em-chars">0</b><span data-i18n="statChars">characters</span></div>
+            <div class="stat"><b id="em-segments">0</b><span data-i18n="statSegments">SMS segments</span></div>
           </div>
           <div class="row">
-            <button id="em-send" class="primary" type="button" disabled>এসএমএস পাঠান</button>
-            <button id="em-copy" type="button" disabled>কপি করুন</button>
-            <button id="em-queue" type="button" disabled>রিলেতে যোগ করুন</button>
+            <button id="em-send" class="primary" type="button" disabled data-i18n="send">Send as SMS</button>
+            <button id="em-copy" type="button" disabled data-i18n="copy">Copy</button>
+            <button id="em-queue" type="button" disabled data-i18n="queue">Add to relay</button>
           </div>
           <p class="note" id="em-note"></p>
 
-          <h2>৬. জরুরি নম্বর — emergency numbers</h2>
-          <p class="note">
-            ফোনে চাপ দিলে কল যাবে, অথবা এই বার্তাটাই এসএমএস করুন। ৯৯৯ টোল-ফ্রি।
-            <br />Tap to call, or send this message to them as an SMS. 999 is toll-free.
-            Short codes do not always accept SMS — if it fails, call.
+          <div class="row">
+            <button id="em-qr-toggle" type="button" data-i18n="showQr">Show QR</button>
+          </div>
+          <p class="note" data-i18n="qrHint">
+            No network at all? Show this to the phone beside you and let them point a camera.
           </p>
+          <div class="qr" id="em-qr" hidden></div>
+
+          <h2 data-i18n="emNumbers">6. Emergency numbers</h2>
+          <p class="note" data-i18n="emNumbersHint">Tap to call, or send this message to them as an SMS. 999 is toll-free. Short codes do not always accept SMS — if it fails, call.</p>
           <ul class="list" id="hotlines"></ul>
         </section>
       </div>
@@ -318,35 +317,34 @@
       <!-- ─────────────────── relay: many plain messages ─────────────────── -->
       <div class="panel" id="panel-relay" role="tabpanel" aria-labelledby="tab-relay" hidden>
         <section>
-          <h2>রিলে — এক এসএমএসে অনেকের খবর</h2>
-          <p class="note">
-            একজনের হাতে নেটওয়ার্ক থাকলেই হয়। জরুরি ট্যাব থেকে বার্তা যোগ করুন, একসাথে পাঠান।
-            <br />Add messages from the Emergency tab and send them together. Plain text, no coding.
-          </p>
+          <h2 data-i18n="relayHead">Relay — many reports, one SMS</h2>
+          <p class="note" data-i18n="relayHint">Add messages from the Emergency tab and send them together. Plain text, no coding.</p>
           <ul class="list" id="relay-list"></ul>
-          <p class="empty" id="relay-empty">
-            খালি — জরুরি ট্যাব থেকে যোগ করুন / empty, add from the Emergency tab
-          </p>
+          <p class="empty" id="relay-empty" data-i18n="relayEmpty">Empty — add from the Emergency tab</p>
 
           <div class="stats">
-            <div class="stat"><b id="r-count">0</b><span>বার্তা / reports</span></div>
-            <div class="stat"><b id="r-chars">0</b><span>অক্ষর / characters</span></div>
-            <div class="stat"><b id="r-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
-            <div class="stat"><b id="r-alone">0</b><span>আলাদা পাঠালে লাগত</span></div>
+            <div class="stat"><b id="r-count">0</b><span data-i18n="statReports">reports</span></div>
+            <div class="stat"><b id="r-chars">0</b><span data-i18n="statChars">characters</span></div>
+            <div class="stat"><b id="r-segments">0</b><span data-i18n="statSegments">SMS segments</span></div>
+            <div class="stat"><b id="r-alone">0</b><span data-i18n="statAlone">sent separately</span></div>
           </div>
           <textarea id="relay-payload" class="payload" readonly aria-live="polite"></textarea>
           <div class="row">
-            <button id="relay-send" class="primary" type="button" disabled>এসএমএস পাঠান</button>
-            <button id="relay-copy" type="button" disabled>কপি করুন</button>
-            <button id="relay-clear" type="button">সব মুছুন</button>
+            <button id="relay-send" class="primary" type="button" disabled data-i18n="send">Send as SMS</button>
+            <button id="relay-copy" type="button" disabled data-i18n="copy">Copy</button>
+            <button id="relay-clear" type="button" data-i18n="clear">Clear all</button>
           </div>
           <p class="note" id="relay-note"></p>
+          <div class="row">
+            <button id="relay-qr-toggle" type="button" disabled data-i18n="showQr">Show QR</button>
+          </div>
+          <div class="qr" id="relay-qr" hidden></div>
         </section>
       </div>
 
       <footer>
-        <p>সব কিছু আপনার ফোনেই চলে — কোনো সার্ভার নেই।</p>
-        <p>Everything runs on your phone. No server, no internet, no message leaves the device.</p>
+        <p data-i18n="footer">Everything runs on your phone. No server, no internet, no message leaves the device.</p>
+        <p class="note">Bornomala <span id="build">—</span></p>
       </footer>
     </main>
 

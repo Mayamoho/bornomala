@@ -95,7 +95,7 @@ check('emergency: phrasebook sentence appends to the typed text', () => {
   el('em-template').value = '2';
   fire(el('em-template'), 'change');
   const s = el('em-preview').textContent;
-  return assert(s.startsWith('ছাদ ভেঙে') && s.includes('আটকে'), s);
+  return assert(s.startsWith('ছাদ ভেঙে') && s.includes('trapped'), s);
 });
 
 check('emergency: quick button selects its sentence and stays selected', () => {
@@ -184,10 +184,37 @@ check('send: hotline SMS targets the short code', () => {
   return assert(href.startsWith('sms:999?body='), href.slice(0, 60));
 });
 
-check('hotlines: all six render with call links', () => {
+check('hotlines: nine verified numbers, each with a call link', () => {
   const items = el('hotlines').querySelectorAll('li');
   const numbers = [...el('hotlines').querySelectorAll('a')].map((a) => a.getAttribute('href'));
-  return assert(items.length === 6 && numbers.includes('tel:999') && numbers.includes('tel:1090'), numbers.join(' '));
+  const wanted = ['tel:999', 'tel:1090', 'tel:102', 'tel:16263', 'tel:333', 'tel:109', 'tel:1098', 'tel:16430', 'tel:106'];
+  return assert(items.length === 9 && wanted.every((n) => numbers.includes(n)), numbers.join(' '));
+});
+
+check('qr: emergency toggle renders an svg', () => {
+  click(el('em-qr-toggle'));
+  return assert(!el('em-qr').hidden && el('em-qr').innerHTML.includes('<svg'), `label="${el('em-qr-toggle').textContent}"`);
+});
+
+check('qr: second tap hides it', () => {
+  click(el('em-qr-toggle'));
+  return assert(el('em-qr').hidden && el('em-qr-toggle').textContent === 'Show QR', el('em-qr-toggle').textContent);
+});
+
+check('lang: bn switches the interface and the message', () => {
+  click(el('lang-bn'));
+  const tab = el('tab-emergency').textContent.trim();
+  const preview = el('em-preview').textContent;
+  return assert(tab.includes('জরুরি') && preview.includes('আটকে'), `tab="${tab}" preview="${preview.split('\n')[0]}"`);
+});
+
+check('lang: the typed message and choices survive the switch', () =>
+  assert(el('em-text').value === 'ছাদ ভেঙে পড়েছে' && el('em-hours').value === '1' && el('em-loc').value === 'district',
+    `text="${el('em-text').value}" hours=${el('em-hours').value} loc=${el('em-loc').value}`));
+
+check('lang: back to english', () => {
+  click(el('lang-en'));
+  return assert(el('tab-emergency').textContent.includes('Emergency'), el('tab-emergency').textContent.trim());
 });
 
 check('receive: a coded payload pasted back decodes to the original', () => {

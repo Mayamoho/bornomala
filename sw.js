@@ -9,7 +9,7 @@
  * Bump CACHE when any shell file or the model changes.
  */
 
-const CACHE = 'bornomala-v18';
+const CACHE = 'bornomala-v19';
 
 const SHELL = [
   './',
@@ -24,6 +24,8 @@ const SHELL = [
   './src/gsm7.js',
   './src/phrasebook.js',
   './src/geo.js',
+  './src/qr.js',
+  './src/i18n.js',
 ];
 
 self.addEventListener('install', (event) => {
