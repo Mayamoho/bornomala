@@ -65,7 +65,8 @@ export const STRINGS = {
 
     crisisMessage: '5. Ready to send',
     willRead: 'What they will read',
-    codeLabel: 'What actually gets sent',
+    codeLabel: 'What actually gets sent — coded',
+    codeLabelPlain: 'What actually gets sent — plain text',
     statChars: 'Characters',
     statSegments: 'SMS segments',
     statUcs2Today: 'Cost today (UCS-2)',
@@ -191,7 +192,8 @@ export const STRINGS = {
 
     crisisMessage: '৫. পাঠানোর জন্য প্রস্তুত',
     willRead: 'ওরা যা পড়বে',
-    codeLabel: 'যা আসলে যাচ্ছে',
+    codeLabel: 'যা আসলে যাচ্ছে — কোড',
+    codeLabelPlain: 'যা আসলে যাচ্ছে — সাধারণ লেখা',
     statChars: 'অক্ষর',
     statSegments: 'এসএমএস সেগমেন্ট',
     statUcs2Today: 'আজ লাগত (UCS-2)',

@@ -50,7 +50,7 @@ const QUICK = [
 const inLang = (pair) => (getLang() === 'bn' ? pair.bn : pair.en);
 
 /** Bumped on every deploy, shown in the footer so a stale copy is visible. */
-const BUILD = 'v10';
+const BUILD = 'v11';
 
 /**
  * A tappable position for a plain-text recipient.
@@ -226,6 +226,8 @@ function refreshCrisis() {
   // The baseline is always the Bangla sentence: that is what someone would
   // have typed today, whatever language the interface happens to be in.
   const today = [...describe(frame, 'bn')].length;
+
+  el('code-label').textContent = t(plainText ? 'codeLabelPlain' : 'codeLabel');
 
   if (plainText) {
     crisisPayload = readable;
