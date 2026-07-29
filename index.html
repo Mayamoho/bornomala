@@ -89,6 +89,56 @@
       }
       button.primary { background: var(--accent); color: #05100c; border-color: transparent; }
       button:disabled { opacity: 0.45; cursor: not-allowed; }
+      .tabs { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 16px; padding-bottom: 4px; }
+      .tabs button {
+        flex: 0 0 auto;
+        min-height: 44px;
+        padding: 0 14px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: #131a18;
+        color: var(--muted);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .tabs button[aria-selected="true"] {
+        background: var(--accent);
+        color: #05100c;
+        border-color: transparent;
+      }
+      .panel[hidden] { display: none; }
+      .req { color: var(--alarm); }
+      .maplink {
+        display: inline-flex;
+        align-items: center;
+        min-height: 40px;
+        padding: 6px 14px;
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        color: var(--accent);
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      ul.list { list-style: none; margin: 0; padding: 0; }
+      ul.list li {
+        background: #0d1413;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.9rem;
+      }
+      ul.list li span { flex: 1 1 auto; white-space: pre-line; }
+      .empty { color: var(--muted); font-size: 0.85rem; }
+      .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 12px; }
+
       .note { color: var(--muted); font-size: 0.82rem; margin: 10px 0 0; }
       .warn { color: var(--warn); }
       footer { color: var(--muted); font-size: 0.8rem; text-align: center; padding-top: 8px; }
@@ -108,6 +158,19 @@
 
       <p id="status" class="note warn" role="status">মডেল লোড হচ্ছে… loading model…</p>
 
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tab-normal" aria-controls="panel-normal" aria-selected="true">
+          সাধারণ বার্তা / Normal
+        </button>
+        <button role="tab" id="tab-emergency" aria-controls="panel-emergency" aria-selected="false">
+          জরুরি বার্তা / Emergency
+        </button>
+        <button role="tab" id="tab-relay" aria-controls="panel-relay" aria-selected="false">
+          রিলে / Relay <span id="relay-count"></span>
+        </button>
+      </div>
+
+      <div class="panel" id="panel-normal" role="tabpanel" aria-labelledby="tab-normal">
       <section aria-labelledby="compose-heading">
         <h2 id="compose-heading">১. লিখুন — compose</h2>
         <textarea
@@ -149,6 +212,101 @@
         <textarea id="plain" lang="bn" readonly aria-live="polite"></textarea>
         <p class="note" id="decode-note"></p>
       </section>
+      </div>
+
+      <!-- ─────────────── emergency: plain text, never coded ─────────────── -->
+      <div class="panel" id="panel-emergency" role="tabpanel" aria-labelledby="tab-emergency" hidden>
+        <section>
+          <h2>১. আপনার বার্তা — your message <span class="req">*</span></h2>
+          <p class="note">
+            এই ট্যাবের বার্তা সংকুচিত হয় না। যে কেউ পড়তে পারবে, প্রাপকের অ্যাপ লাগবে না।
+            <br />Nothing here is compressed or coded. Anyone can read it — the receiver needs no app.
+          </p>
+          <textarea
+            id="em-text"
+            lang="bn"
+            placeholder="কী হয়েছে, নিজের ভাষায় লিখুন…"
+            autocomplete="off"
+            spellcheck="false"
+          ></textarea>
+          <p class="note alarm" id="em-required" hidden>
+            বার্তা লিখতেই হবে / a typed message is required
+          </p>
+
+          <h2>২. প্রস্তুত বাক্য যোগ করুন — add a ready sentence</h2>
+          <label for="em-template">ঐচ্ছিক / optional</label>
+          <select id="em-template"></select>
+          <div id="em-slots" class="grid2"></div>
+
+          <h2>৩. আপনি কোথায় — where are you</h2>
+          <select id="em-loc">
+            <option value="none" selected>অবস্থান পাঠাব না / do not send location</option>
+            <option value="district">আমার জেলা / my district</option>
+            <option value="gps">আমার সঠিক অবস্থান / my live location</option>
+          </select>
+          <div id="em-district-wrap" hidden>
+            <label for="em-district">জেলা / district</label>
+            <select id="em-district"></select>
+          </div>
+          <div id="em-gps-wrap" hidden>
+            <div class="row">
+              <button id="em-locate" type="button" class="small">
+                অবস্থান নিন / use my live location
+              </button>
+            </div>
+            <p class="note" id="em-gps-note">জিপিএস নেওয়া হয়নি / no fix yet</p>
+          </div>
+
+          <h2>৪. কখন — when</h2>
+          <select id="em-hours">
+            <option value="" selected>সময় নেই / no time</option>
+          </select>
+        </section>
+
+        <section>
+          <h2>৫. যা পাঠাবেন — what gets sent</h2>
+          <textarea id="em-preview" lang="bn" readonly aria-live="polite"></textarea>
+          <div class="stats">
+            <div class="stat"><b id="em-chars">0</b><span>অক্ষর / characters</span></div>
+            <div class="stat"><b id="em-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
+          </div>
+          <div class="row">
+            <button id="em-send" class="primary" type="button" disabled>এসএমএস পাঠান</button>
+            <button id="em-copy" type="button" disabled>কপি করুন</button>
+            <button id="em-queue" type="button" disabled>রিলেতে যোগ করুন</button>
+          </div>
+          <p class="note" id="em-note"></p>
+        </section>
+      </div>
+
+      <!-- ─────────────────── relay: many plain messages ─────────────────── -->
+      <div class="panel" id="panel-relay" role="tabpanel" aria-labelledby="tab-relay" hidden>
+        <section>
+          <h2>রিলে — এক এসএমএসে অনেকের খবর</h2>
+          <p class="note">
+            একজনের হাতে নেটওয়ার্ক থাকলেই হয়। জরুরি ট্যাব থেকে বার্তা যোগ করুন, একসাথে পাঠান।
+            <br />Add messages from the Emergency tab and send them together. Plain text, no coding.
+          </p>
+          <ul class="list" id="relay-list"></ul>
+          <p class="empty" id="relay-empty">
+            খালি — জরুরি ট্যাব থেকে যোগ করুন / empty, add from the Emergency tab
+          </p>
+
+          <div class="stats">
+            <div class="stat"><b id="r-count">0</b><span>বার্তা / reports</span></div>
+            <div class="stat"><b id="r-chars">0</b><span>অক্ষর / characters</span></div>
+            <div class="stat"><b id="r-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
+            <div class="stat"><b id="r-alone">0</b><span>আলাদা পাঠালে লাগত</span></div>
+          </div>
+          <textarea id="relay-payload" class="payload" readonly aria-live="polite"></textarea>
+          <div class="row">
+            <button id="relay-send" class="primary" type="button" disabled>এসএমএস পাঠান</button>
+            <button id="relay-copy" type="button" disabled>কপি করুন</button>
+            <button id="relay-clear" type="button">সব মুছুন</button>
+          </div>
+          <p class="note" id="relay-note"></p>
+        </section>
+      </div>
 
       <footer>
         <p>সব কিছু আপনার ফোনেই চলে — কোনো সার্ভার নেই।</p>
