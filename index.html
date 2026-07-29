@@ -96,14 +96,31 @@
         margin: 6px 0 0;
       }
 
-      .quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+      /* The sentence the receiver sees, in the size that says it is the point. */
+      .preview {
+        font-size: 1.15rem;
+        line-height: 1.45;
+        margin: 6px 0 0;
+        padding: 12px 14px;
+        border-left: 3px solid var(--accent);
+        background: #0d1413;
+        border-radius: 0 10px 10px 0;
+      }
+
+      .quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+      /* Thumb-sized, icon first: this is the control someone uses one-handed,
+         in the dark, possibly without reading the label at all. */
       .quick button {
-        min-height: 58px;
+        min-height: 76px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
         text-align: left;
         line-height: 1.25;
-        padding: 8px 12px;
-        font-size: 0.9rem;
+        padding: 10px 12px;
+        font-size: 0.95rem;
       }
+      .quick .icon { font-size: 1.7rem; line-height: 1; }
       .quick button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
 
       .stats {
@@ -226,19 +243,23 @@
       <div class="panel" id="panel-crisis" role="tabpanel" aria-labelledby="tab-crisis">
         <section>
           <h2 data-i18n="crisisWhat">1. What has happened</h2>
+          <p class="note" data-i18n="quickHint">Tap one. These are the six most common.</p>
           <div class="quick" id="quick"></div>
 
-          <label for="template" data-i18n="allMessages">All messages</label>
+          <label for="template" data-i18n="allMessages">Or choose from all 32 messages</label>
           <select id="template"></select>
 
           <div id="slots" class="grid2"></div>
 
-          <h3 data-i18n="where">Where</h3>
+          <h3 data-i18n="where">Where are you</h3>
           <select id="loc-mode">
-            <option value="none" data-i18n="locNone">No location</option>
-            <option value="district" selected data-i18n="locDistrict">District (6 bits)</option>
-            <option value="gps" data-i18n="locGps">Precise GPS (32 bits)</option>
+            <option value="none" data-i18n="locNone">Do not send my location</option>
+            <option value="district" selected data-i18n="locDistrict">My district</option>
+            <option value="gps" data-i18n="locGps">My exact position</option>
           </select>
+          <p class="note" data-i18n="locHint">
+            A district costs 6 bits. An exact position costs 32.
+          </p>
           <div id="district-wrap">
             <label for="district" data-i18n="district">District</label>
             <select id="district"></select>
@@ -283,6 +304,9 @@
 
         <section>
           <h2 data-i18n="crisisMessage">2. The message</h2>
+          <h3 data-i18n="willRead">What they will read</h3>
+          <p class="preview" id="crisis-plain"></p>
+          <h3 data-i18n="codeLabel">What actually gets sent</h3>
           <p class="code" id="crisis-code">—</p>
           <div class="stats">
             <div class="stat"><b id="c-chars">0</b><span data-i18n="statChars">Characters</span></div>
@@ -294,7 +318,6 @@
             </div>
             <div class="stat"><b id="c-ratio">—</b><span data-i18n="statSaving">Saving</span></div>
           </div>
-          <p class="note" id="crisis-plain"></p>
           <div class="row">
             <button id="crisis-send" class="primary" type="button" data-i18n="send">
               Send as SMS

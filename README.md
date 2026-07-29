@@ -242,6 +242,43 @@ name and email; timestamps were left untouched by that rewrite.
 This disclosure is submitted with the entry. Whether the 27 July commits affect
 eligibility is the organisers' call, not a claim made here.
 
+## Why a phrasebook beats a translation
+
+Translators without Borders built a glossary for the Cox's Bazar response
+because humanitarian terminology in Bangladesh was getting people hurt. Their
+clearest example: in Bangla, **ঝড় (*jhor*)** means a storm with wind, and is
+used for a cyclone. In Rohingya, *jhor* means rain — no wind, no real storm. A
+Bangla cyclone warning broadcast into a Rohingya camp reads as *it will rain*,
+in a place where word of mouth is the main channel and the wind is about to
+take the roofs off.
+
+Bornomala cannot make that mistake, because it never transmits the word. What
+travels is **template index 12** and its slot values. The sentence is rendered
+on the receiver's phone, from that receiver's own phrasebook, in that
+receiver's own language. Translation happens once, at the edge, against a fixed
+list of 32 facts a native speaker can check — not per message, under time
+pressure, by whoever is holding the radio.
+
+That also makes the wire format language-neutral by construction. A frame
+contains no text: five bits of template, a few bits of slot values, an optional
+district or coordinate, an optional hour count. Adding Hindi, Nepali, Burmese
+or Rohingya is a render-layer change — one more field per phrasebook entry —
+and it costs **zero bits on the wire**. A message composed in Bangla decodes
+into Hindi on the other end. Only free prose is language-bound, because only
+free prose needs the trained model.
+
+And the person this is built for already exists in an org chart. The Cyclone
+Preparedness Programme has run since 1972 on roughly 43,000 trained volunteers
+and about 160 full-time staff, carrying Bangladesh Met Department warnings into
+coastal communities with a three-flag signalling system. That volunteer, with
+one bar of signal and sixty families' status in a notebook, is exactly who the
+relay tab is for: sixty reports, one SMS, instead of sixty SMS a congested cell
+will not carry.
+
+Sources: [TWB glossaries](https://translatorswithoutborders.org/twb-glossaries/) ·
+[TWB's Rohingya language tool](https://reliefweb.int/report/bangladesh/translators-without-borders-launches-language-tool-rohingya-humanitarian-response) ·
+[Cyclone Preparedness Programme, BDRCS](https://bdrcs.org/cyclone-preparedness-programm-cpp/)
+
 ## Related work
 
 Bangla text compression has been studied for decades — dictionary methods,

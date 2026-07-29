@@ -12,7 +12,16 @@
 import { Model } from './src/model.js';
 import { encodeText, encodeCrisis, encodeRelay, decodeMessage, describe } from './src/message.js';
 import { blankFrame, isPaperSafe, mapLink, MAX_BATCH, MAX_HOURS_AGO } from './src/frame.js';
-import { TEMPLATES, SLOTS, URGENCY, BLOOD, DEPTH, CAPACITY } from './src/phrasebook.js';
+import {
+  TEMPLATES,
+  TEMPLATE_GROUPS,
+  SLOTS,
+  URGENCY,
+  BLOOD,
+  DEPTH,
+  CAPACITY,
+  templateLabel,
+} from './src/phrasebook.js';
 import { DISTRICTS, inCoverage } from './src/geo.js';
 import { ALPHABETS, septetCost, gsm7Segments, ucs2Segments, group } from './src/gsm7.js';
 import { encodeQr, toSvg } from './src/qr.js';
@@ -20,8 +29,22 @@ import { initLang, getLang, setLang, applyLang, t } from './src/i18n.js';
 
 const el = (id) => document.getElementById(id);
 
-/** The six a volunteer reaches for first. */
-const QUICK = [0, 1, 2, 3, 4, 20];
+/**
+ * The six a volunteer reaches for first, each with a picture.
+ *
+ * The icon is not decoration. Someone who reads slowly, or not at all, still
+ * recognises a drop of water and a running figure, and the six are always in
+ * the same places — so the gesture can be learned once and repeated without
+ * reading anything.
+ */
+const QUICK = [
+  { id: 0, icon: '✅' },
+  { id: 1, icon: '🆘' },
+  { id: 2, icon: '⚠️' },
+  { id: 3, icon: '🚑' },
+  { id: 4, icon: '💧' },
+  { id: 20, icon: '🏃' },
+];
 
 /** Message content carries its own bn/en pair; pick the side the UI is on. */
 const inLang = (pair) => (getLang() === 'bn' ? pair.bn : pair.en);
@@ -504,7 +527,7 @@ function markQuick() {
   const current = Number(el('template').value);
   el('quick')
     .querySelectorAll('button')
-    .forEach((button, i) => button.setAttribute('aria-pressed', String(QUICK[i] === current)));
+    .forEach((button, i) => button.setAttribute('aria-pressed', String(QUICK[i].id === current)));
 }
 
 /**
@@ -516,20 +539,36 @@ function buildStaticControls() {
   const templates = el('template');
   const chosenTemplate = templates.value;
   templates.replaceChildren();
-  TEMPLATES.forEach((template, i) => {
-    const option = document.createElement('option');
-    option.value = String(i);
-    option.textContent = inLang(template);
-    templates.append(option);
-  });
+  // Grouped under four headings rather than thirty-two flat lines, and with
+  // slot placeholders shown as blanks instead of `{0}`.
+  for (const group of TEMPLATE_GROUPS) {
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = t(group.key);
+    for (const id of group.ids) {
+      const option = document.createElement('option');
+      option.value = String(id);
+      option.textContent = templateLabel(id, getLang());
+      optgroup.append(option);
+    }
+    templates.append(optgroup);
+  }
   templates.value = chosenTemplate || '0';
 
   const quick = el('quick');
   quick.replaceChildren();
-  for (const id of QUICK) {
+  for (const { id, icon } of QUICK) {
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = inLang(TEMPLATES[id]);
+
+    const glyph = document.createElement('span');
+    glyph.className = 'icon';
+    glyph.textContent = icon;
+    glyph.setAttribute('aria-hidden', 'true');
+
+    const label = document.createElement('span');
+    label.textContent = templateLabel(id, getLang());
+
+    button.append(glyph, label);
     button.addEventListener('click', () => {
       templates.value = String(id);
       renderSlots();

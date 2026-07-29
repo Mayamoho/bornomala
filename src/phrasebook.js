@@ -158,6 +158,31 @@ export function renderTemplate(id, values, lang = 'bn') {
   );
 }
 
+/**
+ * The sentence as a menu entry, before anything has been chosen.
+ *
+ * `{0}` is a slot placeholder, and showing it raw in a dropdown is the sort of
+ * thing that reads fine to whoever wrote the file and as line noise to
+ * everyone else. A blank does what a blank does on a paper form.
+ */
+export function templateLabel(id, lang = 'bn') {
+  const template = TEMPLATES[id];
+  if (!template) throw new RangeError(`no template ${id}`);
+  return template[lang].replace(/\{\d+\}/g, '____');
+}
+
+/**
+ * Display grouping for the picker. Thirty-two flat options is a wall; four
+ * headings is a decision. Wire values are untouched — this only decides what
+ * sits under which heading, and every id appears exactly once.
+ */
+export const TEMPLATE_GROUPS = [
+  { key: 'groupStatus', ids: [0, 30, 21, 22, 9, 10, 24, 31] },
+  { key: 'groupNeed', ids: [1, 2, 3, 4, 5, 6, 7, 8, 23] },
+  { key: 'groupDanger', ids: [11, 12, 13, 14, 15, 16, 20, 25, 26, 27, 29] },
+  { key: 'groupHelp', ids: [17, 18, 19, 28] },
+];
+
 /** Total bits the slots of one template occupy. */
 export function slotBits(id) {
   return TEMPLATES[id].slots.reduce((n, slot) => n + SLOTS[slot].bits, 0);
