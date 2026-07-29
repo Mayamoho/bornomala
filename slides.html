@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bornomala — July Hackathon 2026 — Track A: Crisis Tech</title>
+<style>
+  :root {
+    --bg: #0b0f0e;
+    --panel: #111715;
+    --fg: #e7f0ec;
+    --dim: #8ba49b;
+    --accent: #35d39a;
+    --line: #24312c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+  }
+  .deck { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
+  .slide {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 14px;
+    padding: 44px 44px 40px;
+    margin: 0 0 22px;
+    min-height: 62vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    scroll-margin-top: 16px;
+  }
+  .num {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin: 0 0 18px;
+  }
+  h1 { font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.1; margin: 0 0 14px; }
+  h2 { font-size: clamp(1.5rem, 3.4vw, 2.2rem); line-height: 1.2; margin: 0 0 18px; }
+  p { font-size: clamp(1rem, 1.7vw, 1.18rem); margin: 0 0 14px; max-width: 62ch; }
+  p.lead { font-size: clamp(1.1rem, 2vw, 1.4rem); color: var(--fg); }
+  .dim { color: var(--dim); }
+  .accent { color: var(--accent); }
+  ul { margin: 0 0 14px; padding-left: 1.1em; max-width: 62ch; }
+  li { margin: 0 0 9px; font-size: clamp(1rem, 1.6vw, 1.12rem); }
+  .bn { font-size: 1.05em; }
+  .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin: 18px 0 8px; }
+  .cell { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: #0d1412; }
+  .cell b {
+    display: block;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .cell span { display: block; font-size: 0.92rem; color: var(--dim); margin-top: 6px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 6px; font-size: clamp(0.95rem, 1.5vw, 1.05rem); }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); }
+  th { color: var(--dim); font-weight: 500; font-size: 0.86rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  td.n { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  tr.us td { color: var(--accent); font-weight: 600; }
+  .rule { height: 1px; background: var(--line); border: 0; margin: 20px 0; }
+  .quote { border-left: 3px solid var(--accent); padding-left: 16px; color: var(--fg); font-size: clamp(1.05rem, 2vw, 1.3rem); }
+  code, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .msg {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    background: #0d1412;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 10px 0;
+    font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  a { color: var(--accent); }
+  .foot { color: var(--dim); font-size: 0.9rem; margin-top: 18px; }
+  .hint {
+    position: fixed;
+    right: 14px;
+    bottom: 12px;
+    font-size: 0.76rem;
+    color: var(--dim);
+    background: rgba(11, 15, 14, 0.9);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 12px;
+  }
+  @media print {
+    body { background: #fff; }
+    .deck { max-width: none; padding: 0; }
+    .slide {
+      background: #fff;
+      color: #000;
+      border: 0;
+      min-height: 100vh;
+      page-break-after: always;
+      padding: 8vh 8vw;
+    }
+    .hint { display: none; }
+    .accent, .big, .cell b, tr.us td { color: #0a7a55; }
+    .dim, .num, .cell span, th { color: #55635e; }
+    .cell, .msg { background: #f4f7f6; border-color: #d6dedb; }
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <section class="slide">
+    <p class="num">July Hackathon 2026 · Track A — Crisis Tech · solo entry</p>
+    <h1>বর্ণমালা · Bornomala</h1>
+    <p class="lead">Crisis messaging for the network you have left.</p>
+    <p class="dim">A family's status report is eight characters. Forty-five of them fit in one SMS.
+    And if the phone is dead, the same message can be read off a printed card by hand.</p>
+    <hr class="rule" />
+    <p class="foot mono">mayamoho.github.io/bornomala · github.com/Mayamoho/bornomala</p>
+  </section>
+
+  <section class="slide">
+    <p class="num">01 — the night the network went</p>
+    <h2>In July 2024 the state cut 3G and 4G.</h2>
+    <p>Broadband went dark. What survived was 2G — voice and SMS. People fell back to text.</p>
+    <p class="quote">Every crisis tool assumes it can build a new network. In July, nobody could.</p>
+    <p class="dim">Bangladesh has fought this fight before. 1952 was the right to speak Bangla.
+    2024 was the right to speak at all.</p>
+  </section>
+
+  <section class="slide">
+    <p class="num">02 — the problem, precisely</p>
+    <h2>It costs 2.3× more to be Bangla in a crisis.</h2>
+    <p>Bangla is not in the GSM-7 alphabet. Every Bangla SMS is forced into UCS-2 encoding:</p>
+    <div class="grid">
+      <div class="cell"><b>160</b><span>characters per segment, English</span></div>
+      <div class="cell"><b>70</b><span>characters per segment, Bangla</span></div>
+      <div class="cell"><b>2.3×</b><span>more expensive, per message</span></div>
+    </div>
+    <p>More segments means more cost, more retries, and more failures on a congested
+    network — exactly when SMS is the only channel left.</p>
+  </section>
+
+  <section class="slide">
+    <p class="num">03 — the thing that is actually different</p>
+    <h2>Don't rebuild the network. Shrink the message.</h2>
+    <p>Most crisis messaging tries to build a new transport — mesh, Bluetooth, Wi-Fi Direct.
+    All of it needs both phones running the same app, in range, with battery.</p>
+    <p class="lead accent">Bornomala assumes you cannot build a network, and makes the message
+    small enough that the broken one you still have is enough.</p>
+    <p class="dim">Same fight as 2024, one layer down — in the character encoding.</p>
+  </section>
+
+  <section class="slide">
+    <p class="num">04 — how it works</p>
+    <h2>A language model, an arithmetic coder, and GSM-7.</h2>
+    <ul>
+      <li>A small statistical Bangla model, trained offline, ships as integer probability tables.</li>
+      <li>A deterministic integer arithmetic coder turns the message into bits — the same bits on every device, or decoding would be worthless.</li>
+      <li>The bits are packed into GSM-7 septets, so a coded message rides the 160-character lane instead of the 70-character one.</li>
+      <li>The phone's own SMS composer sends it. No server, no internet, no message leaves the device.</li>
+    </ul>
+    <div class="msg bn">আমরা পাঁচজন নিরাপদ আছি, ঢাকা  →  B*?TΞ9(9Id'Θb</div>
+  </section>
+
+  <section class="slide">
+    <p class="num">05 — measured, not claimed</p>
+    <h2>4,000 real crisis messages, benchmarked.</h2>
+    <table>
+      <thead>
+        <tr><th>Codec</th><th>Bits per character</th><th>Bangla characters per segment</th><th>Fits in one segment</th></tr>
+      </thead>
+      <tbody>
+        <tr class="us"><td>Bornomala</td><td class="n">3.12</td><td class="n">359</td><td class="n">100%</td></tr>
+        <tr><td>raw UCS-2 (what phones do today)</td><td class="n">16.00</td><td class="n">70</td><td class="n">98.3%</td></tr>
+        <tr><td>gzip -9</td><td class="n">21.06</td><td class="n">53</td><td class="n">99.5%</td></tr>
+      </tbody>
+    </table>
+    <p><b class="accent">5.1× more Bangla per SMS than every phone in the country sends today</b>,
+    and 6.8× better than gzip — general compressors get <em>worse</em> than raw on messages this
+    short, because the dictionary never pays for itself.</p>
+    <p class="foot mono">benchmark.json · 4,000 messages · reproducible from the repo</p>
+  </section>
+
+  <section class="slide">
+    <p class="num">06 — the honest problem, and the answer</p>
+    <h2>A survivor does not have the app.</h2>
+    <p>Compression needs the app on both ends. That is the same bootstrap trap the mesh projects
+    have — so Bornomala does not pretend otherwise. It ships a second path that needs nothing:</p>
+    <ul>
+      <li><b>Emergency tab — plain text.</b> Type the situation, add a ready sentence, where you are, and when. It goes out as words any phone can read, app or no app.</li>
+      <li><b>Nine national hotlines</b> — 999, 1090, 102, 333 and more — each one call or SMS away, with the message already written.</li>
+      <li><b>Location that survives no-data:</b> a maps link <em>and</em> the bare coordinates beside it, because the numbers work when the link cannot load.</li>
+      <li><b>Relay:</b> a volunteer collects many households' reports and sends them as one SMS.</li>
+      <li><b>QR handoff</b> for phone-to-phone with no network at all.</li>
+    </ul>
+    <p class="dim">Coordinators and relay volunteers install it. Survivors never have to.</p>
+  </section>
+
+  <section class="slide">
+    <p class="num">07 — graceful degradation</p>
+    <h2>Every layer below has a floor.</h2>
+    <div class="grid">
+      <div class="cell"><b>No internet</b><span>installable offline PWA, precached shell, no server anywhere in the design</span></div>
+      <div class="cell"><b>No data</b><span>SMS over 2G; bare coordinates travel beside every map link</span></div>
+      <div class="cell"><b>No network</b><span>QR handoff, screen to camera</span></div>
+      <div class="cell"><b>No phone</b><span>the code is printable — decodable off a card by hand</span></div>
+    </div>
+    <p>No framework, no dependencies, no analytics, no accounts. The whole app is a handful of
+    files and a 1.7 MB model, and it runs on a low-end Android with a dying battery.</p>
+  </section>
+
+  <section class="slide">
+    <p class="num">08 — status</p>
+    <h2>Working, tested, and live.</h2>
+    <ul>
+      <li>Installable PWA, running now at <span class="mono">mayamoho.github.io/bornomala</span></li>
+      <li>Full interface in Bangla and English, switchable mid-message</li>
+      <li>57 automated checks — codec round trips, send paths, offline shell, translation parity</li>
+      <li>MIT licensed, reproducible benchmark, model training tools in the repo</li>
+    </ul>
+    <hr class="rule" />
+    <p class="lead">One number worth remembering: <span class="accent">5.1×</span> more Bangla in
+    every SMS, on the network that was left.</p>
+    <p class="foot mono">github.com/Mayamoho/bornomala — a star helps this reach the people who need it.</p>
+  </section>
+
+</div>
+<div class="hint">↓ scroll · press P to print or save as PDF</div>
+<script>
+  addEventListener('keydown', (e) => {
+    if (e.key === 'p' || e.key === 'P') { e.preventDefault(); print(); }
+  });
+</script>
+</body>
+</html>

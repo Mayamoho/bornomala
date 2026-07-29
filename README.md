@@ -4,6 +4,19 @@
 eight characters. Forty-five of them fit in one SMS. And if the phone is dead,
 the same message can be read off a printed card by hand.**
 
+**[Try it live](https://mayamoho.github.io/bornomala/) ·
+[Slide deck](https://mayamoho.github.io/bornomala/slides.html) ·
+[Submission pack](SUBMISSION.md)** — July Hackathon 2026, Track A (Crisis Tech).
+
+| | Bornomala | raw UCS-2 (phones today) | gzip -9 |
+|---|---|---|---|
+| Bits per Bangla character | **3.12** | 16.00 | 21.06 |
+| Bangla characters per SMS segment | **359** | 70 | 53 |
+| Of 4,000 crisis messages, fit in one segment | **100%** | 98.3% | 99.5% |
+
+**5.1× more Bangla in every text message.** Measured, not claimed — see
+[`benchmark.json`](benchmark.json).
+
 In July 2024 the state cut 3G and 4G in Bangladesh. Broadband went dark. What
 survived was 2G — voice and SMS. People fell back to text.
 
