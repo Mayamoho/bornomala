@@ -121,6 +121,23 @@
         font-size: 0.95rem;
       }
       .quick .icon { font-size: 1.7rem; line-height: 1; }
+
+      /* A map link is a destination, not a footnote: thumb-sized and legible
+         at arm's length, because it is read in bad light by someone in a hurry. */
+      .maplink {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 40px;
+        padding: 6px 14px;
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        color: var(--accent);
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+      }
       .quick button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
 
       .stats {

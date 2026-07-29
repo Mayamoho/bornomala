@@ -163,7 +163,7 @@ function refreshCrisis() {
   el('c-segments').textContent = String(gsm7Segments(payload));
   el('c-ucs2').textContent = String(today);
   el('c-ratio').textContent = `${((today * 16) / (septets * 7)).toFixed(1)}×`;
-  el('crisis-plain').textContent = describe(frame, getLang());
+  el('crisis-plain').textContent = describe(frame, getLang(), { coords: false });
 
   if (!paperPossible) {
     el('crisis-note').textContent = t('carriesNote');
@@ -213,7 +213,7 @@ function refreshRelay() {
   relay.forEach((frame, i) => {
     const item = document.createElement('li');
     const text = document.createElement('span');
-    text.textContent = describe(frame, getLang());
+    text.textContent = describe(frame, getLang(), { coords: false });
 
     const remove = document.createElement('button');
     remove.type = 'button';
@@ -224,7 +224,16 @@ function refreshRelay() {
       refreshRelay();
     });
 
-    item.append(text, remove);
+    const link = mapLink(frame);
+    if (link) {
+      const open = document.createElement('a');
+      open.href = link;
+      open.textContent = t('seeOnMap');
+      open.className = 'maplink';
+      item.append(text, open, remove);
+    } else {
+      item.append(text, remove);
+    }
     list.append(item);
   });
 
@@ -355,15 +364,17 @@ function refreshDecode() {
   for (const frame of message.frames) {
     const item = document.createElement('li');
     const text = document.createElement('span');
-    text.textContent = describe(frame, getLang());
+    // Coordinates are left out of the sentence: a pair of decimal degrees is
+    // not a place to most people, and the link beside it is.
+    text.textContent = describe(frame, getLang(), { coords: false });
     item.append(text);
 
     const link = mapLink(frame);
     if (link) {
       const open = document.createElement('a');
       open.href = link;
-      open.textContent = t('map');
-      open.className = 'note';
+      open.textContent = t('seeOnMap');
+      open.className = 'maplink';
       item.append(open);
     }
     list.append(item);

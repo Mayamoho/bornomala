@@ -167,14 +167,20 @@ export function isPaperSafe(frames) {
   return frames.every((frame) => !frame.note);
 }
 
-/** Human sentence for a decoded frame, in `bn` or `en`. */
-export function describe(frame, lang = 'bn') {
+/**
+ * Human sentence for a decoded frame, in `bn` or `en`.
+ *
+ * `coords: false` leaves the raw latitude and longitude out, for callers that
+ * render the position as a map link instead. Two decimal-degree numbers are
+ * not information to most readers; "see on map" is.
+ */
+export function describe(frame, lang = 'bn', { coords = true } = {}) {
   const parts = [renderTemplate(frame.template, frame.values, lang)];
 
   if (frame.location) {
     if (frame.location.precise) {
       const { lat, lon } = frame.location;
-      parts.push(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+      if (coords) parts.push(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);
     } else {
       parts.push(districtName(frame.location.district, lang));
     }

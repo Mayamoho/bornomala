@@ -76,6 +76,7 @@ export const STRINGS = {
     showQr: 'Show QR',
     remove: 'Remove',
     map: 'Map',
+    seeOnMap: '📍 See on map',
 
     noNetworkHead: 'No network at all?',
     noNetworkHelp:
@@ -192,6 +193,7 @@ export const STRINGS = {
     showQr: 'QR দেখান',
     remove: 'বাদ',
     map: 'মানচিত্র',
+    seeOnMap: '📍 মানচিত্রে দেখুন',
 
     noNetworkHead: 'নেটওয়ার্ক একেবারেই নেই?',
     noNetworkHelp: 'পাশের ফোনে QR দেখান, ওরা ক্যামেরা ধরুক। কোনো রেডিও, অপারেটর বা অনুমতি লাগে না।',
