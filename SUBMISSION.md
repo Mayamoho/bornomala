@@ -81,7 +81,7 @@ Track A — Crisis Tech.
 > phone: the coded string is printable and can be decoded off a card by hand.
 >
 > The interface is fully bilingual, Bangla and English, switchable mid-message.
-> There is no framework, no dependency, no analytics, and no account. 57
+> There is no framework, no dependency, no analytics, and no account. 81
 > automated checks cover codec round trips, every send path, the offline shell,
 > and translation parity.
 >

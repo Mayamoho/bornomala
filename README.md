@@ -249,6 +249,8 @@ python3 tools/train_model.py \
 
 # 3. Verify
 npm test          # coder, GSM-7, frames, checksum, relay and codec round trips
+npm run check     # the whole interface, headless: every send path, both languages
+npm run audit     # offline shell, translation parity, dead ids, privacy
 npm run bench     # held-out comparison against gzip and UCS-2
 
 # 4. Run the app
