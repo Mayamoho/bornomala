@@ -55,6 +55,9 @@ export const STRINGS = {
     noteHelp:
       'A note needs the app at the other end. Without one, the message can be read off paper.',
     paperCheck: 'Hand-decodable code (base-32)',
+    plainTextCheck: 'Send as plain text — no app needed at the other end',
+    plainTextHint:
+      'Anyone can read it, including an office that has never heard of this app. It costs more SMS segments, and nothing here is secret either way.',
 
     crisisMessage: '2. The message',
     willRead: 'What they will read',
@@ -172,6 +175,9 @@ export const STRINGS = {
     notePlaceholder: 'যেমন: আয়েশা খাতুন',
     noteHelp: 'নোট থাকলে প্রাপকের অ্যাপ লাগবে। নোট ছাড়া বার্তা কাগজেও পড়া যায়।',
     paperCheck: 'কাগজে পড়া যায় এমন কোড (বেস-৩২)',
+    plainTextCheck: 'সাধারণ লেখা হিসেবে পাঠান — প্রাপকের অ্যাপ লাগবে না',
+    plainTextHint:
+      'যে কেউ পড়তে পারবে, এই অ্যাপের কথা না জানলেও। বেশি এসএমএস সেগমেন্ট লাগবে, আর কোনো ক্ষেত্রেই বার্তা গোপন নয়।',
 
     crisisMessage: '২. যা পাঠাবেন',
     willRead: 'ওরা যা পড়বে',

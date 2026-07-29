@@ -317,6 +317,17 @@
               Hand-decodable code (base-32)
             </label>
           </div>
+
+          <div class="check">
+            <input type="checkbox" id="crisis-plaintext" />
+            <label for="crisis-plaintext" style="margin: 0" data-i18n="plainTextCheck">
+              Send as plain text — no app needed at the other end
+            </label>
+          </div>
+          <p class="note" data-i18n="plainTextHint">
+            Anyone can read it, including an office that has never heard of this app. It costs more
+            SMS segments, and nothing here is secret either way.
+          </p>
         </section>
 
         <section>
@@ -383,6 +394,12 @@
             <div class="stat">
               <b id="r-alone">0</b><span data-i18n="statAlone">Sent separately</span>
             </div>
+          </div>
+          <div class="check">
+            <input type="checkbox" id="relay-plaintext" />
+            <label for="relay-plaintext" style="margin: 0" data-i18n="plainTextCheck">
+              Send as plain text — no app needed at the other end
+            </label>
           </div>
           <textarea id="relay-payload" class="payload" readonly aria-live="polite"></textarea>
           <div class="row">

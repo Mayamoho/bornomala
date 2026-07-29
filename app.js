@@ -52,6 +52,9 @@ const inLang = (pair) => (getLang() === 'bn' ? pair.bn : pair.en);
 let model = null;
 let gpsFix = null;
 let crisisPayload = '';
+/** The coded relay batch, kept apart from the textarea so the QR never
+ *  carries the plain-text form even while the textarea shows it. */
+let relayPayload = '';
 const relay = [];
 
 /* ────────────────────────────── tabs ────────────────────────────── */
@@ -152,17 +155,32 @@ function refreshCrisis() {
     return;
   }
 
-  crisisPayload = payload;
+  // Plain text is the escape hatch for a recipient who has never heard of this
+  // app — a thana, a relief office, a landline-era number. It costs segments
+  // and it is not less private: nothing here was ever secret.
+  const plainText = el('crisis-plaintext').checked;
+  const readable = describe(frame, getLang());
+
   const septets = septetCost(payload);
   // The baseline is always the Bangla sentence: that is what someone would
   // have typed today, whatever language the interface happens to be in.
   const today = [...describe(frame, 'bn')].length;
 
-  el('crisis-code').textContent = paper ? group(payload) : payload;
-  el('c-chars').textContent = String([...payload].length);
-  el('c-segments').textContent = String(gsm7Segments(payload));
-  el('c-ucs2').textContent = String(today);
-  el('c-ratio').textContent = `${((today * 16) / (septets * 7)).toFixed(1)}×`;
+  if (plainText) {
+    crisisPayload = readable;
+    el('crisis-code').textContent = readable;
+    el('c-chars').textContent = String([...readable].length);
+    el('c-segments').textContent = String(ucs2Segments(readable));
+    el('c-ucs2').textContent = String(ucs2Segments(readable));
+    el('c-ratio').textContent = '1.0×';
+  } else {
+    crisisPayload = payload;
+    el('crisis-code').textContent = paper ? group(payload) : payload;
+    el('c-chars').textContent = String([...payload].length);
+    el('c-segments').textContent = String(gsm7Segments(payload));
+    el('c-ucs2').textContent = String(today);
+    el('c-ratio').textContent = `${((today * 16) / (septets * 7)).toFixed(1)}×`;
+  }
   el('crisis-plain').textContent = describe(frame, getLang(), { coords: false });
 
   if (!paperPossible) {
@@ -173,6 +191,8 @@ function refreshCrisis() {
     el('crisis-note').textContent = t('appNeeded');
   }
   setCrisisButtons(true);
+  // The QR always carries the coded form: it is an app-to-app handoff, and the
+  // symbol stays small enough to scan off a cracked screen.
   refreshQr('crisis-qr', payload);
 }
 
@@ -242,6 +262,7 @@ function refreshRelay() {
   el('r-count').textContent = String(relay.length);
 
   if (relay.length === 0) {
+    relayPayload = '';
     el('relay-payload').value = '';
     el('r-chars').textContent = '0';
     el('r-segments').textContent = '0';
@@ -269,9 +290,16 @@ function refreshRelay() {
   );
   const segments = gsm7Segments(payload);
 
-  el('relay-payload').value = payload;
-  el('r-chars').textContent = String([...payload].length);
-  el('r-segments').textContent = String(segments);
+  // Same escape hatch as the crisis tab: sixty reports as sentences is many
+  // segments, but it lands on a phone that has never seen this app.
+  const plainText = el('relay-plaintext').checked;
+  const readable = relay.map((frame) => describe(frame, getLang())).join('\n');
+  const sending = plainText ? readable : payload;
+
+  relayPayload = payload;
+  el('relay-payload').value = sending;
+  el('r-chars').textContent = String([...sending].length);
+  el('r-segments').textContent = String(plainText ? ucs2Segments(readable) : segments);
   el('r-alone').textContent = String(alone);
   el('relay-send').disabled = false;
   el('relay-copy').disabled = false;
@@ -684,6 +712,8 @@ function wire() {
   el('district').addEventListener('change', refreshCrisis);
   el('hours').addEventListener('change', refreshCrisis);
   el('paper').addEventListener('change', refreshCrisis);
+  el('crisis-plaintext').addEventListener('change', refreshCrisis);
+  el('relay-plaintext').addEventListener('change', refreshRelay);
   el('note').addEventListener('input', refreshCrisis);
   el('loc-mode').addEventListener('change', () => {
     const mode = el('loc-mode').value;
@@ -700,12 +730,12 @@ function wire() {
   });
   el('relay-qr-toggle').addEventListener('click', () => {
     const host = el('relay-qr');
-    if (host.hidden) renderQr('relay-qr', el('relay-payload').value);
+    if (host.hidden) renderQr('relay-qr', relayPayload);
     else host.hidden = true;
   });
   el('qr-link').addEventListener('change', () => {
     refreshQr('crisis-qr', crisisPayload);
-    refreshQr('relay-qr', el('relay-payload').value);
+    refreshQr('relay-qr', relayPayload);
   });
 
   el('crisis-send').addEventListener('click', () => sendBySms(crisisPayload));
