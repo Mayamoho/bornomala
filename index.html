@@ -193,111 +193,130 @@
     <main>
       <header>
         <h1>বর্ণমালা <span aria-hidden="true">·</span> Bornomala</h1>
-        <p class="tagline">
-          নেটওয়ার্ক ভেঙে পড়লে যে বার্তাটা যায়।
-          <br />Crisis messaging for the network you have left.
+        <p class="tagline" data-i18n="tagline">
+          Crisis messaging for the network you have left.
         </p>
+        <div class="row noprint" role="group" aria-label="Language / ভাষা">
+          <button id="lang-en" type="button" class="small primary" lang="en">English</button>
+          <button id="lang-bn" type="button" class="small" lang="bn">বাংলা</button>
+        </div>
       </header>
 
-      <p id="status" class="note warn" role="status">মডেল লোড হচ্ছে… loading model…</p>
+      <p id="status" class="note warn" role="status">loading model…</p>
 
       <div class="tabs" role="tablist">
         <button role="tab" id="tab-crisis" aria-controls="panel-crisis" aria-selected="true">
-          জরুরি বার্তা
+          <span data-i18n="tabCrisis">Crisis</span>
         </button>
         <button role="tab" id="tab-relay" aria-controls="panel-relay" aria-selected="false">
-          রিলে <span id="relay-count"></span>
+          <span data-i18n="tabRelay">Relay</span> <span id="relay-count"></span>
         </button>
         <button role="tab" id="tab-text" aria-controls="panel-text" aria-selected="false">
-          লিখুন
+          <span data-i18n="tabText">Write</span>
         </button>
         <button role="tab" id="tab-decode" aria-controls="panel-decode" aria-selected="false">
-          খুলুন
+          <span data-i18n="tabDecode">Decode</span>
         </button>
         <button role="tab" id="tab-card" aria-controls="panel-card" aria-selected="false">
-          কাগজের কার্ড
+          <span data-i18n="tabCard">Paper card</span>
         </button>
       </div>
 
       <!-- ─────────────────────────── crisis frame ─────────────────────────── -->
       <div class="panel" id="panel-crisis" role="tabpanel" aria-labelledby="tab-crisis">
         <section>
-          <h2>১. কী হয়েছে — what has happened</h2>
+          <h2 data-i18n="crisisWhat">1. What has happened</h2>
           <div class="quick" id="quick"></div>
 
-          <label for="template">সব বার্তা — all messages</label>
+          <label for="template" data-i18n="allMessages">All messages</label>
           <select id="template"></select>
 
           <div id="slots" class="grid2"></div>
 
-          <h3>কোথায় — where</h3>
+          <h3 data-i18n="where">Where</h3>
           <select id="loc-mode">
-            <option value="none">অবস্থান নেই / no location</option>
-            <option value="district" selected>জেলা / district (৬ বিট)</option>
-            <option value="gps">জিপিএস / precise GPS (৩২ বিট)</option>
+            <option value="none" data-i18n="locNone">No location</option>
+            <option value="district" selected data-i18n="locDistrict">District (6 bits)</option>
+            <option value="gps" data-i18n="locGps">Precise GPS (32 bits)</option>
           </select>
           <div id="district-wrap">
-            <label for="district">জেলা — district</label>
+            <label for="district" data-i18n="district">District</label>
             <select id="district"></select>
           </div>
           <div id="gps-wrap" hidden>
             <div class="row">
-              <button id="locate" type="button" class="small">অবস্থান নিন / use my location</button>
+              <button id="locate" type="button" class="small" data-i18n="useLocation">
+                Use my location
+              </button>
             </div>
-            <p class="note" id="gps-note">জিপিএস নেওয়া হয়নি / no fix yet</p>
+            <p class="note" id="gps-note">No GPS fix yet</p>
           </div>
 
-          <h3>কখন — when</h3>
+          <h3 data-i18n="when">When</h3>
           <select id="hours">
-            <option value="">সময় নেই / no time</option>
+            <option value="" data-i18n="noTime">No time</option>
           </select>
 
-          <h3>নাম বা নোট — name or note <span class="note">(ঐচ্ছিক / optional)</span></h3>
-          <input id="note" type="text" lang="bn" placeholder="যেমন: আয়েশা খাতুন" autocomplete="off" />
-          <p class="note">
-            নোট থাকলে প্রাপকের অ্যাপ লাগবে। নোট ছাড়া বার্তা কাগজেও পড়া যায়।
-            <br />A note needs the app at the other end. Without one, the message can be read off paper.
+          <h3>
+            <span data-i18n="noteHead">Name or note</span>
+            <span class="note" data-i18n="optional">(optional)</span>
+          </h3>
+          <input
+            id="note"
+            type="text"
+            lang="bn"
+            placeholder="e.g. Ayesha Khatun"
+            data-i18n-placeholder="notePlaceholder"
+            autocomplete="off"
+          />
+          <p class="note" data-i18n="noteHelp">
+            A note needs the app at the other end. Without one, the message can be read off paper.
           </p>
 
           <div class="check">
             <input type="checkbox" id="paper" checked />
-            <label for="paper" style="margin: 0">
-              কাগজে পড়া যায় এমন কোড / hand-decodable code (base-32)
+            <label for="paper" style="margin: 0" data-i18n="paperCheck">
+              Hand-decodable code (base-32)
             </label>
           </div>
         </section>
 
         <section>
-          <h2>২. যা পাঠাবেন — the message</h2>
+          <h2 data-i18n="crisisMessage">2. The message</h2>
           <p class="code" id="crisis-code">—</p>
           <div class="stats">
-            <div class="stat"><b id="c-chars">0</b><span>অক্ষর / characters</span></div>
-            <div class="stat"><b id="c-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
-            <div class="stat"><b id="c-ucs2">0</b><span>আজ লাগত (UCS-2)</span></div>
-            <div class="stat"><b id="c-ratio">—</b><span>সাশ্রয় / saving</span></div>
+            <div class="stat"><b id="c-chars">0</b><span data-i18n="statChars">Characters</span></div>
+            <div class="stat">
+              <b id="c-segments">0</b><span data-i18n="statSegments">SMS segments</span>
+            </div>
+            <div class="stat">
+              <b id="c-ucs2">0</b><span data-i18n="statUcs2Today">Cost today (UCS-2)</span>
+            </div>
+            <div class="stat"><b id="c-ratio">—</b><span data-i18n="statSaving">Saving</span></div>
           </div>
           <p class="note" id="crisis-plain"></p>
           <div class="row">
-            <button id="crisis-send" class="primary" type="button">এসএমএস পাঠান</button>
-            <button id="crisis-copy" type="button">কপি</button>
-            <button id="crisis-queue" type="button">রিলেতে যোগ করুন</button>
+            <button id="crisis-send" class="primary" type="button" data-i18n="send">
+              Send as SMS
+            </button>
+            <button id="crisis-copy" type="button" data-i18n="copy">Copy</button>
+            <button id="crisis-queue" type="button" data-i18n="queue">Add to relay</button>
           </div>
           <p class="note" id="crisis-note"></p>
 
-          <h3>নেটওয়ার্ক একেবারেই নেই? — no network at all?</h3>
-          <p class="note">
-            পাশের ফোনে QR দেখান, ওরা ক্যামেরা ধরুক। কোনো রেডিও, অপারেটর বা অনুমতি লাগে না।
-            <br />Show the QR to the phone beside you and let them point a camera. No radio, no
-            operator, no permission.
+          <h3 data-i18n="noNetworkHead">No network at all?</h3>
+          <p class="note" data-i18n="noNetworkHelp">
+            Show the QR to the phone beside you and let them point a camera. No radio, no operator,
+            no permission.
           </p>
           <div class="check">
             <input type="checkbox" id="qr-link" checked />
-            <label for="qr-link" style="margin: 0">
-              স্ক্যান করলে অ্যাপ খুলবে / scanning opens the app
+            <label for="qr-link" style="margin: 0" data-i18n="qrLinkCheck">
+              Scanning opens the app
             </label>
           </div>
           <div class="row">
-            <button id="crisis-qr-toggle" type="button">QR দেখান / show QR</button>
+            <button id="crisis-qr-toggle" type="button" data-i18n="showQr">Show QR</button>
           </div>
           <div class="qr" id="crisis-qr" hidden></div>
         </section>
@@ -306,31 +325,36 @@
       <!-- ────────────────────────────── relay ─────────────────────────────── -->
       <div class="panel" id="panel-relay" role="tabpanel" aria-labelledby="tab-relay" hidden>
         <section>
-          <h2>রিলে — one SMS for many people</h2>
-          <p class="note">
-            একজনের হাতে নেটওয়ার্ক থাকলেই হয়। ৪৫ জনের খবর একটাই এসএমএসে যায়।
-            <br />One person with a bar of signal carries forty-five people's status in a single SMS.
+          <h2 data-i18n="relayHead">Relay — one SMS for many people</h2>
+          <p class="note" data-i18n="relayHelp">
+            One person with a bar of signal carries forty-five people's status in a single SMS.
           </p>
           <ul class="list" id="relay-list"></ul>
-          <p class="empty" id="relay-empty">
-            খালি — «জরুরি বার্তা» ট্যাব থেকে যোগ করুন / empty, add from the crisis tab
+          <p class="empty" id="relay-empty" data-i18n="relayEmpty">
+            Empty — add reports from the Crisis tab
           </p>
 
           <div class="stats">
-            <div class="stat"><b id="r-count">0</b><span>বার্তা / reports</span></div>
-            <div class="stat"><b id="r-chars">0</b><span>অক্ষর / characters</span></div>
-            <div class="stat"><b id="r-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
-            <div class="stat"><b id="r-alone">0</b><span>আলাদা পাঠালে লাগত</span></div>
+            <div class="stat"><b id="r-count">0</b><span data-i18n="statReports">Reports</span></div>
+            <div class="stat"><b id="r-chars">0</b><span data-i18n="statChars">Characters</span></div>
+            <div class="stat">
+              <b id="r-segments">0</b><span data-i18n="statSegments">SMS segments</span>
+            </div>
+            <div class="stat">
+              <b id="r-alone">0</b><span data-i18n="statAlone">Sent separately</span>
+            </div>
           </div>
           <textarea id="relay-payload" class="payload" readonly aria-live="polite"></textarea>
           <div class="row">
-            <button id="relay-send" class="primary" type="button" disabled>এসএমএস পাঠান</button>
-            <button id="relay-copy" type="button" disabled>কপি</button>
-            <button id="relay-clear" type="button">সব মুছুন</button>
+            <button id="relay-send" class="primary" type="button" disabled data-i18n="send">
+              Send as SMS
+            </button>
+            <button id="relay-copy" type="button" disabled data-i18n="copy">Copy</button>
+            <button id="relay-clear" type="button" data-i18n="clear">Clear all</button>
           </div>
           <p class="note" id="relay-note"></p>
           <div class="row">
-            <button id="relay-qr-toggle" type="button" disabled>QR দেখান / show QR</button>
+            <button id="relay-qr-toggle" type="button" disabled data-i18n="showQr">Show QR</button>
           </div>
           <div class="qr" id="relay-qr" hidden></div>
         </section>
@@ -339,31 +363,42 @@
       <!-- ──────────────────────────── free text ───────────────────────────── -->
       <div class="panel" id="panel-text" role="tabpanel" aria-labelledby="tab-text" hidden>
         <section>
-          <h2>লিখুন — free Bangla text</h2>
+          <h2 data-i18n="textHead">Write freely in Bangla</h2>
           <textarea
             id="input"
             lang="bn"
-            placeholder="এখানে বাংলায় লিখুন…"
+            placeholder="Type in Bangla here…"
+            data-i18n-placeholder="textPlaceholder"
             autocomplete="off"
             spellcheck="false"
           ></textarea>
 
           <div class="stats">
-            <div class="stat"><b id="stat-chars">0</b><span>অক্ষর / characters</span></div>
-            <div class="stat"><b id="stat-segments">0</b><span>এসএমএস সেগমেন্ট</span></div>
-            <div class="stat"><b id="stat-ucs2">0</b><span>সেগমেন্ট আজ (UCS-2)</span></div>
-            <div class="stat"><b id="stat-ratio">—</b><span>সংকোচন / vs UCS-2</span></div>
+            <div class="stat">
+              <b id="stat-chars">0</b><span data-i18n="statChars">Characters</span>
+            </div>
+            <div class="stat">
+              <b id="stat-segments">0</b><span data-i18n="statSegments">SMS segments</span>
+            </div>
+            <div class="stat">
+              <b id="stat-ucs2">0</b><span data-i18n="statUcs2Segments">Segments today (UCS-2)</span>
+            </div>
+            <div class="stat">
+              <b id="stat-ratio">—</b><span data-i18n="statCompression">vs UCS-2</span>
+            </div>
           </div>
 
           <div class="row">
-            <button id="send" class="primary" type="button" disabled>এসএমএস পাঠান</button>
-            <button id="copy" type="button" disabled>কপি করুন</button>
+            <button id="send" class="primary" type="button" disabled data-i18n="send">
+              Send as SMS
+            </button>
+            <button id="copy" type="button" disabled data-i18n="copy">Copy</button>
           </div>
           <p class="note" id="compose-note"></p>
         </section>
 
         <section>
-          <h2>সংকুচিত বার্তা — compressed payload</h2>
+          <h2 data-i18n="payloadHead">Compressed payload</h2>
           <textarea id="payload" class="payload" readonly aria-live="polite"></textarea>
         </section>
       </div>
@@ -371,18 +406,15 @@
       <!-- ────────────────────────────── decode ────────────────────────────── -->
       <div class="panel" id="panel-decode" role="tabpanel" aria-labelledby="tab-decode" hidden>
         <section>
-          <h2>পাওয়া বার্তা খুলুন — decode</h2>
+          <h2 data-i18n="decodeHead">Open a message you received</h2>
           <textarea
             id="cipher"
             class="payload"
-            placeholder="প্রাপ্ত কোড এখানে পেস্ট করুন…  H-428R-H7E"
+            placeholder="Paste the code you received…  H-428R-H7E"
+            data-i18n-placeholder="decodePlaceholder"
             autocomplete="off"
             spellcheck="false"
           ></textarea>
-          <div class="row">
-            <button id="lang-bn" type="button" class="small primary">বাংলা</button>
-            <button id="lang-en" type="button" class="small">English</button>
-          </div>
           <ul class="list" id="decoded"></ul>
           <p class="note" id="decode-note"></p>
         </section>
@@ -391,58 +423,51 @@
       <!-- ─────────────────────────── printable card ───────────────────────── -->
       <div class="panel" id="panel-card" role="tabpanel" aria-labelledby="tab-card" hidden>
         <section>
-          <h2>কাগজের কার্ড — the paper decode card</h2>
-          <p class="note noprint">
-            ছাপিয়ে আশ্রয়কেন্দ্রে রাখুন। ফোন বা বিদ্যুৎ ছাড়াই <code>H</code> দিয়ে শুরু হওয়া কোড
-            এই কার্ড দেখে হাতে খোলা যায়।
-            <br />Print this and pin it up. A code beginning with <code>H</code> can be decoded by
-            hand from this card, with no phone and no power.
+          <h2 data-i18n="cardHead">The paper decode card</h2>
+          <p class="note noprint" data-i18n="cardHelpHtml">
+            Print this and pin it up. A code beginning with <code>H</code> can be decoded by hand
+            from this card, with no phone and no power.
           </p>
           <div class="row noprint">
-            <button type="button" id="print" class="small">ছাপান / print</button>
+            <button type="button" id="print" class="small" data-i18n="print">Print</button>
           </div>
 
-          <h3>কীভাবে পড়বেন — how to read a code by hand</h3>
+          <h3 data-i18n="cardHowHead">How to read a code by hand</h3>
           <ol class="note" style="padding-left: 20px">
-            <li>
-              হাইফেন বাদ দিন। প্রথম অক্ষর <code>H</code> মানে হাতে-পড়ার কোড।
-              <br />Drop the hyphens. A leading <code>H</code> means hand-decodable.
+            <li data-i18n="cardStep1Html">
+              Drop the hyphens. A leading <code>H</code> means hand-decodable.
             </li>
-            <li>
-              বাকি অক্ষরগুলো নিচের তালিকা থেকে সংখ্যায় বদলান, প্রতিটির ৫ বিট পাশাপাশি লিখুন।
-              <br />Convert each remaining character to its number below, and write each as 5 bits.
+            <li data-i18n="cardStep2">
+              Convert each remaining character to its number below, and write each as 5 bits.
             </li>
-            <li>
-              প্রথম ১ বিট বাদ দিন (সেন্টিনেল), শেষ ৮ বিট বাদ দিন (চেকসাম)।
-              <br />Drop the first bit (sentinel) and the last 8 bits (checksum).
+            <li data-i18n="cardStep3">
+              Drop the first bit (sentinel) and the last 8 bits (checksum).
             </li>
-            <li>
-              এবার শুরু থেকে: ৫ বিট = বার্তা নম্বর · ১ বিট অবস্থান আছে কি না · থাকলে ১ বিট ধরন
-              (০ = জেলা, তারপর ৬ বিট জেলা নম্বর) · ১ বিট সময় আছে কি না · থাকলে ৫ বিট = কত ঘণ্টা আগে
-              · তারপর বার্তার নিজস্ব ঘরগুলো · শেষ ১ বিট নোট আছে কি না।
-              <br />Then read left to right: 5 bits message number · 1 bit has-location · if set, 1
-              bit mode (0 = district, then 6 bits district number) · 1 bit has-time · if set, 5 bits
+            <li data-i18n="cardStep4">
+              Then read left to right: 5 bits message number · 1 bit has-location · if set, 1 bit
+              mode (0 = district, then 6 bits district number) · 1 bit has-time · if set, 5 bits
               hours ago · then the message's own fields · a final bit saying whether a note follows.
             </li>
           </ol>
 
-          <h3>অক্ষর → সংখ্যা — character values (Crockford base-32)</h3>
+          <h3 data-i18n="cardBase32Head">Character values (Crockford base-32)</h3>
           <div id="card-base32"></div>
 
-          <h3>বার্তা — messages (৫ বিট / 5 bits)</h3>
+          <h3 data-i18n="cardMessagesHead">Messages (5 bits)</h3>
           <div id="card-templates" class="cardcols"></div>
 
-          <h3>ঘরের মান — field values</h3>
+          <h3 data-i18n="cardFieldsHead">Field values</h3>
           <div id="card-slots" class="cardcols"></div>
 
-          <h3>জেলা — districts (৬ বিট / 6 bits)</h3>
+          <h3 data-i18n="cardDistrictsHead">Districts (6 bits)</h3>
           <div id="card-districts" class="cardcols"></div>
         </section>
       </div>
 
       <footer class="noprint">
-        <p>সব কিছু আপনার ফোনেই চলে — কোনো সার্ভার নেই।</p>
-        <p>Everything runs on your phone. No server, no internet, no message leaves the device.</p>
+        <p data-i18n="footer">
+          Everything runs on your phone. No server, no internet, no message leaves the device.
+        </p>
       </footer>
     </main>
 

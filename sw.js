@@ -9,7 +9,7 @@
  * Bump CACHE when any shell file or the model changes.
  */
 
-const CACHE = 'bornomala-v2';
+const CACHE = 'bornomala-v3';
 
 /**
  * The shell is a few tens of kilobytes and covers every structured crisis
@@ -29,6 +29,7 @@ const SHELL = [
   './src/frame.js',
   './src/geo.js',
   './src/gsm7.js',
+  './src/i18n.js',
   './src/message.js',
   './src/model.js',
   './src/phrasebook.js',

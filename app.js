@@ -16,14 +16,17 @@ import { TEMPLATES, SLOTS, URGENCY, BLOOD, DEPTH, CAPACITY } from './src/phraseb
 import { DISTRICTS, inCoverage } from './src/geo.js';
 import { ALPHABETS, septetCost, gsm7Segments, ucs2Segments, group } from './src/gsm7.js';
 import { encodeQr, toSvg } from './src/qr.js';
+import { initLang, getLang, setLang, applyLang, t } from './src/i18n.js';
 
 const el = (id) => document.getElementById(id);
 
 /** The six a volunteer reaches for first. */
 const QUICK = [0, 1, 2, 3, 4, 20];
 
+/** Message content carries its own bn/en pair; pick the side the UI is on. */
+const inLang = (pair) => (getLang() === 'bn' ? pair.bn : pair.en);
+
 let model = null;
-let lang = 'bn';
 let gpsFix = null;
 let crisisPayload = '';
 const relay = [];
@@ -72,17 +75,18 @@ function renderSlots() {
     const spec = SLOTS[slot];
     const label = document.createElement('label');
     label.htmlFor = `slot-${i}`;
-    label.textContent = `${spec.bn} — ${spec.en}`;
+    label.textContent = inLang(spec);
 
     const select = document.createElement('select');
     select.id = `slot-${i}`;
     for (let v = 0; v < 2 ** spec.bits; v += 1) {
       const option = document.createElement('option');
       option.value = String(v);
+      // Numbers and blood groups read the same either way; the rest translate.
       option.textContent =
         slot === 'count' || slot === 'capacity' || slot === 'blood'
           ? spec.render(v, 'en')
-          : `${spec.render(v, 'bn')} / ${spec.render(v, 'en')}`;
+          : spec.render(v, getLang());
       select.append(option);
     }
     select.addEventListener('change', refreshCrisis);
@@ -110,8 +114,7 @@ function refreshCrisis() {
 
   if (frame.note && !model) {
     el('crisis-code').textContent = '—';
-    el('crisis-note').textContent =
-      'নোট লিখতে মডেল লাগে, লোড হচ্ছে / a note needs the model, still loading';
+    el('crisis-note').textContent = t('noteNeedsModel');
     setCrisisButtons(false);
     return;
   }
@@ -121,31 +124,30 @@ function refreshCrisis() {
     payload = encodeCrisis(frame, model, { paper });
   } catch (error) {
     el('crisis-code').textContent = '—';
-    el('crisis-note').textContent = `পাঠানো যাচ্ছে না / cannot encode: ${error.message}`;
+    el('crisis-note').textContent = t('cannotEncode', error.message);
     setCrisisButtons(false);
     return;
   }
 
   crisisPayload = payload;
   const septets = septetCost(payload);
-  const sentence = describe(frame, 'bn');
-  const today = [...sentence].length;
+  // The baseline is always the Bangla sentence: that is what someone would
+  // have typed today, whatever language the interface happens to be in.
+  const today = [...describe(frame, 'bn')].length;
 
   el('crisis-code').textContent = paper ? group(payload) : payload;
   el('c-chars').textContent = String([...payload].length);
   el('c-segments').textContent = String(gsm7Segments(payload));
   el('c-ucs2').textContent = String(today);
   el('c-ratio').textContent = `${((today * 16) / (septets * 7)).toFixed(1)}×`;
-  el('crisis-plain').textContent = `${sentence}\n${describe(frame, 'en')}`;
+  el('crisis-plain').textContent = describe(frame, getLang());
 
   if (!paperPossible) {
-    el('crisis-note').textContent =
-      'নোট আছে, তাই কাগজে পড়া যাবে না / carries a note, so the paper path is off';
+    el('crisis-note').textContent = t('carriesNote');
   } else if (paper) {
-    el('crisis-note').textContent =
-      'কাগজ থেকেও পড়া যাবে / can be decoded by hand from the printed card';
+    el('crisis-note').textContent = t('paperOk');
   } else {
-    el('crisis-note').textContent = 'অ্যাপ লাগবে, কিন্তু ছোট / needs the app, but shorter';
+    el('crisis-note').textContent = t('appNeeded');
   }
   setCrisisButtons(true);
   refreshQr('crisis-qr', payload);
@@ -153,25 +155,27 @@ function refreshCrisis() {
 
 function useLocation() {
   if (!navigator.geolocation) {
-    el('gps-note').textContent = 'এই ফোনে জিপিএস নেই / no geolocation on this device';
+    el('gps-note').textContent = t('noGeolocation');
     return;
   }
-  el('gps-note').textContent = 'খোঁজা হচ্ছে… / locating…';
+  el('gps-note').textContent = t('locating');
   navigator.geolocation.getCurrentPosition(
     ({ coords }) => {
       if (!inCoverage(coords.latitude, coords.longitude)) {
-        el('gps-note').textContent =
-          'বাংলাদেশের বাইরে — জেলা বেছে নিন / outside the grid, pick a district instead';
+        el('gps-note').textContent = t('outsideGrid');
         gpsFix = null;
       } else {
         gpsFix = { lat: coords.latitude, lon: coords.longitude };
-        el('gps-note').textContent =
-          `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)} — ±১০ মিটার / ±10 m`;
+        el('gps-note').textContent = t(
+          'fix',
+          coords.latitude.toFixed(4),
+          coords.longitude.toFixed(4),
+        );
       }
       refreshCrisis();
     },
     (error) => {
-      el('gps-note').textContent = `পাওয়া গেল না / no fix: ${error.message}`;
+      el('gps-note').textContent = t('noFixError', error.message);
     },
     { enableHighAccuracy: true, timeout: 10_000 },
   );
@@ -186,12 +190,12 @@ function refreshRelay() {
   relay.forEach((frame, i) => {
     const item = document.createElement('li');
     const text = document.createElement('span');
-    text.textContent = describe(frame, lang);
+    text.textContent = describe(frame, getLang());
 
     const remove = document.createElement('button');
     remove.type = 'button';
     remove.className = 'small';
-    remove.textContent = 'বাদ';
+    remove.textContent = t('remove');
     remove.addEventListener('click', () => {
       relay.splice(i, 1);
       refreshRelay();
@@ -222,7 +226,7 @@ function refreshRelay() {
   try {
     payload = encodeRelay(relay, model, { paper: isPaperSafe(relay) });
   } catch (error) {
-    el('relay-note').textContent = `পাঠানো যাচ্ছে না / cannot encode: ${error.message}`;
+    el('relay-note').textContent = t('cannotEncode', error.message);
     return;
   }
 
@@ -241,9 +245,7 @@ function refreshRelay() {
   el('relay-copy').disabled = false;
   el('relay-qr-toggle').disabled = false;
   refreshQr('relay-qr', payload);
-  el('relay-note').textContent =
-    `${relay.length} জনের খবর ${segments} সেগমেন্টে — ` +
-    `${relay.length} reports in ${segments} segment(s) instead of ${alone}`;
+  el('relay-note').textContent = t('relayNote', relay.length, segments, alone);
 }
 
 /* ─────────────────────────────── free text ──────────────────────── */
@@ -260,9 +262,7 @@ function refreshCompose() {
     el('stat-ratio').textContent = '—';
     el('send').disabled = true;
     el('copy').disabled = true;
-    el('compose-note').textContent = model
-      ? ''
-      : 'মডেল লোড হচ্ছে / waiting for the model — জরুরি বার্তা এখনই কাজ করে';
+    el('compose-note').textContent = model ? '' : t('waitingModel');
     return;
   }
 
@@ -270,7 +270,7 @@ function refreshCompose() {
   try {
     payload = encodeText(text, model);
   } catch (error) {
-    el('compose-note').textContent = `সংকোচন ব্যর্থ / compression failed: ${error.message}`;
+    el('compose-note').textContent = t('compressionFailed', error.message);
     return;
   }
 
@@ -286,9 +286,12 @@ function refreshCompose() {
   el('stat-ratio').textContent = `${((chars * 16) / (septets * 7)).toFixed(1)}×`;
   el('send').disabled = false;
   el('copy').disabled = false;
-  el('compose-note').textContent =
-    `${septets} সেপ্টেট / septets · ${((septets * 7) / chars).toFixed(2)} bits per character` +
-    (segments === 1 ? ' · এক সেগমেন্টেই যাচ্ছে' : ` · ${segments} সেগমেন্ট`);
+  el('compose-note').textContent = t(
+    'composeNote',
+    septets,
+    ((septets * 7) / chars).toFixed(2),
+    segments,
+  );
 }
 
 /* ─────────────────────────────── decode ─────────────────────────── */
@@ -308,15 +311,13 @@ function refreshDecode() {
     message = decodeMessage(payload, model);
   } catch (error) {
     el('decode-note').className = 'note alarm';
-    el('decode-note').textContent = `খোলা গেল না / could not decode: ${error.message}`;
+    el('decode-note').textContent = t('couldNotDecode', error.message);
     return;
   }
 
   el('decode-note').className = 'note';
   el('decode-note').textContent =
-    message.kind === 'batch'
-      ? `${message.frames.length}টি বার্তা এক এসএমএসে / ${message.frames.length} reports in one SMS`
-      : '';
+    message.kind === 'batch' ? t('batchCount', message.frames.length) : '';
 
   if (message.kind === 'text') {
     const item = document.createElement('li');
@@ -331,14 +332,14 @@ function refreshDecode() {
   for (const frame of message.frames) {
     const item = document.createElement('li');
     const text = document.createElement('span');
-    text.textContent = describe(frame, lang);
+    text.textContent = describe(frame, getLang());
     item.append(text);
 
     const link = mapLink(frame);
     if (link) {
       const open = document.createElement('a');
       open.href = link;
-      open.textContent = 'মানচিত্র';
+      open.textContent = t('map');
       open.className = 'note';
       item.append(open);
     }
@@ -369,9 +370,14 @@ function table(head, rows) {
 }
 
 function renderCard() {
+  // Rebuilt whenever the language changes, so the hosts are cleared first.
+  for (const id of ['card-base32', 'card-templates', 'card-slots', 'card-districts']) {
+    el(id).replaceChildren();
+  }
+
   el('card-base32').append(
     table(
-      ['#', 'অক্ষর', '#', 'অক্ষর'],
+      ['#', t('colChar'), '#', t('colChar')],
       Array.from({ length: 16 }, (_, i) => [
         String(i),
         ALPHABETS.base32[i],
@@ -381,9 +387,11 @@ function renderCard() {
     ),
   );
 
+  // Card rows stay bilingual whatever the interface is set to: the sheet gets
+  // printed once and then read by whoever is holding it.
   el('card-templates').append(
     table(
-      ['#', 'বার্তা / message', 'ঘর / fields'],
+      ['#', t('colMessage'), t('colFields')],
       TEMPLATES.map((template, i) => [
         String(i),
         `${template.bn} — ${template.en}`,
@@ -413,7 +421,7 @@ function renderCard() {
 
   el('card-districts').append(
     table(
-      ['#', 'জেলা / district'],
+      ['#', t('colDistrict')],
       DISTRICTS.map((district, i) => [String(i), `${district.bn} — ${district.en}`]),
     ),
   );
@@ -451,8 +459,10 @@ function renderQr(hostId, payload) {
     host.hidden = false;
   } catch (error) {
     host.hidden = true;
-    el(hostId === 'crisis-qr' ? 'crisis-note' : 'relay-note').textContent =
-      `QR বানানো গেল না / cannot build a QR: ${error.message}`;
+    el(hostId === 'crisis-qr' ? 'crisis-note' : 'relay-note').textContent = t(
+      'qrFailed',
+      error.message,
+    );
   }
 }
 
@@ -474,9 +484,9 @@ async function copyText(text, noteId) {
   if (!text) return;
   try {
     await navigator.clipboard.writeText(text);
-    el(noteId).textContent = 'কপি হয়েছে / copied';
+    el(noteId).textContent = t('copied');
   } catch {
-    el(noteId).textContent = 'নিজে কপি করুন / select and copy';
+    el(noteId).textContent = t('copyManually');
   }
 }
 
@@ -497,21 +507,29 @@ function markQuick() {
     .forEach((button, i) => button.setAttribute('aria-pressed', String(QUICK[i] === current)));
 }
 
+/**
+ * Every control whose labels come from JS rather than markup. Rebuilt from
+ * scratch on a language switch, so it restores whatever was already selected
+ * instead of resetting a form someone was halfway through.
+ */
 function buildStaticControls() {
   const templates = el('template');
+  const chosenTemplate = templates.value;
+  templates.replaceChildren();
   TEMPLATES.forEach((template, i) => {
     const option = document.createElement('option');
     option.value = String(i);
-    option.textContent = `${template.bn} — ${template.en}`;
+    option.textContent = inLang(template);
     templates.append(option);
   });
+  templates.value = chosenTemplate || '0';
 
   const quick = el('quick');
+  quick.replaceChildren();
   for (const id of QUICK) {
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = `${TEMPLATES[id].bn}\n${TEMPLATES[id].en}`;
-    button.style.whiteSpace = 'pre-line';
+    button.textContent = inLang(TEMPLATES[id]);
     button.addEventListener('click', () => {
       templates.value = String(id);
       renderSlots();
@@ -522,22 +540,85 @@ function buildStaticControls() {
   }
 
   const districts = el('district');
+  const chosenDistrict = districts.value;
+  districts.replaceChildren();
   DISTRICTS.forEach((district, i) => {
     const option = document.createElement('option');
     option.value = String(i);
-    option.textContent = `${district.bn} — ${district.en}`;
+    option.textContent = inLang(district);
     districts.append(option);
   });
-  districts.value = '17'; // Dhaka, the likeliest single answer
+  districts.value = chosenDistrict || '17'; // Dhaka, the likeliest single answer
 
   const hours = el('hours');
+  const chosenHours = hours.value;
+  hours.replaceChildren();
+  const noTime = document.createElement('option');
+  noTime.value = '';
+  noTime.textContent = t('noTime');
+  hours.append(noTime);
   for (let h = 0; h <= MAX_HOURS_AGO; h += 1) {
     const option = document.createElement('option');
     option.value = String(h);
-    option.textContent = h === 0 ? 'এইমাত্র / just now' : `${h} ঘণ্টা আগে / ${h}h ago`;
+    option.textContent = h === 0 ? t('justNow') : t('hoursAgo', h);
     hours.append(option);
   }
-  hours.value = '0';
+  hours.value = chosenHours || '0';
+}
+
+/* ─────────────────────────────── language ───────────────────────── */
+
+/** What the crisis form holds right now, so a rebuild can put it back. */
+function formState() {
+  const template = Number(el('template').value);
+  return {
+    template: el('template').value,
+    slots: TEMPLATES[template].slots.map((_, i) => el(`slot-${i}`)?.value ?? '0'),
+    mode: el('loc-mode').value,
+    district: el('district').value,
+    hours: el('hours').value,
+    note: el('note').value,
+  };
+}
+
+function restoreForm(state) {
+  el('template').value = state.template;
+  renderSlots();
+  state.slots.forEach((value, i) => {
+    const control = el(`slot-${i}`);
+    if (control) control.value = value;
+  });
+  el('loc-mode').value = state.mode;
+  el('district').value = state.district;
+  el('hours').value = state.hours;
+  el('note').value = state.note;
+}
+
+function markLangButtons() {
+  for (const code of ['en', 'bn']) {
+    const button = el(`lang-${code}`);
+    button.className = `small${getLang() === code ? ' primary' : ''}`;
+    button.setAttribute('aria-pressed', String(getLang() === code));
+  }
+}
+
+/** Everything that carries language: markup labels, options, card, output. */
+function switchLang(code) {
+  if (code === getLang()) return;
+  const state = formState();
+
+  setLang(code);
+  applyLang();
+  markLangButtons();
+  buildStaticControls();
+  restoreForm(state);
+  markQuick();
+  renderCard();
+
+  refreshCrisis();
+  refreshRelay();
+  refreshCompose();
+  refreshDecode();
 }
 
 function wire() {
@@ -603,14 +684,8 @@ function wire() {
   el('copy').addEventListener('click', () => copyText(el('payload').value, 'compose-note'));
 
   el('cipher').addEventListener('input', refreshDecode);
-  for (const code of ['bn', 'en']) {
-    el(`lang-${code}`).addEventListener('click', () => {
-      lang = code;
-      el('lang-bn').className = `small${code === 'bn' ? ' primary' : ''}`;
-      el('lang-en').className = `small${code === 'en' ? ' primary' : ''}`;
-      refreshDecode();
-      refreshRelay();
-    });
+  for (const code of ['en', 'bn']) {
+    el(`lang-${code}`).addEventListener('click', () => switchLang(code));
   }
 
   el('print').addEventListener('click', () => window.print());
@@ -631,6 +706,9 @@ async function loadModel() {
 }
 
 function main() {
+  initLang();
+  applyLang();
+  markLangButtons();
   buildStaticControls();
   renderSlots();
   markQuick();
@@ -643,8 +721,7 @@ function main() {
   refreshRelay();
   consumeSharedText();
 
-  el('status').textContent =
-    'জরুরি বার্তা চালু — বাংলা লেখার মডেল নামছে / crisis messages ready, loading the text model…';
+  el('status').textContent = t('statusReady');
 
   loadModel().then(
     (loaded) => {
@@ -655,9 +732,7 @@ function main() {
       refreshDecode();
     },
     (error) => {
-      el('status').textContent =
-        `মডেল আসেনি, তবু জরুরি বার্তা কাজ করছে / no text model (${error.message}) — ` +
-        'structured crisis messages still work';
+      el('status').textContent = t('statusNoModel', error.message);
     },
   );
 
