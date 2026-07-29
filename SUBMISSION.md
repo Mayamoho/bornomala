@@ -49,41 +49,41 @@ Track A — Crisis Tech.
 ## 4. Solution description (limit: 400 words)
 
 > Bornomala does not try to replace the broken network. It makes the message small
-> enough that the network still standing is enough.
+> enough that the network still standing is enough. It is an installable offline
+> app with three tabs.
 >
-> A small statistical Bangla language model, trained offline and shipped as
-> integer probability tables, drives a deterministic integer arithmetic coder. The
-> output is packed into GSM-7 septets, so a compressed Bangla message travels in
-> the 160-character lane instead of the 70-character one. Everything runs on the
-> phone: no server, no internet, no message ever leaves the device.
+> **Normal — compress and decode.** Type Bangla and live counters show characters,
+> compressed segments, what the same text costs today in UCS-2, and the ratio. A
+> small Bangla model trained offline drives a deterministic arithmetic coder; the
+> bits pack into GSM-7 septets, so the message rides the 160-character lane instead
+> of the 70-character one. Send hands it to the phone's own SMS composer. Paste back
+> a code — or the whole received SMS — and the Bangla returns.
 >
-> Benchmarked over 4,000 crisis-style Bangla messages: 3.12 bits per character
-> against UCS-2's 16, which is 359 Bangla characters per SMS segment instead of
-> 70 — 5.1× more. All 4,000 test messages fit in a single segment. gzip -9 scores
-> worse than doing nothing (21.06 bits per character), because a general
-> compressor's dictionary never pays for itself at SMS length. That gap is the
-> whole argument for a purpose-built codec.
+> Benchmarked on 5,000 held-out messages never seen in training: 3.106 bits per
+> character against UCS-2's 16.000 — 361 Bangla characters per segment instead of
+> 70, 5.15× more, with 100% fitting one segment. gzip -9 does worse than doing
+> nothing (21.002 bits per character): a general compressor's dictionary never pays
+> for itself at SMS length.
 >
-> Compression needs the app at both ends, and a survivor will not have it. So
-> Bornomala ships a second path that requires nothing of the receiver. The
-> Emergency tab sends plain Bangla text — readable on any phone in the country —
-> built from what a responder actually needs: what is happening, where you are,
-> when it happened. Nine official national hotlines (999, 1090, 102, 333 and
-> others) are one tap from a call or a pre-written SMS. Location travels as a maps
-> link *and* as bare coordinates beside it, because the numbers still work when
-> the link cannot load. A relay mode lets one volunteer carry many households'
-> reports in a single SMS. A QR handoff moves a message phone-to-phone with no
-> network at all. Coordinators and volunteers install the app; survivors never
-> have to.
+> **Emergency — plain text, nothing needed on the other end.** Compression needs
+> the app at both ends and a survivor will not have it, so this tab uses none of
+> the codec. It refuses to send until the report is useful: what is happening in
+> your own words; one of 32 ready sentences in four groups with fill-in values
+> (people, urgency, blood group, flood depth, shelter capacity); where you are, from
+> 64 districts or live GPS; and when, up to 31 hours ago. Nine official national
+> hotlines (999, 1090, 102, 16263, 333, 109, 1098, 16430, 106) are one tap from a
+> call or a pre-written SMS. Location travels twice, as a maps link and as bare
+> coordinates, because the numbers work when the link cannot load.
 >
-> It degrades all the way down. No internet: an installable offline PWA with a
-> precached shell. No data: SMS over 2G. No network: QR, screen to camera. No
-> phone: the coded string is printable and can be decoded off a card by hand.
+> **Relay — many reports, one SMS.** A volunteer adds each household's status with
+> one tap and sends the batch as a single message, against a counter showing what
+> sending them separately would have cost.
 >
-> The interface is fully bilingual, Bangla and English, switchable mid-message.
-> There is no framework, no dependency, no analytics, and no account. 81
-> automated checks cover codec round trips, every send path, the offline shell,
-> and translation parity.
+> It degrades in steps: no internet, an offline PWA; no data, SMS over 2G; no GPS,
+> a district instead of coordinates; no network, a QR shown screen to camera.
+>
+> Fully bilingual. No framework, no dependency, no account. 81 automated checks
+> cover codec round trips, every send path, the offline shell and translations.
 >
 > 1952 was the right to speak Bangla. 2024 was the right to speak at all. This is
 > the same fight one layer down, in the character encoding.
@@ -129,14 +129,14 @@ Record on a real phone where possible. Judges reward seeing the SMS composer act
 |---|---|---|
 | 0:00–0:25 | Black screen, then the July 2024 blackout line | "In July 2024 the network was cut. What survived was SMS. And Bangla costs 2.3× more to send than English, because it is not in the GSM-7 alphabet." |
 | 0:25–0:55 | App open on the phone, type a Bangla status in the Write tab | "This is a real status report. Watch the counter." |
-| 0:55–1:30 | Zoom on the stats row: characters, segments, ratio | "Seventy characters would have been one segment. This fits three hundred and fifty-nine. 5.1× more Bangla in the same SMS." |
+| 0:55–1:30 | Zoom on the stats row: characters, segments, ratio | "Seventy characters would have been one segment. This fits three hundred and sixty-one. 5.15× more Bangla in the same SMS." |
 | 1:30–2:00 | Tap Send — **show the phone's SMS composer opening with the message prefilled** | "No server. The phone's own SMS app sends it." |
 | 2:00–2:30 | Second phone: paste the code into Decode, original Bangla appears | "On the other side, the same model turns it back into words." |
 | 2:30–3:15 | Emergency tab: type situation, pick a ready sentence, location, time; show the plain-text preview | "A survivor will not have this app. So the emergency path sends plain Bangla any phone can read — with the location as a link *and* as bare numbers, because the numbers work with no data." |
 | 3:15–3:40 | Tap SMS beside 999 in the hotline list | "Nine official national hotlines, message already written." |
 | 3:40–4:10 | Relay tab: two reports queued, sent as one SMS. Then QR toggle, second phone scans it | "One volunteer carries forty households. And with no network at all, the QR moves it screen to camera." |
 | 4:10–4:35 | Turn on airplane mode, reload the app — it still opens | "Installed, it runs with no internet at all." |
-| 4:35–5:00 | Benchmark table on screen | "Four thousand messages. 3.12 bits per character. Every one fits in a single segment. Gzip does worse than doing nothing. This is what a purpose-built codec buys you." |
+| 4:35–5:00 | Benchmark table on screen | "Five thousand held-out messages. 3.1 bits per character. Every one fits in a single segment. Gzip does worse than doing nothing. This is what a purpose-built codec buys you." |
 
 ---
 
@@ -153,8 +153,8 @@ Record on a real phone where possible. Judges reward seeing the SMS composer act
 > that at the encoding layer. A small Bangla language model plus an arithmetic
 > coder compresses a message before it is sent.
 >
-> Measured over 4,000 crisis messages: **359 Bangla characters in a single SMS
-> segment instead of 70. 5.1× more.** Every test message fit in one segment. gzip
+> Measured over 5,000 held-out messages: **361 Bangla characters in a single SMS
+> segment instead of 70. 5.15× more.** Every test message fit in one segment. gzip
 > actually does *worse* than sending raw.
 >
 > It also has an emergency mode that sends plain Bangla any phone can read, with
@@ -185,7 +185,7 @@ The GitHub half of public engagement is 10% of the total score, and the repo cur
 
 On https://github.com/Mayamoho/bornomala, click the ⚙ beside **About**:
 
-- **Description:** `Offline Bangla SMS compression codec — 5.1× more Bangla per text message. Built for the network a blackout leaves behind.`
+- **Description:** `Offline Bangla SMS app — compress messages 5.15×, send plain-text emergency reports, relay many households in one SMS. No server, no internet.`
 - **Website:** `https://mayamoho.github.io/bornomala/`
 - **Topics:** `bangla` `sms` `compression` `arithmetic-coding` `offline-first` `pwa` `crisis-tech` `bangladesh` `gsm7` `disaster-response`
 

@@ -1,8 +1,15 @@
 # বর্ণমালা · Bornomala
 
-**Crisis messaging for the network you have left. A family's status report is
-eight characters. Forty-five of them fit in one SMS. And if the phone is dead,
-the same message can be read off a printed card by hand.**
+**An offline Bangla SMS app for the network a blackout leaves behind.** It does
+three things, all on your phone, with no server and no internet:
+
+1. **Normal** — write Bangla, and it compresses to a short code that fits **5.15×
+   more** in a single SMS. Paste a code you received and get the Bangla back.
+2. **Emergency** — build a plain-text report any phone can read, with a ready
+   sentence, your location and how long ago, then send it to a contact or to one
+   of nine national hotlines with the message already written.
+3. **Relay** — a volunteer collects many households' reports and sends the whole
+   batch as one SMS.
 
 **[Try it live](https://mayamoho.github.io/bornomala/) ·
 [Slide deck](https://mayamoho.github.io/bornomala/slides.html) ·
@@ -10,11 +17,11 @@ the same message can be read off a printed card by hand.**
 
 | | Bornomala | raw UCS-2 (phones today) | gzip -9 |
 |---|---|---|---|
-| Bits per Bangla character | **3.12** | 16.00 | 21.06 |
-| Bangla characters per SMS segment | **359** | 70 | 53 |
-| Of 4,000 crisis messages, fit in one segment | **100%** | 98.3% | 99.5% |
+| Bits per Bangla character | **3.106** | 16.000 | 21.002 |
+| Bangla characters per SMS segment | **361** | 70 | 53 |
+| Of 5,000 held-out messages, fit in one segment | **100.0%** | 98.2% | 99.5% |
 
-**5.1× more Bangla in every text message.** Measured, not claimed — see
+Measured, not claimed — `npm run bench`, output in
 [`benchmark.json`](benchmark.json).
 
 In July 2024 the state cut 3G and 4G in Bangladesh. Broadband went dark. What
@@ -35,35 +42,60 @@ Most crisis messaging tries to build a new network. Bornomala assumes you
 cannot, and makes the message small enough that the broken network you still
 have is enough.
 
-That turns out to matter most for the messages people actually send in the
-first hours: not prose, but a small closed set of facts. *We are five. We are
-safe. We are in Khulna. The water is chest deep. Do not come this way.*
+## What the app actually does
 
-So Bornomala does not compress the sentence. It sends the fact.
+Three tabs, three jobs.
 
-| what you send | on the wire | what it costs today |
-| --- | --- | ---: |
-| "আমরা ৩ জন নিরাপদ আছি, ঢাকা, ২ ঘণ্টা আগে" | `H-428R-H7E` | 37 chars of UCS-2 |
-| the same, as compressed free text | 24 characters | — |
-| 45 families' status reports | **one SMS segment** | 45 SMS |
-| 15 families' reports, with names | **one SMS segment** | 15 SMS |
+### 1. Normal — compress and decode
 
-`H-428R-H7E` is a real payload, not an illustration. `npm test` asserts it.
+Type Bangla and four counters move on every keystroke: characters, the GSM-7
+segments the compressed form needs, the segments the same text costs *today* in
+UCS-2, and the ratio between them. Below that sits the compressed message —
 
-## Three kinds of message
+```
+আমরা পাঁচজন নিরাপদ আছি, ঢাকা   →   B*?TΞ9(9Id'Θb
+```
 
-Every payload announces itself with one leading character, so the receiver
-never has to guess.
+— every payload beginning with `B`, so a receiver never has to guess what they
+are looking at. **Send** hands it to the phone's own SMS composer, addressed and
+filled in. The recipient number is required: an SMS link with no number is
+silently refused by most phones, so the button stays off rather than pretending
+to work.
 
-- **`H` — a crisis frame, hand-decodable.** Five bits pick one of 32 phrasebook
-  messages; the rest are typed slots (how many people, how urgent, blood group,
-  flood depth, shelter capacity), a location, and how many hours ago. Packed in
-  Crockford base-32, which has no `I`, `L`, `O` or `U` to confuse with `1`, `0`
-  or `V`.
-- **`C` / `D` — the same, packed dense.** 6.95 bits per character instead of 5,
-  for when both ends have the app. `D` is a batch of up to 64 frames.
-- **`B` — free Bangla prose**, arithmetic-coded against the language model, for
-  everything the phrasebook does not cover.
+The same tab opens messages coming back. Paste the code and the Bangla returns.
+Paste the *entire* received SMS — attribution line, map link, blank lines — and
+it still finds the code inside. Text shared into the app from any other app
+lands there automatically.
+
+### 2. Emergency — plain text, no app needed on the other end
+
+Compression needs the app at both ends, and a survivor will not have it. So this
+tab uses none of the codec. It sends plain Bangla words, and it refuses to send
+until the message is worth a responder's time:
+
+- **What is happening**, typed in your own words. Required.
+- **A ready sentence** — 32 of them in four groups (status, need, danger, help
+  offered), the six reached for first sitting on icon buttons. Each carries
+  fill-in values: how many people, how urgent, blood group, flood depth, shelter
+  capacity.
+- **Where you are** — one of 64 districts, or live GPS. Required.
+- **When** — just now, or up to 31 hours ago. Required.
+- **Nine official national hotlines** — 999, 1090, 102, 16263, 333, 109, 1098,
+  16430, 106 — each one tap from a call, or from an SMS with your message
+  already written into it.
+
+A live preview shows the exact text that will leave the phone, with its
+character and segment count. Location always travels twice: a maps link *and*
+the bare coordinates beside it, because the numbers still work on a phone that
+cannot load the link.
+
+### 3. Relay — many reports, one SMS
+
+A volunteer at a shelter collects status from the families around them. Each
+report is added from the Emergency tab with one tap. The queue lists them all,
+each removable, and four counters show what it costs: reports, characters,
+segments as one batch, and — the number that makes the case — how many segments
+those same reports would have cost sent one at a time.
 
 ## Graceful degradation, taken literally
 
@@ -77,10 +109,9 @@ here, not a disclaimer.
 | No mobile data, 2G only | Everything. Messages go through the phone's own SMS composer. |
 | A slow connection that never finishes | Crisis frames, relay and decoding all work **before `model.bin` arrives**. The shell is 92 kB against the model's 1.7 MB, and the service worker installs without it. |
 | No GPS | Location degrades from a 32-bit coordinate (±10 m) to a 6-bit district index, in the same slot, behind one flag bit. |
-| **A button phone** | It cannot run the app, but it can carry the message: an `H` payload is plain GSM-7 that any handset can receive, store and forward verbatim. |
-| **No phone at all** | An `H` payload decodes by hand from the printed card in the app's last tab. Character values, the 32 messages, the field ladders and all 64 districts fit on one sheet. |
+| **A button phone on the receiving end** | The Emergency and Relay tabs send plain Bangla text, not a code. Any handset that can receive an SMS can read it, with no app and nothing installed. |
 | **No network whatsoever** | Show the QR, let the phone beside you point a camera. No radio, no operator, no pairing. |
-| A damaged message | CRC-8 on every payload. It refuses instead of decoding into fluent Bangla nobody wrote. |
+| A damaged message | A coded message that arrives garbled fails to decode and says so, rather than turning into fluent Bangla nobody wrote. |
 
 That last row is the one that matters most and is easiest to skip. Without a
 checksum a message garbled in transit does not fail — it *arrives*, plausible
@@ -169,10 +200,10 @@ invent a sentence nobody wrote.
 screen up, and let the other phone's camera read it. Nothing is transmitted:
 no tower, no Bluetooth, no pairing, no permission.
 
-**When there is no phone at all — the Paper card tab.** Press *Print* and keep
-the sheet. A code that begins with `H` can be decoded by hand from those
-tables, with no device and no power. It is slow — a minute or two per message —
-and it is the floor under everything else.
+**When the other phone has no app — the Emergency tab.** It sends plain Bangla
+words, never a code. That is the floor under everything else: compression is an
+optimisation for two informed ends, and the emergency path assumes neither end
+is informed.
 
 ## Results
 
@@ -207,13 +238,12 @@ compression**.
 - **`src/phrasebook.js`** — the 32 messages and their slot ladders. Append-only:
   the index *is* the wire value, so reordering it would silently change the
   meaning of every message already in flight.
-- **`src/frame.js`** — fixed-width bit fields, deliberately *not* run through the
-  arithmetic coder. That is what makes a frame decodable by hand. Notes are the
-  exception and are arithmetic-coded onto the tail, which is why a frame with a
-  note cannot use the paper profile — the app says so rather than failing.
+- **`src/frame.js`, `src/crc.js`** — a fixed-width bit-field frame format and its
+  CRC-8/ATM checksum. Written for a phrasebook-only wire format that the shipped
+  app does not use: the Emergency tab sends plain words instead, which needs
+  nothing of the receiver. Kept because the format is finished and tested, but
+  **nothing in `app.js` imports either file.** Treat them as library, not feature.
 - **`src/geo.js`** — the two location precisions, and the 64 districts.
-- **`src/crc.js`** — CRC-8/ATM, with the payload length folded in so the trailing
-  zero bits the transport is free to add or drop cannot pass unnoticed.
 - **`src/qr.js`** — a self-contained QR encoder for the no-network handoff,
   checked against an outside decoder rather than trusted.
 - **`src/gsm7.js`** — packs the bitstream into GSM 03.38 basic characters,
@@ -277,10 +307,10 @@ Then there are the three things a phone's SMS app cannot do at all:
 
 - **Sixty families' status in one SMS.** Not a feature of any SMS client. It is
   the difference between a shelter volunteer spending one message and sixty.
-- **A message that survives a dead phone.** A code beginning with `H` is
-  decodable by hand from a printed card, with no device and no power.
 - **A message with no network at any point.** Screen to camera over QR — no
   tower, no Bluetooth, no pairing, no permission.
+- **A message that costs a fifth as much to send.** Five times the Bangla in the
+  same segment, on the same tower, for the same money.
 
 So this is not an SMS replacement. It is what SMS degrades into when SMS is the
 only channel left and it is overloaded.
@@ -313,8 +343,8 @@ livestock, no body recovery.
 
 That is roughly twenty more messages, and the table holds exactly 32 because
 the template index is five bits. Going further means six bits: one more bit on
-every message, every printed card reprinted, and every payload changed. That is
-a deliberate version boundary, not a patch.
+every message, and every payload changed. That is a deliberate version boundary,
+not a patch.
 
 It is also the wrong thing to do from a laptop. The list above is derived from
 standards documents; the list that belongs in the app comes from people who
@@ -421,7 +451,8 @@ Bangla text compression has been studied for decades — dictionary methods,
 Huffman variants over conjunct clusters, and PPM applied to Indic scripts. What
 is different here is the target: not the smallest possible file, but the
 **160-septet SMS segment boundary**, with a decoder that has to be bit-exact on
-a low-end phone with no network — and a fallback that assumes no phone at all.
+a low-end phone with no network — and a fallback path that assumes the phone on
+the other end has never heard of the app.
 
 ---
 

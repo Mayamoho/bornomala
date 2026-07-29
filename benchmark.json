@@ -1,27 +1,27 @@
 {
   "model_bytes": 1769145,
-  "messages": 4000,
+  "messages": 5000,
   "results": [
     {
       "codec": "bornomala",
-      "messages": 4000,
-      "bits_per_char": 3.115506867504876,
-      "chars_per_segment": 359.49206585988924,
+      "messages": 5000,
+      "bits_per_char": 3.1064894159062484,
+      "chars_per_segment": 360.53559180508756,
       "one_segment_share": 1
     },
     {
       "codec": "gzip -9",
-      "messages": 4000,
-      "bits_per_char": 21.06464168637703,
-      "chars_per_segment": 53.169667762463234,
-      "one_segment_share": 0.99475
+      "messages": 5000,
+      "bits_per_char": 21.002071160577806,
+      "chars_per_segment": 53.32807376171116,
+      "one_segment_share": 0.9946
     },
     {
       "codec": "raw UCS-2",
-      "messages": 4000,
+      "messages": 5000,
       "bits_per_char": 16,
       "chars_per_segment": 70,
-      "one_segment_share": 0.983
+      "one_segment_share": 0.9816
     }
   ]
 }

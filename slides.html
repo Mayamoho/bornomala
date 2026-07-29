@@ -116,9 +116,11 @@
   <section class="slide">
     <p class="num">July Hackathon 2026 · Track A — Crisis Tech · solo entry</p>
     <h1>বর্ণমালা · Bornomala</h1>
-    <p class="lead">Crisis messaging for the network you have left.</p>
-    <p class="dim">A family's status report is eight characters. Forty-five of them fit in one SMS.
-    And if the phone is dead, the same message can be read off a printed card by hand.</p>
+    <p class="lead">An offline Bangla SMS app with three jobs: compress ordinary messages so
+    5× more fits in one text, compose emergency reports any phone can read, and let one
+    volunteer relay many households' reports in a single SMS.</p>
+    <p class="dim">Everything runs on the phone. No server, no internet, no account, no message
+    ever leaves the device except through your own SMS app.</p>
     <hr class="rule" />
     <p class="foot mono">mayamoho.github.io/bornomala · github.com/Mayamoho/bornomala</p>
   </section>
@@ -159,7 +161,7 @@
     <p class="num">04 — how it works</p>
     <h2>A language model, an arithmetic coder, and GSM-7.</h2>
     <ul>
-      <li>A small statistical Bangla model, trained offline, ships as integer probability tables.</li>
+      <li>A small statistical Bangla model, trained offline, ships as integer probability tables — 1.7 MB, 152 symbols, three context orders.</li>
       <li>A deterministic integer arithmetic coder turns the message into bits — the same bits on every device, or decoding would be worthless.</li>
       <li>The bits are packed into GSM-7 septets, so a coded message rides the 160-character lane instead of the 70-character one.</li>
       <li>The phone's own SMS composer sends it. No server, no internet, no message leaves the device.</li>
@@ -168,63 +170,93 @@
   </section>
 
   <section class="slide">
-    <p class="num">05 — measured, not claimed</p>
-    <h2>4,000 real crisis messages, benchmarked.</h2>
+    <p class="num">05 — tab one: Normal</p>
+    <h2>Write Bangla, watch it shrink, send it.</h2>
+    <ul>
+      <li><b>Write</b> in Bangla. Four live counters update on every keystroke: characters, GSM-7 segments the coded form needs, segments the same text would cost today in UCS-2, and the ratio between them.</li>
+      <li><b>The compressed message</b> appears as a short GSM-7 string, with its exact cost in septets and bits per character.</li>
+      <li><b>Send</b> hands it to the phone's SMS composer, already addressed and filled. The recipient number is required — a number-less SMS link is silently refused by most phones, so the button stays off rather than pretending.</li>
+      <li><b>Open a message you received:</b> paste the code and the original Bangla comes back. Paste the <em>whole</em> received SMS — attribution line, map link and all — and it still finds the code.</li>
+      <li>Text shared into the app from any other app lands in the decode box automatically.</li>
+    </ul>
+  </section>
+
+  <section class="slide">
+    <p class="num">06 — the honest problem, and tab two</p>
+    <h2>A survivor does not have the app.</h2>
+    <p>Compression needs the app at both ends — the same bootstrap trap the mesh projects have.
+    So the Emergency tab uses none of it. It sends <b>plain Bangla any phone can read</b>, and it
+    refuses to send until the message is actually useful to a responder:</p>
+    <ul>
+      <li><b>What is happening</b> — typed in your own words. Required.</li>
+      <li><b>A ready sentence</b> — 32 of them in four groups (status, need, danger, help offered), six on icon buttons for the ones reached for first. Each carries fill-in values: how many people, how urgent, blood group, flood depth, shelter capacity.</li>
+      <li><b>Where you are</b> — 64 districts, or live GPS. Required.</li>
+      <li><b>When</b> — just now, or up to 31 hours ago. Required.</li>
+      <li><b>Nine official national hotlines</b> — 999, 1090, 102, 16263, 333, 109, 1098, 16430, 106 — each one tap from a call, or from an SMS with your message already written into it.</li>
+    </ul>
+    <p class="dim">A live preview shows the exact text that will leave the phone, with its
+    character and segment count. Coordinators and volunteers install the app; survivors never have to.</p>
+  </section>
+
+  <section class="slide">
+    <p class="num">07 — tab three: Relay</p>
+    <h2>One volunteer, forty households, one SMS.</h2>
+    <p>A volunteer at a shelter collects status from the families around them. Each report is added
+    from the Emergency tab with one tap, and the whole queue goes out as a single message.</p>
+    <ul>
+      <li>The queue lists every report, each removable, with a running count.</li>
+      <li>Four counters show what it costs: reports, characters, segments as one batch, and — the number that makes the case — how many segments the same reports would have cost sent one at a time.</li>
+      <li>Send to one number, or copy the batch out. Same required-recipient rule.</li>
+    </ul>
+    <p class="dim">Batching is not a micro-optimisation here. On a saturated tower, one message
+    that goes through beats forty that queue.</p>
+  </section>
+
+  <section class="slide">
+    <p class="num">08 — measured, not claimed</p>
+    <h2>5,000 held-out messages, benchmarked.</h2>
     <table>
       <thead>
         <tr><th>Codec</th><th>Bits per character</th><th>Bangla characters per segment</th><th>Fits in one segment</th></tr>
       </thead>
       <tbody>
-        <tr class="us"><td>Bornomala</td><td class="n">3.12</td><td class="n">359</td><td class="n">100%</td></tr>
-        <tr><td>raw UCS-2 (what phones do today)</td><td class="n">16.00</td><td class="n">70</td><td class="n">98.3%</td></tr>
-        <tr><td>gzip -9</td><td class="n">21.06</td><td class="n">53</td><td class="n">99.5%</td></tr>
+        <tr class="us"><td>Bornomala</td><td class="n">3.106</td><td class="n">361</td><td class="n">100.0%</td></tr>
+        <tr><td>raw UCS-2 (what phones do today)</td><td class="n">16.000</td><td class="n">70</td><td class="n">98.2%</td></tr>
+        <tr><td>gzip -9</td><td class="n">21.002</td><td class="n">53</td><td class="n">99.5%</td></tr>
       </tbody>
     </table>
-    <p><b class="accent">5.1× more Bangla per SMS than every phone in the country sends today</b>,
-    and 6.8× better than gzip — general compressors get <em>worse</em> than raw on messages this
-    short, because the dictionary never pays for itself.</p>
-    <p class="foot mono">benchmark.json · 4,000 messages · reproducible from the repo</p>
+    <p><b class="accent">5.15× more Bangla per SMS than every phone in the country sends today</b>,
+    and 6.8× better than gzip — general compressors do <em>worse than nothing</em> at this length,
+    because the dictionary never pays for itself.</p>
+    <p class="foot mono">Every 50th corpus line, excluded from training, never read by the model · npm run bench</p>
   </section>
 
   <section class="slide">
-    <p class="num">06 — the honest problem, and the answer</p>
-    <h2>A survivor does not have the app.</h2>
-    <p>Compression needs the app on both ends. That is the same bootstrap trap the mesh projects
-    have — so Bornomala does not pretend otherwise. It ships a second path that needs nothing:</p>
-    <ul>
-      <li><b>Emergency tab — plain text.</b> Type the situation, add a ready sentence, where you are, and when. It goes out as words any phone can read, app or no app.</li>
-      <li><b>Nine national hotlines</b> — 999, 1090, 102, 333 and more — each one call or SMS away, with the message already written.</li>
-      <li><b>Location that survives no-data:</b> a maps link <em>and</em> the bare coordinates beside it, because the numbers work when the link cannot load.</li>
-      <li><b>Relay:</b> a volunteer collects many households' reports and sends them as one SMS.</li>
-      <li><b>QR handoff</b> for phone-to-phone with no network at all.</li>
-    </ul>
-    <p class="dim">Coordinators and relay volunteers install it. Survivors never have to.</p>
-  </section>
-
-  <section class="slide">
-    <p class="num">07 — graceful degradation</p>
-    <h2>Every layer below has a floor.</h2>
+    <p class="num">09 — graceful degradation</p>
+    <h2>Each layer below has a floor.</h2>
     <div class="grid">
       <div class="cell"><b>No internet</b><span>installable offline PWA, precached shell, no server anywhere in the design</span></div>
-      <div class="cell"><b>No data</b><span>SMS over 2G; bare coordinates travel beside every map link</span></div>
-      <div class="cell"><b>No network</b><span>QR handoff, screen to camera</span></div>
-      <div class="cell"><b>No phone</b><span>the code is printable — decodable off a card by hand</span></div>
+      <div class="cell"><b>No mobile data</b><span>SMS over 2G, through the phone's own composer</span></div>
+      <div class="cell"><b>No GPS</b><span>location falls back from live coordinates to a district you pick</span></div>
+      <div class="cell"><b>No network at all</b><span>show the QR, let the phone beside you point a camera — no radio, no pairing</span></div>
     </div>
-    <p>No framework, no dependencies, no analytics, no accounts. The whole app is a handful of
-    files and a 1.7 MB model, and it runs on a low-end Android with a dying battery.</p>
+    <p>Location always travels twice: a maps link <em>and</em> the bare coordinates beside it,
+    because the numbers still work on a phone that cannot load the link.</p>
+    <p>No framework, no dependencies, no analytics, no accounts. The shell is 92 kB; the model is
+    1.7 MB and loads separately, so the Emergency and Relay tabs work before it arrives.</p>
   </section>
 
   <section class="slide">
-    <p class="num">08 — status</p>
+    <p class="num">10 — status</p>
     <h2>Working, tested, and live.</h2>
     <ul>
       <li>Installable PWA, running now at <span class="mono">mayamoho.github.io/bornomala</span></li>
-      <li>Full interface in Bangla and English, switchable mid-message</li>
+      <li>Full interface in Bangla and English, switchable mid-message without losing what you typed</li>
       <li>81 automated checks in three suites — codec unit tests, a headless run of the whole interface, and a project audit (offline shell, translation parity, dead ids)</li>
       <li>MIT licensed, reproducible benchmark, model training tools in the repo</li>
     </ul>
     <hr class="rule" />
-    <p class="lead">One number worth remembering: <span class="accent">5.1×</span> more Bangla in
+    <p class="lead">One number worth remembering: <span class="accent">5.15×</span> more Bangla in
     every SMS, on the network that was left.</p>
     <p class="foot mono">github.com/Mayamoho/bornomala — a star helps this reach the people who need it.</p>
   </section>
