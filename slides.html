@@ -92,6 +92,29 @@
     background: #000;
   }
   .shots figcaption { color: var(--dim); font-size: 0.85rem; margin-top: 8px; }
+  .split { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 26px; align-items: center; }
+  .split .shots { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); margin: 0; }
+  .steps { list-style: none; padding: 0; margin: 0; }
+  .steps li {
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    margin: 0 0 14px;
+    font-size: clamp(1rem, 1.7vw, 1.15rem);
+  }
+  .steps .k {
+    flex: 0 0 auto;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .callout {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--accent);
+    font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+    margin: 6px 0 0;
+  }
+  @media (max-width: 700px) { .split { grid-template-columns: 1fr; } }
   .hint {
     position: fixed;
     right: 14px;
@@ -104,16 +127,37 @@
     padding: 6px 12px;
   }
   @media print {
+    @page { size: A4 landscape; margin: 0; }
     body { background: #fff; }
     .deck { max-width: none; padding: 0; }
+    /*
+     * One slide, one page. Without the height cap a tall screenshot spills onto
+     * a second sheet and a nine-slide deck prints as twelve.
+     */
     .slide {
       background: #fff;
       color: #000;
       border: 0;
-      min-height: 100vh;
+      height: 100vh;
+      min-height: 0;
+      overflow: hidden;
       page-break-after: always;
-      padding: 8vh 8vw;
+      break-after: page;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      margin: 0;
+      border-radius: 0;
+      padding: 6vh 7vw;
     }
+    .slide:last-child { page-break-after: auto; break-after: auto; }
+    h1 { font-size: 34pt; }
+    h2 { font-size: 22pt; }
+    p, li { font-size: 11.5pt; }
+    p.lead { font-size: 13pt; }
+    table { font-size: 10.5pt; }
+    .shots { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .shots img { max-height: 52vh; object-fit: contain; object-position: top; }
+    .shots figcaption { font-size: 8.5pt; }
     .hint { display: none; }
     .accent, .big, .cell b, tr.us td { color: #0a7a55; }
     .dim, .num, .cell span, th { color: #55635e; }
@@ -175,77 +219,128 @@
 
   <section class="slide">
     <p class="num">03 — how the compression works</p>
-    <h2>The app guesses the next letter, so it costs less to write down.</h2>
-    <ul>
-      <li>A small Bangla language model ships inside the app — 1.7 MB, learned from millions of lines of ordinary Bangla, before anyone downloads it.</li>
-      <li>At every letter it predicts what is likely to come next. The better the guess, the fewer bits are needed to record the answer. Common Bangla becomes very cheap.</li>
-      <li>Those bits are then written in characters that SMS considers "cheap English", so the message travels in the 160-character lane instead of the 70-character one.</li>
-      <li>Your phone's own SMS screen sends it. Nothing goes through us, because there is no server.</li>
-    </ul>
-    <div class="msg bn">আমরা পাঁচজন নিরাপদ আছি, ঢাকা  →  B*?TΞ9(9Id'Θb</div>
-    <p class="dim">The receiver's app runs the same model backwards and gets the sentence back, letter for letter.</p>
+    <h2>It guesses the next letter, so the letter costs less.</h2>
+    <div class="split">
+      <div>
+        <ul class="steps">
+          <li><span class="k">1</span><span>A small Bangla model rides inside the app. No internet, no server.</span></li>
+          <li><span class="k">2</span><span>It predicts each next letter. A good guess costs almost nothing to record.</span></li>
+          <li><span class="k">3</span><span>The bits go out as characters SMS treats as cheap.</span></li>
+        </ul>
+        <div class="msg bn">আমরা পাঁচজন নিরাপদ আছি, ঢাকা</div>
+        <div class="msg">B*?TΞ9(9Id'Θb</div>
+        <p class="callout">731 characters → 3 texts, not 11</p>
+      </div>
+      <div class="shots">
+        <figure>
+          <img src="image/6293860224368054147.jpg" alt="Normal tab showing 143 characters in 1 SMS segment against 3 today" />
+          <figcaption>731 Bangla characters: 3 texts, not 11.</figcaption>
+        </figure>
+      </div>
+    </div>
   </section>
 
   <section class="slide">
     <p class="num">04 — tab one: Normal</p>
-    <h2>Write Bangla, watch it shrink, send it.</h2>
-    <ul>
-      <li><b>Write</b> in Bangla. Four counters move as you type: how many characters, how many messages it costs after compressing, how many it would cost today, and how much you saved.</li>
-      <li><b>The compressed message</b> appears underneath, ready to send.</li>
-      <li><b>Send</b> opens your phone's normal SMS screen with the number and message already filled in. The number is required — a text link with no number silently does nothing on most phones, so the button stays off rather than pretending to work.</li>
-      <li><b>Reading one you received:</b> paste the code and the Bangla comes back. Paste the whole text message — signature line, map link and all — and it still finds the code inside.</li>
-      <li>Anything shared into the app from another app lands here automatically.</li>
-    </ul>
+    <h2>Type Bangla. Send it. Read it back.</h2>
+    <div class="split">
+      <div>
+        <ul class="steps">
+          <li><span class="k">→</span><span><b>Send</b> opens your own SMS app, number and message filled in.</span></li>
+          <li><span class="k">→</span><span>It stays off until a real number is there — a text link with no number silently fails.</span></li>
+          <li><span class="k">←</span><span>Paste the whole message you received. It finds the code, ignores the signature and the map link.</span></li>
+          <li><span class="k">⇥</span><span>Anything shared into the app from elsewhere lands in the decode box.</span></li>
+        </ul>
+        <p class="callout">Try it: 01315267528</p>
+      </div>
+      <div class="shots">
+        <figure>
+          <img src="image/6293860224368054148.jpg" alt="A compressed Bornomala message arriving in the phone's SMS app" />
+          <figcaption>How it lands on the other phone.</figcaption>
+        </figure>
+      </div>
+    </div>
   </section>
 
   <section class="slide">
-    <p class="num">05 — the honest problem, and tab two</p>
-    <h2>A survivor does not have the app.</h2>
-    <p>Compressing only works if both sides have the app — the same trap the mesh projects fall
-    into. So this tab uses none of it. It sends <b>plain Bangla words any phone can display</b>,
-    and it will not send until the report is actually useful:</p>
-    <ul>
-      <li><b>What is happening</b> — in your own words. Required.</li>
-      <li><b>A ready-made sentence</b> — 32 of them, grouped as status, need, danger and help offered, with the six most urgent on icon buttons. Each has blanks you fill: how many people, how urgent, blood group, water depth, shelter space.</li>
-      <li><b>Where you are</b> — pick a district, or use your live location. Required.</li>
-      <li><b>How long ago</b> — just now, or up to 31 hours. Required.</li>
-      <li><b>Nine official national numbers</b> — 999, 1090, 102, 16263, 333, 109, 1098, 16430, 106 — one tap to call, one tap to text with your message already written. <b>Calls work with no internet at all.</b></li>
-    </ul>
-    <p class="dim">A preview shows the exact words that will leave your phone. Volunteers and
-    coordinators install the app; the people they are helping never have to.</p>
+    <p class="num">05 — tab two: Emergency</p>
+    <h2>A survivor has no app. So this tab sends words.</h2>
+    <div class="split">
+      <div>
+        <ul class="steps">
+          <li><span class="k">✍</span><span>What is happening, in your own words.</span></li>
+          <li><span class="k">☑</span><span>One of 32 ready sentences, with a blank to fill.</span></li>
+          <li><span class="k">📍</span><span>A district, or your live location.</span></li>
+          <li><span class="k">⏱</span><span>How long ago.</span></li>
+          <li><span class="k">☎</span><span>999 and eight more, one tap to call. <b>Calls need no internet.</b></span></li>
+        </ul>
+        <p class="dim">It refuses to send until those are answered — a report with no place is not a report.</p>
+      </div>
+      <div class="shots">
+        <figure>
+          <img src="image/6293860224368054151.jpg" alt="Emergency tab with a report, a ready sentence, a district and a time" />
+          <figcaption>What actually gets sent — plain words.</figcaption>
+        </figure>
+        <figure>
+          <img src="image/6293860224368054154.jpg" alt="The nine national hotlines, each with a call and an SMS button" />
+          <figcaption>Nine national numbers.</figcaption>
+        </figure>
+      </div>
+    </div>
   </section>
 
   <section class="slide">
     <p class="num">06 — tab three: Relay</p>
-    <h2>One volunteer, forty households, one SMS.</h2>
-    <p>A volunteer at a shelter collects status from the families around them. Each report is added
-    from the Emergency tab with one tap, and the whole queue goes out as a single message.</p>
-    <ul>
-      <li>The list shows every report, each one removable.</li>
-      <li>Counters show how many messages this batch costs — and how many it would have cost sending them one by one. That second number is the whole point.</li>
-      <li>Send to one number, or copy the batch out.</li>
-    </ul>
-    <p class="dim">This is not a small saving. When the towers are jammed, one message that gets
-    through beats forty stuck in a queue.</p>
+    <h2>Forty families. One message.</h2>
+    <div class="split">
+      <div>
+        <ul class="steps">
+          <li><span class="k">+</span><span>Each household is added with one tap from the Emergency tab.</span></li>
+          <li><span class="k">=</span><span>They go out together, with one signature for the batch.</span></li>
+          <li><span class="k">△</span><span>A counter shows what sending them one by one would have cost.</span></li>
+        </ul>
+        <p class="callout">Two households → one message</p>
+        <p class="dim">When the towers are jammed, one message that gets through beats forty in a queue.</p>
+      </div>
+      <div class="shots">
+        <figure>
+          <img src="image/6293860224368054156.jpg" alt="Relay tab with two queued reports, 6 segments against 8 sent separately" />
+          <figcaption>The queue, and what it costs.</figcaption>
+        </figure>
+        <figure>
+          <img src="image/6293860224368054157.jpg" alt="Two relayed reports arriving as one plain-text SMS" />
+          <figcaption>Both arriving as one SMS.</figcaption>
+        </figure>
+      </div>
+    </div>
   </section>
 
   <section class="slide">
     <p class="num">07 — measured, not claimed</p>
-    <h2>Tested on 5,000 messages the model had never seen.</h2>
-    <table>
-      <thead>
-        <tr><th></th><th>Bangla characters in one text</th><th>Fits in a single text</th></tr>
-      </thead>
-      <tbody>
-        <tr class="us"><td>Bornomala</td><td class="n">361</td><td class="n">100.0%</td></tr>
-        <tr><td>What every phone does today</td><td class="n">70</td><td class="n">98.2%</td></tr>
-        <tr><td>Ordinary compression (gzip)</td><td class="n">53</td><td class="n">99.5%</td></tr>
-      </tbody>
-    </table>
-    <p><b class="accent">5.15× more Bangla in every text message</b> than any phone in the country
-    sends today. Ordinary compression does <em>worse than doing nothing</em> — it has no idea what
-    Bangla looks like, and messages this short never repay the overhead.</p>
-    <p class="foot mono">Every 50th line of the corpus, held out of training · npm run bench</p>
+    <h2>5,000 messages the model had never seen.</h2>
+    <div class="split">
+      <div>
+        <table>
+          <thead>
+            <tr><th></th><th>Bangla in one text</th><th>Fits in one</th></tr>
+          </thead>
+          <tbody>
+            <tr class="us"><td>Bornomala</td><td class="n">361</td><td class="n">100.0%</td></tr>
+            <tr><td>Every phone today</td><td class="n">70</td><td class="n">98.2%</td></tr>
+            <tr><td>gzip</td><td class="n">53</td><td class="n">99.5%</td></tr>
+          </tbody>
+        </table>
+        <p class="callout">5.15× more Bangla per text</p>
+        <p class="dim">Ordinary compression does worse than doing nothing — it has no idea what Bangla
+        looks like, and a message this short never repays the overhead.</p>
+      </div>
+      <div class="shots">
+        <figure>
+          <img src="image/6293860224368054158.jpg" alt="A QR code holding the whole message, with the hotline list beneath" />
+          <figcaption>No network at all? The message becomes a QR.</figcaption>
+        </figure>
+      </div>
+    </div>
   </section>
 
   <section class="slide">
@@ -268,31 +363,31 @@
     <h2>Installed and sent, on two Android handsets.</h2>
     <div class="shots">
       <figure>
-        <img src="image/shot-install.jpg" alt="Chrome's Install prompt for Bornomala on Android" />
+        <img src="image/6293860224368054142.jpg" alt="Chrome's Install prompt for Bornomala on Android" />
         <figcaption>Install from the browser menu — no Play Store, no APK.</figcaption>
       </figure>
       <figure>
-        <img src="image/shot-normal.jpg" alt="731 Bangla characters compressed to 3 SMS segments instead of 11" />
+        <img src="image/6293860224368054147.jpg" alt="731 Bangla characters compressed to 3 SMS segments instead of 11" />
         <figcaption>731 Bangla characters: 3 segments instead of 11.</figcaption>
       </figure>
       <figure>
-        <img src="image/shot-emergency.jpg" alt="Emergency tab with a filled report and live location" />
+        <img src="image/6293860224368054150.jpg" alt="Emergency tab with a filled report and live location" />
         <figcaption>An emergency report, built and previewed.</figcaption>
       </figure>
       <figure>
-        <img src="image/shot-qr-hotlines.jpg" alt="QR code and the national hotline list with call and SMS buttons" />
+        <img src="image/6293860224368054158.jpg" alt="QR code and the national hotline list with call and SMS buttons" />
         <figcaption>QR handoff, and the hotlines underneath.</figcaption>
       </figure>
       <figure>
-        <img src="image/shot-relay.jpg" alt="Relay tab with two queued reports: 6 SMS segments batched against 8 sent separately" />
-        <figcaption>Two households queued: 6 segments, against 8 sent one by one.</figcaption>
+        <img src="image/6293860224368054156.jpg" alt="Relay tab with two queued reports: 6 SMS segments batched against 8 sent separately" />
+        <figcaption>Two households, queued.</figcaption>
       </figure>
       <figure>
-        <img src="image/shot-received-relay.jpg" alt="Two relayed reports arriving as one plain-text SMS" />
+        <img src="image/6293860224368054157.jpg" alt="Two relayed reports arriving as one plain-text SMS" />
         <figcaption>The same batch, as it arrives.</figcaption>
       </figure>
       <figure>
-        <img src="image/shot-received-coded.jpg" alt="A compressed message arriving in the phone's SMS app" />
+        <img src="image/6293860224368054148.jpg" alt="A compressed message arriving in the phone's SMS app" />
         <figcaption>A compressed message, as it lands.</figcaption>
       </figure>
     </div>

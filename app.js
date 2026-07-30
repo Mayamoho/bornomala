@@ -766,7 +766,7 @@ async function main() {
   applyLang();
   markLangButtons();
   const stamp = el('build');
-  if (stamp) stamp.textContent = 'v25';
+  if (stamp) stamp.textContent = 'v26';
 
   buildEmergencyControls();
   buildHotlines();
@@ -795,7 +795,34 @@ async function main() {
 
   if ('serviceWorker' in navigator) {
     try {
-      await navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
+      // An installed app is never navigated the way a tab is: it is opened from
+      // the home screen, backgrounded, and opened again for weeks. Without an
+      // explicit check it can sit on one build indefinitely, which is how a
+      // phone stayed on v23 while a laptop had moved on.
+      const hadController = Boolean(navigator.serviceWorker.controller);
+      const registration = await navigator.serviceWorker.register('sw.js', {
+        updateViaCache: 'none',
+      });
+      const check = () => registration.update().catch(() => {});
+      check();
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') check();
+      });
+
+      // A new worker taking over does not touch the page already on screen —
+      // that keeps the old markup until something reloads it. Reload once, and
+      // never while there is a half-written message to lose.
+      let reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!hadController || reloading) return;
+        const unsaved = [ui.input, emEl.text()].some((field) => field?.value.trim() !== '');
+        if (unsaved) {
+          ui.status.textContent = t('updateReady');
+          return;
+        }
+        reloading = true;
+        window.location.reload();
+      });
     } catch {
       // Offline caching is a bonus; the app still works for this session.
     }

@@ -12,8 +12,8 @@ three things, all on your phone, with no server and no internet:
    batch as one SMS.
 
 **[Try it live](https://mayamoho.github.io/bornomala/) ·
-[Slide deck](https://mayamoho.github.io/bornomala/slides.html)** — July Hackathon
-2026, Track A (Crisis Tech).
+[Slide deck](https://mayamoho.github.io/bornomala/slides.html) ·
+[Deck as PDF](bornomala-slides.pdf)** — July Hackathon 2026, Track A (Crisis Tech).
 
 | | Bornomala | raw UCS-2 (phones today) | gzip -9 |
 |---|---|---|---|
@@ -80,7 +80,7 @@ prompt. A `ব` icon appears on your home screen, and the app now opens like any
 other app — full screen, no address bar.
 
 <p align="center">
-  <img src="image/shot-install.jpg" alt="Chrome's Install option for Bornomala" width="260" />
+  <img src="image/6293860224368054142.jpg" alt="Chrome's Install option for Bornomala" width="260" />
 </p>
 
 **3. Turn off mobile data and open it again.** It still works. Everything runs
@@ -92,9 +92,12 @@ screenshot below is 731 characters that would have cost **11** text messages,
 going out as **3**. Type the recipient's number, tap **Send as SMS**, and your
 usual messaging app opens with everything filled in. Press send there.
 
+To try it against a real phone, send to **01315267528** — the author's number.
+Paste what arrives back into the decode box to see the Bangla come out.
+
 <p align="center">
-  <img src="image/shot-normal.jpg" alt="731 Bangla characters compressed from 11 SMS segments to 3" width="260" />
-  <img src="image/shot-received-coded.jpg" alt="The compressed message arriving in the phone's SMS app" width="260" />
+  <img src="image/6293860224368054147.jpg" alt="731 Bangla characters compressed from 11 SMS segments to 3" width="260" />
+  <img src="image/6293860224368054148.jpg" alt="The compressed message arriving in the phone's SMS app" width="260" />
 </p>
 
 **5. Read one you were sent.** Copy the whole text message you received, paste
@@ -110,8 +113,8 @@ ago. The preview shows exactly what will be sent. Then send it to a number, or
 scroll to **Emergency numbers** and tap **Call** or **SMS** beside 999.
 
 <p align="center">
-  <img src="image/shot-emergency.jpg" alt="Emergency tab with a filled report and live location" width="260" />
-  <img src="image/shot-qr-hotlines.jpg" alt="QR code and national hotlines with call and SMS buttons" width="260" />
+  <img src="image/6293860224368054150.jpg" alt="Emergency tab with a filled report and live location" width="260" />
+  <img src="image/6293860224368054158.jpg" alt="QR code and national hotlines with call and SMS buttons" width="260" />
 </p>
 
 **7. Relay several reports at once.** On the Emergency tab tap **Add to relay**
@@ -120,7 +123,7 @@ send them all as one message. The counters show what you saved — two reports
 below go out as 6 segments instead of the 8 they would cost sent separately.
 
 <p align="center">
-  <img src="image/shot-relay.jpg" alt="Relay tab with two queued reports, 6 segments against 8 sent separately" width="260" />
+  <img src="image/6293860224368054156.jpg" alt="Relay tab with two queued reports, 6 segments against 8 sent separately" width="260" />
 </p>
 
 **No network at all?** Tap **Show QR** and let the phone beside you photograph
@@ -206,93 +209,67 @@ That last row is the one that matters most and is easiest to skip. Without a
 checksum a message garbled in transit does not fail — it *arrives*, plausible
 and wrong, in front of somebody deciding where to send a boat.
 
-## Relay: one person's signal, everyone's message
-
-Frames are small enough that batching stops being a micro-optimisation and
-becomes the product. A volunteer at a shelter collects status from the families
-around them and spends one SMS on all of it.
-
-```
-45 reports  →  159 septets  →  1 segment
-46 reports  →  162 septets  →  2 segments
-```
-
-Both numbers are asserted in `test/message.test.js`, so the claim in this
-README breaks the build if it ever stops being true.
-
 ## The last transport: QR
 
 When there is no network at all — no data, no SMS, the tower itself down — two
 phones in the same room can still hand a message across. One shows a QR, the
-other points its ordinary camera app.
+other points its ordinary camera app. Nothing is transmitted: no tower, no
+Bluetooth, no pairing, no permission.
 
-The symbol encodes a link back to the app with the payload in `?shared=`, so
-scanning opens the decode tab directly. Nothing is fetched: the URL names a
-page the service worker already holds, which is why this works with the radio
-switched off entirely. A status report needs a version-1 symbol; a full 45-name
-relay batch still fits comfortably.
+`src/qr.js` is a complete encoder written for this — Reed-Solomon over GF(256),
+all eight masks scored by the standard's penalty rules, error correction level
+M. A full emergency report with its map link fits comfortably.
 
-`src/qr.js` is a complete encoder — Reed-Solomon over GF(256), all eight masks
-scored by the standard's penalty rules, error correction level M. Its output is
-verified against `zbarimg`, an outside decoder, in `test/qr.test.js`: whatever
-went in has to come back out, or the build fails.
 
-## Using it, step by step
+## Every screenshot from testing
 
-Open **https://mayamoho.github.io/bornomala/**. Nothing to sign up for, nothing
-to install first, no permissions asked until you ask for a location.
+Every one of these was taken on a real phone — two Android handsets, plus one
+desktop browser for the QR. Some were taken before the layout fixes and the
+relay batching fix landed, so a Remove button sits outside its card in one and
+another shows batching saving nothing; both are fixed in the current build.
 
-**Install it before you need it.** On Android Chrome, the three-dot menu →
-*Add to Home screen*. On iPhone, in Safari, the share icon → *Add to Home
-Screen*. On a desktop, the install icon at the right of the address bar. After
-that first visit the app runs with the network off. Doing this on a calm day is
-the entire point; on the day of, the download may not finish.
+### Installing
 
-**Choose your language.** English and বাংলা sit at the top of the page. English
-is the default. The choice is remembered.
+| | | |
+| --- | --- | --- |
+| <img src="image/6293860224368054143.jpg" width="230" /> | <img src="image/6293860224368054144.jpg" width="230" /> | <img src="image/6293860224368054142.jpg" width="230" /> |
+| Chrome's ⋮ menu, top right | *Install and create shortcut* | Confirm **Install** |
+| <img src="image/6293860224368054145.jpg" width="230" /> | | |
+| The `ব` icon, now on the home screen | | |
 
-**Send a status report — the Crisis tab.**
+### Normal — compressing and decoding
 
-1. **Tap what happened.** Six icons cover the common cases: ✅ we are safe,
-   🆘 need help, ⚠️ trapped, 🚑 injured, 💧 water needed, 🏃 evacuate. For
-   anything else, the dropdown below holds all 32, grouped under *We are… /
-   We need… / Danger here / Help is here*. A blank like `____` in an option is
-   a value you are about to fill in.
-2. **Fill the boxes that appear.** How many people, how urgent, how deep the
-   water — whatever that message needs. They are dropdowns, never typing.
-3. **Say where.** *My district* is one tap and costs almost nothing to send.
-   *My exact position* asks the phone for GPS and is worth it when a boat has
-   to find you. *Do not send my location* is a real choice.
-4. **Say when**, in hours ago, up to 31. Leave it on *just now* if it is now.
-5. **Add a name or note** only if you need to — it is optional, it needs the
-   text model to have finished downloading, and it stops the message from being
-   readable off paper.
-6. **Read the big sentence** under *What they will read*. That is what arrives
-   on the other phone. Under it, *What actually gets sent* shows the short code
-   that travels, with what it costs and what the same message would have cost
-   as ordinary Bangla SMS.
-7. **Press Send as SMS.** Your normal messaging app opens with the code already
-   written. Pick who it goes to and send it. *Copy* puts it on the clipboard
-   instead, for any app you like.
+| | | |
+| --- | --- | --- |
+| <img src="image/6293860224368054147.jpg" width="230" /> | <img src="image/6293860224368054146.jpg" width="230" /> | <img src="image/6293860224368054147.jpg" width="230" /> |
+| 731 characters: 3 texts instead of 11 | 731 characters: 3 instead of 11 — send is off until a number is typed | The same, with a recipient filled in |
+| <img src="image/6293860224368054140.jpg" width="230" /> | <img src="image/6293860224368054141.jpg" width="230" /> | <img src="image/6293860224368054148.jpg" width="230" /> |
+| The compressed message, and a decoded one below it | The code arriving as an ordinary SMS | The same message, full screen |
 
-**Carry other people's reports — the Relay tab.** Instead of sending, press
-*Add to relay*, then build the next report. Up to 64. Open the Relay tab and
-send once: everyone's status in a single SMS. This is the tab for a shelter
-volunteer with one bar of signal and a notebook full of families.
+### Emergency — plain text, no app needed
 
-**Read a message you were sent — the Decode tab.** Paste the code in. The
-sentence appears in your language. A message sent with GPS gives you a map
-link. If the code arrived damaged, the app says so and refuses — it will not
-invent a sentence nobody wrote.
+| | | |
+| --- | --- | --- |
+| <img src="image/6293860224368054151.jpg" width="230" /> | <img src="image/6293860224368054149.jpg" width="230" /> | <img src="image/6293860224368054150.jpg" width="230" /> |
+| The emergency form, filled in | *(earlier build)* narrow, mismatched selects | *(earlier build)* a slot label crammed beside its box |
+| <img src="image/6293860224368054151.jpg" width="230" /> | <img src="image/6293860224368054153.jpg" width="230" /> | <img src="image/6293860224368054152.jpg" width="230" /> |
+| What gets sent, priced in characters and segments | Copied, with the share sheet open | How it arrives — plain Bangla, readable by anyone |
 
-**When there is no network at all — the QR button.** Press *Show QR*, hold the
-screen up, and let the other phone's camera read it. Nothing is transmitted:
-no tower, no Bluetooth, no pairing, no permission.
+### Hotlines and the QR handoff
 
-**When the other phone has no app — the Emergency tab.** It sends plain Bangla
-words, never a code. That is the floor under everything else: compression is an
-optimisation for two informed ends, and the emergency path assumes neither end
-is informed.
+| | | |
+| --- | --- | --- |
+| <img src="image/6293860224368054154.jpg" width="230" /> | <img src="image/6293860224368054158.jpg" width="230" /> | <img src="image/6293860224368054159.jpg" width="230" /> |
+| Nine national numbers, call or SMS | The QR, with the hotlines beneath | The same QR on a laptop screen |
+
+### Relay — many reports, one SMS
+
+| | | |
+| --- | --- | --- |
+| <img src="image/6293860224368054156.jpg" width="230" /> | <img src="image/6293860224368054155.jpg" width="230" /> | <img src="image/6293860224368054156.jpg" width="230" /> |
+| Two reports queued, with what they cost | *(earlier build)* Remove pushed outside its card | *(earlier build)* 7 against 7 — batching saving nothing |
+| <img src="image/6293860224368054157.jpg" width="230" /> | <img src="image/6293860224368054157.jpg" width="230" /> | <img src="image/6293860224368054158.jpg" width="230" /> |
+| The batch arriving as one message | The same batch, full screen | QR and hotlines together |
 
 ## Results
 

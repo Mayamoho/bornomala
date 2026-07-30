@@ -85,6 +85,7 @@ export const STRINGS = {
       'Required. An SMS link with no number is refused by most phones, so the button stays off until a number is here. 01XXXXXXXXX, or +8801XXXXXXXXX.',
     needNumber: 'a phone number',
     badNumber: 'Check the number — 11 digits starting 01, or +8801 and nine more.',
+    updateReady: 'A newer version is ready — close and reopen the app to use it.',
 
     relayHead: 'Relay — many reports, one SMS',
     relayHint: 'Add messages from the Emergency tab and send them together. Plain text, no coding.',
@@ -171,6 +172,7 @@ export const STRINGS = {
       'নম্বর দিতেই হবে। নম্বর ছাড়া এসএমএস লিংক বেশির ভাগ ফোন নেয় না, তাই নম্বর না দিলে বোতাম বন্ধ থাকে। 01XXXXXXXXX, বা +8801XXXXXXXXX।',
     needNumber: 'মোবাইল নম্বর',
     badNumber: 'নম্বরটা দেখুন — 01 দিয়ে ১১ সংখ্যা, বা +8801 এর পরে আরও নয়টি।',
+    updateReady: 'নতুন সংস্করণ তৈরি — অ্যাপটি বন্ধ করে আবার খুলুন।',
 
     relayHead: 'রিলে — অনেকের খবর, এক এসএমএসে',
     relayHint: 'জরুরি ট্যাব থেকে বার্তা যোগ করুন, একসাথে পাঠান। সাধারণ লেখা, কোনো কোড নেই।',

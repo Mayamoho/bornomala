@@ -88,7 +88,59 @@ Track A — Crisis Tech.
 
 ---
 
-## 5. Tech stack
+## 5. Tech stack and third-party components
+
+**Languages:** JavaScript (ES modules, no framework, no build step), HTML, CSS.
+Python 3 for the offline model-training and benchmark tooling.
+
+**Frameworks and libraries: none in the shipped app.** It has zero runtime
+dependencies — no React, no jQuery, no CDN, no analytics. The only development
+dependency is `jsdom`, used to run the interface test suite headlessly.
+
+**Written from scratch for this project:**
+
+- the Bangla language model (static PPM with backoff, quantised 16-bit integer
+  frequencies) and the integer arithmetic coder driving it
+- GSM-7 septet packing and segment counting
+- the QR encoder — Reed–Solomon over GF(256), all eight masks, no library
+- the 32-sentence phrasebook, the 64-district table, and the bilingual interface
+
+**Browser APIs used:** Service Worker and Cache Storage (offline install),
+Geolocation (live location), Clipboard, Web Share Target, `sms:` and `tel:` URIs
+for handing messages to the phone's own apps.
+
+**Pre-trained models: none.** The language model is trained from scratch, by us,
+on public Bangla text. No third-party model weights are used or redistributed.
+
+**Training data:** OpenSubtitles Bangla and a Bangla Wikipedia dump, both
+publicly available. Cleaning scripts are in `corpus/tools/`; the corpora
+themselves are not redistributed here (554 MB).
+
+**Emergency numbers** are Bangladesh's official public short codes (999, 1090,
+102, 16263, 333, 109, 1098, 16430, 106), verified against
+[999.gov.bd](https://www.999.gov.bd/) and
+[police.gov.bd](https://www.police.gov.bd/en/hot_line_number).
+
+**Hosting:** GitHub Pages (static files only). **Licence:** MIT.
+
+---
+
+## 6. AI tools used
+
+**Disclosure:** Claude (Anthropic) was used as a coding assistant throughout the
+72-hour sprint — writing and refactoring application code, the test suites, this
+submission pack and the slide deck, and reviewing the project for claims that did
+not match the code.
+
+All architectural decisions, the compression approach, the product direction and
+every accepted change were the author's. The language model shipped in the app is
+**not** an AI-tool artefact: it is trained from scratch by the tooling in
+`tools/train_model.py`, and no generative model runs inside the app or is called
+at runtime. The app makes no network requests of any kind.
+
+---
+
+## 7. Tech stack, short form (if the form wants one line)
 
 - **App:** offline-first installable PWA — vanilla JavaScript ES modules, no framework, no runtime dependencies, service worker precaching the full shell.
 - **Codec:** Bangla context model trained offline from a crisis-message corpus, exported as integer probability tables (`model.bin`, 1.7 MB); deterministic integer arithmetic coder in JavaScript; GSM-7 septet packing.
@@ -99,7 +151,7 @@ Track A — Crisis Tech.
 
 ---
 
-## 6. Links
+## 8. Links
 
 **How a judge runs it, in one minute:** open
 https://mayamoho.github.io/bornomala/ in Chrome on Android → **⋮** menu →
@@ -117,13 +169,13 @@ still opens. Tested on two Android handsets; screenshots are in
 
 ---
 
-## 7. Team
+## 9. Team
 
 Solo entry — Md. Abu Kawser. Role: ML/AI. Responsible for the language model, codec, app, and benchmark.
 
 ---
 
-## 8. Demo video — shot list (5 minutes maximum)
+## 10. Demo video — shot list (5 minutes maximum)
 
 Record on a real phone where possible. Judges reward seeing the SMS composer actually open.
 
@@ -142,7 +194,7 @@ Record on a real phone where possible. Judges reward seeing the SMS composer act
 
 ---
 
-## 9. Facebook post (copy-paste)
+## 11. Facebook post (copy-paste)
 
 > In July 2024 the state cut 3G and 4G. What survived was 2G — voice and SMS.
 >
@@ -181,7 +233,45 @@ Record on a real phone where possible. Judges reward seeing the SMS composer act
 
 ---
 
-## 10. Repository housekeeping — five minutes, do this first
+## 12. Notes for the judges
+
+**What is honest about the numbers.** The 5.15× figure is free-text compression
+measured on 5,000 held-out messages — every 50th corpus line, never seen in
+training (`npm run bench`). It applies to the **Normal** tab only. The Emergency
+and Relay tabs deliberately send uncompressed plain text, so a stranger's phone
+can read them, and they claim no compression at all.
+
+**Known limitations.**
+
+- Compression needs the app on both ends. That is why the emergency path exists,
+  and why the pitch is that volunteers and coordinators install it rather than
+  survivors.
+- Relay's saving comes from sending one message instead of many, not from
+  compression. Two reports go out as 6 segments instead of 8; the gain scales
+  with the number of reports, not with clever encoding.
+- Short codes such as 999 do not reliably accept SMS. The app says so plainly and
+  offers Call first.
+- The Send buttons do nothing on a desktop browser — a computer has no SMS app.
+  Copy works there instead. This is stated in the interface.
+- The 1.7 MB model downloads once on first open. Until it arrives, the Emergency
+  and Relay tabs work but the Normal tab cannot compress.
+- Location accuracy depends on the phone's GPS; without a fix the app falls back
+  to a district, which is coarse but always available.
+
+**What I would do next.** Batch the relay queue into the compressed format when
+both ends are known to have the app, which would turn the current 6-segment batch
+into roughly one. Add a receipt path so a coordinator can confirm a report was
+read. Widen the phrasebook past 32 sentences, which is a deliberate version
+boundary rather than an oversight.
+
+**Before you open the repo.** `README.md` is the long technical write-up.
+`SUBMISSION.md` is this file. `npm test`, `npm run check` and `npm run audit` run
+the three suites — 81 checks, no network needed. `npm run bench` reproduces the
+compression table from the held-out set.
+
+---
+
+## 13. Repository housekeeping — five minutes, do this first
 
 The GitHub half of public engagement is 10% of the total score, and the repo currently has no description and no homepage, so a judge landing on it sees nothing.
 
