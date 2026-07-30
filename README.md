@@ -116,7 +116,12 @@ scroll to **Emergency numbers** and tap **Call** or **SMS** beside 999.
 
 **7. Relay several reports at once.** On the Emergency tab tap **Add to relay**
 instead of sending. Do that for each household, then open the **Relay** tab and
-send them all as one message.
+send them all as one message. The counters show what you saved — two reports
+below go out as 6 segments instead of the 8 they would cost sent separately.
+
+<p align="center">
+  <img src="image/shot-relay.jpg" alt="Relay tab with two queued reports, 6 segments against 8 sent separately" width="260" />
+</p>
 
 **No network at all?** Tap **Show QR** and let the phone beside you photograph
 the screen.

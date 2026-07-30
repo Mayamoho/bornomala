@@ -258,7 +258,7 @@ function emergencyMessage() {
   const hours = emEl.hours().value;
   parts.push(hours === '0' ? t('justNow') : t('hoursAgo', getLang() === 'bn' ? bnNum(hours) : hours));
 
-  return withAttribution([parts.join(' · '), ...locationLines()].join('\n'));
+  return [parts.join(' · '), ...locationLines()].join('\n');
 }
 
 function renderEmergencySlots() {
@@ -291,7 +291,9 @@ function renderEmergencySlots() {
 
 function refreshEmergency() {
   const missing = missingFields();
-  const message = emergencyMessage();
+  // Sent on its own, a report carries the signature. Queued for relay it does
+  // not, or the batch repeats the same line once per household.
+  const message = withAttribution(emergencyMessage());
 
   el('em-required').hidden = emEl.text().value.trim() !== '';
   emEl.preview().textContent = message || '—';
@@ -387,14 +389,18 @@ function refreshRelay() {
     list.append(item);
   });
 
-  const joined = relay.join('\n———\n');
+  // One signature for the whole batch, not one per household — that line and a
+  // full map URL repeated forty times is what made batching pointless.
+  const joined = withAttribution(relay.join('\n———\n'));
   el('relay-empty').hidden = relay.length > 0;
   el('relay-count').textContent = relay.length > 0 ? `(${relay.length})` : '';
   el('r-count').textContent = String(relay.length);
   el('r-chars').textContent = String([...joined].length);
   el('r-segments').textContent = String(joined ? ucs2Segments(joined) : 0);
-  // Sent one at a time, each report costs its own segments.
-  el('r-alone').textContent = String(relay.reduce((n, m) => n + ucs2Segments(m), 0));
+  // Sent one at a time, each report carries its own signature and its own cost.
+  el('r-alone').textContent = String(
+    relay.reduce((n, m) => n + ucs2Segments(withAttribution(m)), 0),
+  );
   el('relay-payload').value = joined;
   const number = validNumber(el('relay-to').value);
   setSendLink('relay-send', number ? joined : '', number);
@@ -574,7 +580,7 @@ function wireEmergency() {
   });
   el('em-locate').addEventListener('click', useEmergencyLocation);
   el('em-qr-toggle').addEventListener('click', () =>
-    toggleQr('em-qr', emergencyMessage(), 'em-qr-toggle', 'em-note'),
+    toggleQr('em-qr', withAttribution(emergencyMessage()), 'em-qr-toggle', 'em-note'),
   );
   el('relay-qr-toggle').addEventListener('click', () =>
     toggleQr('relay-qr', el('relay-payload').value, 'relay-qr-toggle', 'relay-note'),
@@ -584,7 +590,7 @@ function wireEmergency() {
     el(`lang-${code}`).addEventListener('click', () => switchLang(code));
   }
 
-  el('em-copy').addEventListener('click', () => copyPlain(emergencyMessage(), 'em-note'));
+  el('em-copy').addEventListener('click', () => copyPlain(withAttribution(emergencyMessage()), 'em-note'));
   el('em-queue').addEventListener('click', () => {
     const message = emergencyMessage();
     if (!message) return;
@@ -760,7 +766,7 @@ async function main() {
   applyLang();
   markLangButtons();
   const stamp = el('build');
-  if (stamp) stamp.textContent = 'v24';
+  if (stamp) stamp.textContent = 'v25';
 
   buildEmergencyControls();
   buildHotlines();
