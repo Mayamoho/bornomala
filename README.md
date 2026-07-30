@@ -20,7 +20,8 @@ three things, all on your phone, with no server and no internet:
 > only gets 70 characters, how compression can cost less than one bit per letter —
 > and walks through the app screen by screen, including exactly what **Relay** and
 > the **QR code** are for and when to use each. It also contains a five-minute
-> speech you can read aloud.
+> speech you can read aloud. A Bangla version of the script is in
+> [PRESENTATION-BN.md](PRESENTATION-BN.md).
 
 | | Bornomala | raw UCS-2 (phones today) | gzip -9 |
 |---|---|---|---|

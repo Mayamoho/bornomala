@@ -1,5 +1,7 @@
 # Bornomala — demo video script
 
+**বাংলা স্ক্রিপ্ট: [PRESENTATION-BN.md](PRESENTATION-BN.md)**
+
 **One five-minute script.** Left column is what the camera shows, right column is
 what you say. Record the screen, speak over it.
 
