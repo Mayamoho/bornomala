@@ -766,7 +766,7 @@ async function main() {
   applyLang();
   markLangButtons();
   const stamp = el('build');
-  if (stamp) stamp.textContent = 'v26';
+  if (stamp) stamp.textContent = 'v27';
 
   buildEmergencyControls();
   buildHotlines();
@@ -817,7 +817,10 @@ async function main() {
         if (!hadController || reloading) return;
         const unsaved = [ui.input, emEl.text()].some((field) => field?.value.trim() !== '');
         if (unsaved) {
+          // The status line is hidden once the model loads, so unhide it or the
+          // notice is written into an invisible element.
           ui.status.textContent = t('updateReady');
+          ui.status.hidden = false;
           return;
         }
         reloading = true;
