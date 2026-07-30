@@ -15,6 +15,13 @@ three things, all on your phone, with no server and no internet:
 [Slide deck](https://mayamoho.github.io/bornomala/slides.html) ·
 [Deck as PDF](bornomala-slides.pdf)** — July Hackathon 2026, Track A (Crisis Tech).
 
+> **New here? Read [PRESENTATION.md](PRESENTATION.md) first.** It explains every
+> technical word in plain language — what an *SMS segment* actually is, why Bangla
+> only gets 70 characters, how compression can cost less than one bit per letter —
+> and walks through the app screen by screen, including exactly what **Relay** and
+> the **QR code** are for and when to use each. It also contains a five-minute
+> speech you can read aloud.
+
 | | Bornomala | raw UCS-2 (phones today) | gzip -9 |
 |---|---|---|---|
 | Bits per Bangla character | **3.106** | 16.000 | 21.002 |
@@ -183,11 +190,37 @@ cannot load the link.
 
 ### 3. Relay — many reports, one SMS
 
-A volunteer at a shelter collects status from the families around them. Each
-report is added from the Emergency tab with one tap. The queue lists them all,
-each removable, and four counters show what it costs: reports, characters,
-segments as one batch, and — the number that makes the case — how many segments
-those same reports would have cost sent one at a time.
+**Who it is for:** one person speaking for many — a shelter volunteer, a ward
+coordinator, someone collecting status for a whole street. Not for your own
+single message; that is the Emergency tab.
+
+Picture a cyclone shelter. One volunteer, forty families, one bar of signal. Sent
+separately that is forty messages, forty charges against a prepaid balance nobody
+can top up, and forty attempts on a tower that is already overloaded.
+
+Instead she fills in each family's report on the Emergency tab and taps **Add to
+relay** rather than Send. When the notebook is done she opens the Relay tab,
+enters one number, and sends once.
+
+The queue lists every report, each removable, and four counters show what it
+costs: reports, characters, segments as one batch, and — the number that makes
+the case — how many segments those same reports would have cost sent one at a
+time. Two reports go out as 5 segments against 6.
+
+The saving is one send and one signature per report, not compression: these
+travel as plain readable words on purpose.
+
+### When there is no network at all — the QR button
+
+**Use it when** there is no signal whatsoever and the person you need is standing
+next to you. Tap **Show QR** and let their ordinary camera app read your screen.
+Nothing is transmitted — no tower, no Bluetooth, no pairing, no permission — so
+it works when every radio is dead.
+
+In practice that means handing a report to a rescue team that arrived with its
+own link, giving a relay batch to someone walking out to coverage, or moving a
+message onto a phone with more battery than yours. It is a handoff, not a
+transmission: the other person has to be in front of you.
 
 ## Graceful degradation, taken literally
 

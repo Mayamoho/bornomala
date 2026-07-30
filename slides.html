@@ -91,7 +91,14 @@
     border-radius: 10px;
     background: #000;
   }
-  .shots figcaption { color: var(--dim); font-size: 0.85rem; margin-top: 8px; }
+  .shots figcaption {
+    color: var(--fg);
+    font-size: 0.95rem;
+    line-height: 1.35;
+    margin-top: 10px;
+    padding-left: 10px;
+    border-left: 3px solid var(--accent);
+  }
   .split { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 26px; align-items: center; }
   .split .shots { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); margin: 0; }
   .steps { list-style: none; padding: 0; margin: 0; }
@@ -161,7 +168,7 @@
     .slide:last-child { page-break-after: auto; break-after: auto; }
     .shots.wide { grid-template-columns: repeat(4, 1fr); }
     .shots.wide img { max-height: 25vh; }
-    .shots.wide figcaption { font-size: 7pt; margin-top: 4px; }
+    .shots.wide figcaption { font-size: 8.5pt; margin-top: 6px; padding-left: 7px; }
     h1 { font-size: 32pt; }
     h2 { font-size: 20pt; }
     p, li, .steps li { font-size: 11pt; }
@@ -172,7 +179,7 @@
     .msg { font-size: 9.5pt; }
     .shots { gap: 12px; }
     .shots img { max-height: 58vh; object-fit: contain; object-position: top; }
-    .shots figcaption { font-size: 8pt; }
+    .shots figcaption { font-size: 9.5pt; line-height: 1.3; }
     .hint { display: none; }
   }
 </style>
@@ -183,11 +190,13 @@
   <section class="slide">
     <p class="num">July Hackathon 2026 · Track A — Crisis Tech · solo entry</p>
     <h1>বর্ণমালা · Bornomala</h1>
-    <p class="lead">An offline Bangla SMS app with three jobs: compress ordinary messages so
-    5× more fits in one text, compose emergency reports any phone can read, and let one
-    volunteer relay many households' reports in a single SMS.</p>
-    <p class="dim">Everything runs on the phone. No server, no internet, no account, no message
-    ever leaves the device except through your own SMS app.</p>
+    <p class="lead">Texting in Bangla costs twice as much as texting in English — same phone,
+    same tower. In a blackout that is the difference between a message getting out and not.</p>
+    <div class="grid">
+      <div class="cell"><b>5.15×</b><span>more Bangla in one text message</span></div>
+      <div class="cell"><b>0</b><span>servers, accounts or internet needed</span></div>
+      <div class="cell"><b>2G</b><span>all it needs to work</span></div>
+    </div>
     <hr class="rule" />
     <p class="foot mono">mayamoho.github.io/bornomala · github.com/Mayamoho/bornomala</p>
   </section>
@@ -199,7 +208,7 @@
     voice calls and text messages. People fell back to texting.</p>
     <p class="quote">Every crisis tool assumes it can build a new network. In July, nobody could.</p>
     <hr class="rule" />
-    <h2>And it costs twice as much to text in Bangla.</h2>
+    <h2>And texting in Bangla costs twice as much.</h2>
     <p>Text messages were built around an old character set that only covers English. Write one
     Bangla letter and the whole message switches to a heavier format:</p>
     <div class="grid">
@@ -207,8 +216,9 @@
       <div class="cell"><b>70</b><span>characters per segment, Bangla</span></div>
       <div class="cell"><b>2.3×</b><span>more expensive, per message</span></div>
     </div>
-    <p>More segments means more cost, more retries, and more failures on a congested
-    network — exactly when SMS is the only channel left.</p>
+    <p>Worse than the price: a long message is split into pieces, and it arrives only if
+    <b>every</b> piece does. Lose one on a jammed tower and the whole report is gone. A message
+    small enough to fit in one piece has nothing to lose.</p>
   </section>
 
   <section class="slide">
@@ -236,7 +246,7 @@
       <div>
         <ul class="steps">
           <li><span class="k">1</span><span>A small Bangla model rides inside the app. No internet, no server.</span></li>
-          <li><span class="k">2</span><span>It predicts each next letter. A good guess costs almost nothing to record.</span></li>
+          <li><span class="k">2</span><span>It predicts each next letter. <b>Cost equals surprise</b> — an expected letter is nearly free to record; only surprises cost.</span></li>
           <li><span class="k">3</span><span>The bits go out as characters SMS treats as cheap.</span></li>
         </ul>
         <div class="msg bn">আমরা পাঁচজন নিরাপদ আছি, ঢাকা</div>
@@ -316,7 +326,9 @@
           <li><span class="k">△</span><span>A counter shows what sending them one by one would have cost.</span></li>
         </ul>
         <p class="callout">Two households → one message</p>
-        <p class="dim">When the towers are jammed, one message that gets through beats forty in a queue.</p>
+        <p class="dim"><b>Who it is for:</b> a shelter volunteer or ward coordinator — one person
+        speaking for many. Not for your own single message; that is the Emergency tab. When towers
+        are jammed, one message that gets through beats forty in a queue.</p>
       </div>
       <div class="shots">
         <figure>
@@ -366,7 +378,7 @@
       <div class="cell"><b>No internet</b><span>install it once and it opens forever after, with no connection</span></div>
       <div class="cell"><b>No mobile data</b><span>texts and calls still go, over 2G</span></div>
       <div class="cell"><b>No GPS</b><span>pick your district instead of using live location</span></div>
-      <div class="cell"><b>No network at all</b><span>show the QR code and let the phone beside you photograph it</span></div>
+      <div class="cell"><b>No network at all</b><span>show the QR and let the phone beside you photograph it — for handing a report to a rescue team, or to someone walking out to coverage</span></div>
     </div>
     <p>Your location always travels twice — as a map link <em>and</em> as plain numbers beside it —
     because the numbers still make sense on a phone that cannot open the link.</p>

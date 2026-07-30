@@ -163,6 +163,8 @@ still opens. Tested on two Android handsets; screenshots are in
 |---|---|
 | Live app | https://mayamoho.github.io/bornomala/ |
 | Slide deck | https://mayamoho.github.io/bornomala/slides.html |
+| Slide deck (PDF, 10 pages) | https://mayamoho.github.io/bornomala/bornomala-slides.pdf |
+| Plain-language guide + 5-minute speech | [PRESENTATION.md](PRESENTATION.md) |
 | Repository | https://github.com/Mayamoho/bornomala |
 | Demo video | *(paste the link once uploaded — unlisted YouTube is fine)* |
 | Facebook post | *(paste after posting)* |
