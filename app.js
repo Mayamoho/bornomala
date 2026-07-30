@@ -760,7 +760,7 @@ async function main() {
   applyLang();
   markLangButtons();
   const stamp = el('build');
-  if (stamp) stamp.textContent = 'v23';
+  if (stamp) stamp.textContent = 'v24';
 
   buildEmergencyControls();
   buildHotlines();

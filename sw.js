@@ -9,7 +9,7 @@
  * Bump CACHE when any shell file or the model changes.
  */
 
-const CACHE = 'bornomala-v23';
+const CACHE = 'bornomala-v24';
 
 const SHELL = [
   './',

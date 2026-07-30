@@ -64,6 +64,67 @@ So Bornomala does not build a network. It uses the one that already reaches
 everybody, and makes it cheaper to use. Where a mesh genuinely wins — two phones
 side by side with no tower at all — the app shows a QR code instead.
 
+## Run it on your Android phone
+
+Tested on two Android handsets. There is no Play Store listing and no APK to
+sideload — it installs straight from the browser, and takes about a minute.
+
+**1. Open the link in Chrome.**
+Go to **[mayamoho.github.io/bornomala](https://mayamoho.github.io/bornomala/)**.
+Wait a few seconds on first open: a 1.7 MB language model downloads once, and
+never again.
+
+**2. Install it to your home screen.**
+Tap the **⋮** menu at the top right of Chrome, then **Install**. Accept the
+prompt. A `ব` icon appears on your home screen, and the app now opens like any
+other app — full screen, no address bar.
+
+<p align="center">
+  <img src="image/shot-install.jpg" alt="Chrome's Install option for Bornomala" width="260" />
+</p>
+
+**3. Turn off mobile data and open it again.** It still works. Everything runs
+on the phone; there is nothing to connect to.
+
+**4. Send a compressed message.**
+Stay on the **Normal** tab and type Bangla in the box. Watch the counters — the
+screenshot below is 731 characters that would have cost **11** text messages,
+going out as **3**. Type the recipient's number, tap **Send as SMS**, and your
+usual messaging app opens with everything filled in. Press send there.
+
+<p align="center">
+  <img src="image/shot-normal.jpg" alt="731 Bangla characters compressed from 11 SMS segments to 3" width="260" />
+  <img src="image/shot-received-coded.jpg" alt="The compressed message arriving in the phone's SMS app" width="260" />
+</p>
+
+**5. Read one you were sent.** Copy the whole text message you received, paste
+it into **Open a message you received** at the bottom of the same tab, and the
+Bangla appears. The signature line and any map link are ignored automatically,
+so paste it exactly as it arrived.
+
+**6. Send an emergency report.**
+Open the **Emergency** tab. This one is plain text — whoever receives it needs
+no app at all. Type what is happening, tap a ready sentence and fill in its
+blank, choose your district or tap **use my live location**, and say how long
+ago. The preview shows exactly what will be sent. Then send it to a number, or
+scroll to **Emergency numbers** and tap **Call** or **SMS** beside 999.
+
+<p align="center">
+  <img src="image/shot-emergency.jpg" alt="Emergency tab with a filled report and live location" width="260" />
+  <img src="image/shot-qr-hotlines.jpg" alt="QR code and national hotlines with call and SMS buttons" width="260" />
+</p>
+
+**7. Relay several reports at once.** On the Emergency tab tap **Add to relay**
+instead of sending. Do that for each household, then open the **Relay** tab and
+send them all as one message.
+
+**No network at all?** Tap **Show QR** and let the phone beside you photograph
+the screen.
+
+> On a laptop the Send buttons do nothing — a computer has no SMS app. Use
+> **Copy** there instead. Compressing, decoding and the QR all work fine in a
+> desktop browser.
+
 ## What the app actually does
 
 Three tabs, three jobs.

@@ -154,19 +154,43 @@
       }
       .quick .icon { font-size: 1.6rem; line-height: 1; }
       .quick button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
-      #panel-emergency select, #panel-emergency textarea { min-height: 50px; font-size: 1rem; }
+      /*
+       * A native select shrinks to its widest option, so an untouched "Choose…"
+       * sat at half the width of the one beside it and the last one clipped at
+       * the screen edge. Every control on the page is full width instead.
+       */
+      select, input[type="tel"] {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        min-height: 50px;
+        padding: 10px 12px;
+        background: #0d1413;
+        color: var(--ink);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font: inherit;
+      }
+      select:focus, input[type="tel"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+      #panel-emergency textarea { min-height: 50px; font-size: 1rem; }
       #panel-emergency button.primary { min-height: 54px; font-size: 1.05rem; }
+      /* Each slot is its own labelled row, not a label crammed beside a box. */
+      #em-slots > div { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+      #em-slots label { color: var(--muted); font-size: 0.85rem; }
       .maplink {
         display: inline-flex;
         align-items: center;
-        min-height: 40px;
-        padding: 6px 14px;
+        justify-content: center;
+        gap: 6px;
+        min-height: 44px;
+        padding: 6px 16px;
         border: 1px solid var(--accent);
         border-radius: 999px;
         color: var(--accent);
         font-size: 1rem;
         font-weight: 600;
         text-decoration: none;
+        white-space: nowrap;
       }
       ul.list { list-style: none; margin: 0; padding: 0; }
       ul.list li {
@@ -179,9 +203,21 @@
         gap: 10px;
         align-items: center;
         justify-content: space-between;
+        flex-wrap: wrap;
         font-size: 0.9rem;
       }
-      ul.list li span { flex: 1 1 auto; white-space: pre-line; }
+      /*
+       * A queued report carries a maps link with no spaces in it. Without
+       * min-width the flex item refuses to shrink below that link's width, and
+       * the Remove button beside it is pushed clean outside the card.
+       */
+      ul.list li span {
+        flex: 1 1 12ch;
+        min-width: 0;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+      }
+      ul.list li button, ul.list li a { flex: 0 0 auto; }
       .empty { color: var(--muted); font-size: 0.85rem; }
       .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 12px; }
 

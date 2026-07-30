@@ -101,6 +101,12 @@ Track A — Crisis Tech.
 
 ## 6. Links
 
+**How a judge runs it, in one minute:** open
+https://mayamoho.github.io/bornomala/ in Chrome on Android → **⋮** menu →
+**Install** → a `ব` icon appears on the home screen. Turn mobile data off and it
+still opens. Tested on two Android handsets; screenshots are in
+[`image/`](image/), step-by-step instructions in the README.
+
 | Item | URL |
 |---|---|
 | Live app | https://mayamoho.github.io/bornomala/ |
@@ -131,7 +137,7 @@ Record on a real phone where possible. Judges reward seeing the SMS composer act
 | 2:30–3:15 | Emergency tab: type situation, pick a ready sentence, location, time; show the plain-text preview | "A survivor will not have this app. So the emergency path sends plain Bangla any phone can read — with the location as a link *and* as bare numbers, because the numbers work with no data." |
 | 3:15–3:40 | Tap SMS beside 999 in the hotline list | "Nine official national hotlines, message already written." |
 | 3:40–4:10 | Relay tab: two reports queued, sent as one SMS. Then QR toggle, second phone scans it | "One volunteer carries forty households. And with no network at all, the QR moves it screen to camera." |
-| 4:10–4:35 | Turn on airplane mode, reload the app — it still opens | "Installed, it runs with no internet at all." |
+| 4:10–4:35 | Install from Chrome's ⋮ menu, then turn on airplane mode and open it from the home screen | "It installs from the browser — no Play Store, no APK. And once installed it runs with no internet at all." |
 | 4:35–5:00 | Benchmark table on screen | "Five thousand held-out messages. 3.1 bits per character. Every one fits in a single segment. Gzip does worse than doing nothing. This is what a purpose-built codec buys you." |
 
 ---

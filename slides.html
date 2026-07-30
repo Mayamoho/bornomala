@@ -81,6 +81,17 @@
   }
   a { color: var(--accent); }
   .foot { color: var(--dim); font-size: 0.9rem; margin-top: 18px; }
+  .shots { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 8px 0 4px; }
+  .shots figure { margin: 0; }
+  .shots img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #000;
+  }
+  .shots figcaption { color: var(--dim); font-size: 0.85rem; margin-top: 8px; }
   .hint {
     position: fixed;
     right: 14px;
@@ -253,15 +264,38 @@
   </section>
 
   <section class="slide">
-    <p class="num">09 — status</p>
-    <h2>Working, tested, and live.</h2>
-    <ul>
-      <li>Installable PWA, running now at <span class="mono">mayamoho.github.io/bornomala</span></li>
-      <li>Full interface in Bangla and English, switchable mid-message without losing what you typed</li>
-      <li>81 automated checks in three suites — codec unit tests, a headless run of the whole interface, and a project audit (offline shell, translation parity, dead ids)</li>
-      <li>MIT licensed, reproducible benchmark, model training tools in the repo</li>
-    </ul>
+    <p class="num">09 — running on real phones</p>
+    <h2>Installed and sent, on two Android handsets.</h2>
+    <div class="shots">
+      <figure>
+        <img src="image/shot-install.jpg" alt="Chrome's Install prompt for Bornomala on Android" />
+        <figcaption>Install from the browser menu — no Play Store, no APK.</figcaption>
+      </figure>
+      <figure>
+        <img src="image/shot-normal.jpg" alt="731 Bangla characters compressed to 3 SMS segments instead of 11" />
+        <figcaption>731 Bangla characters: 3 segments instead of 11.</figcaption>
+      </figure>
+      <figure>
+        <img src="image/shot-emergency.jpg" alt="Emergency tab with a filled report and live location" />
+        <figcaption>An emergency report, built and previewed.</figcaption>
+      </figure>
+      <figure>
+        <img src="image/shot-qr-hotlines.jpg" alt="QR code and the national hotline list with call and SMS buttons" />
+        <figcaption>QR handoff, and the hotlines underneath.</figcaption>
+      </figure>
+      <figure>
+        <img src="image/shot-received-relay.jpg" alt="Two relayed reports arriving as one plain-text SMS" />
+        <figcaption>Two households arriving as one plain SMS.</figcaption>
+      </figure>
+      <figure>
+        <img src="image/shot-received-coded.jpg" alt="A compressed message arriving in the phone's SMS app" />
+        <figcaption>A compressed message, as it lands.</figcaption>
+      </figure>
+    </div>
     <hr class="rule" />
+    <p>Live at <span class="mono">mayamoho.github.io/bornomala</span> · bilingual, switchable
+    mid-message · 81 automated checks across three suites · MIT licensed, with the benchmark and
+    the model training tools in the repo.</p>
     <p class="lead">One number worth remembering: <span class="accent">5.15×</span> more Bangla in
     every SMS, on the network that was left.</p>
     <p class="foot mono">github.com/Mayamoho/bornomala — a star helps this reach the people who need it.</p>
