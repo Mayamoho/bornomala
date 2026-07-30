@@ -3,3 +3,14 @@ corpus/clean/
 corpus/tools/*.log
 node_modules/
 *.tmp
+
+# presentation scripts — local only
+PRESENTATION.md
+PRESENTATION-BN.md
+PRESENTATION-BANGLISH.md
+SPEAK-BANGLISH.md
+
+# raw recording sources — local only
+video6296112023721746575.mp4
+bornomala-demo-5min.mp4
+*.m4a

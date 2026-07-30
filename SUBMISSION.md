@@ -164,9 +164,9 @@ still opens. Tested on two Android handsets; screenshots are in
 | Live app | https://mayamoho.github.io/bornomala/ |
 | Slide deck | https://mayamoho.github.io/bornomala/slides.html |
 | Slide deck (PDF, 10 pages) | https://mayamoho.github.io/bornomala/bornomala-slides.pdf |
-| Plain-language guide + 5-minute speech | [PRESENTATION.md](PRESENTATION.md) |
 | Repository | https://github.com/Mayamoho/bornomala |
-| Demo video | *(paste the link once uploaded — unlisted YouTube is fine)* |
+| Demo video (5:00, in repo) | https://github.com/Mayamoho/bornomala/blob/main/bornomala-final-5min.mp4 |
+| Demo video (upload) | *(paste the link once uploaded — unlisted YouTube is fine)* |
 | Facebook post | *(paste after posting)* |
 
 ---
@@ -196,42 +196,134 @@ Record on a real phone where possible. Judges reward seeing the SMS composer act
 
 ---
 
-## 11. Facebook post (copy-paste)
+## 11. Public Facebook post
 
-> In July 2024 the state cut 3G and 4G. What survived was 2G — voice and SMS.
->
-> Here is something most people do not know: Bangla is not in the GSM-7 alphabet
-> that SMS was built on. So every Bangla text is forced into UCS-2 — 70 characters
-> per message instead of English's 160. It costs about 2.3× more to be Bangla in a
-> crisis.
->
-> I spent this weekend building বর্ণমালা · Bornomala, an offline app that fixes
-> that at the encoding layer. A small Bangla language model plus an arithmetic
-> coder compresses a message before it is sent.
->
-> Measured over 5,000 held-out messages: **361 Bangla characters in a single SMS
-> segment instead of 70. 5.15× more.** Every test message fit in one segment. gzip
-> actually does *worse* than sending raw.
->
-> It also has an emergency mode that sends plain Bangla any phone can read, with
-> nine national hotlines (999, 1090, 102, 333…) one tap away, your location as a
-> map link *and* as bare coordinates for when there is no data, and a QR handoff
-> for when there is no network at all.
->
-> No server. No internet. Nothing leaves your phone. Works on a cheap Android.
-> Open source, MIT.
->
-> 1952 was the right to speak Bangla. 2024 was the right to speak at all. This is
-> the same fight one layer down — in the character encoding.
->
-> 🔗 Try it: https://mayamoho.github.io/bornomala/
-> ⭐ Code: https://github.com/Mayamoho/bornomala
->
-> #JulyHackathon2026 #CrisisTech #Bangla #OpenSource
+Publish the post **after** you submit, then paste the URL back into the website.
+Engagement on it is **10% of the score**, and it keeps counting until
+**1 August 2026, 23:59** — later than the submission deadline itself.
 
-**Attach:** the demo video (upload natively to Facebook — native video outreaches a YouTube link), or failing that a screen recording of the stats row.
+### The rules, as a checklist
 
-**Do not** buy reactions, boost the post, or use farm accounts — the rules disqualify that entire scoring component.
+| # | Rule | Done |
+|---|---|---|
+| 01 | After submitting, publish one **public** Facebook post about the project | ☐ |
+| 02 | Post must include: **project name · track · one-line description · demo video (or a link to it) · #JulyHackathon2026** | ☐ |
+| 03 | **Tag or link the official event page** so organisers can verify the post | ☐ |
+| 04 | Submit the post URL through the website — only that URL is counted. **One post per team** | ☐ |
+| 05 | Post stays **public and unedited in reach settings** until 1 August, 23:59 | ☐ |
+| 06 | Repository must be **public** and its URL submitted through the website, so stars can be counted | ☐ |
+
+**Official event page (link or tag it in the post):**
+https://www.facebook.com/events/s/july-hackathon-2026/1587478822794562/
+
+---
+
+### Post (copy-paste)
+
+> **বর্ণমালা · Bornomala**
+> **Track A — Crisis Tech**
+> **An offline Bangla SMS app that fits 5× more crisis information into every text message.**
+>
+> 📽️ Full 5-minute demo video below 👇
+>
+> ---
+>
+> **What it is, in plain words.**
+>
+> In July 2024 mobile internet was switched off across Bangladesh. Broadband went
+> down too. Facebook, WhatsApp, Messenger — all gone at once, for everyone. Only
+> the oldest part of the phone network kept working: **voice calls and SMS.**
+>
+> So people went back to texting. And that is where a problem shows up that almost
+> nobody knows about.
+>
+> SMS was invented in the 1980s, for English. In that alphabet **one message holds
+> 160 characters.** Bangla is not in that alphabet. The moment you type a single
+> Bangla letter, your phone switches the whole message into a heavier format —
+> where **one message holds only 70 characters.**
+>
+> Same phone. Same tower. Same price. **Less than half the room, only because you
+> wrote in your own language.** A few paragraphs of Bangla can turn into 30+ billed
+> messages.
+>
+> **Bornomala fixes this at the encoding layer.** A small Bangla language model
+> lives inside the app. It has read a lot of Bangla, so it can guess which letter
+> is likely to come next — and anything easy to guess costs almost nothing to write
+> down. Measured on 5,000 messages the model had never seen: **361 Bangla
+> characters now fit in one SMS instead of 70 — about 5× more.** (Ordinary
+> zip-style compression actually does *worse* than sending it raw, because it has
+> no idea what Bangla looks like.)
+>
+> **But compression only helps if both phones have the app** — and someone
+> stranded on a rooftop will not have it. So there is a second mode that uses no
+> compression at all:
+>
+> 🆘 **Emergency** — sends **plain Bangla words any phone can read**, with nothing
+> installed on the other side. It asks five things before it will let you send:
+> what happened in your own words, a ready-made sentence you just fill in, where
+> you are, how long ago, and who to send it to. Your location goes out **twice** —
+> as a map link *and* as plain numbers — because a phone with no data cannot open a
+> link, but a rescue team can still read the numbers. Nine official national
+> hotlines (999, 1090, 102, 333, 109, 1098…) sit underneath, one tap to call. And
+> calling needs no internet at all.
+>
+> 📻 **Relay** — for the volunteer at a shelter with forty families in a notebook
+> and one bar of signal. Sending forty separate texts means forty charges and forty
+> attempts on a jammed tower. Relay sends them **together, as one message.**
+>
+> 📷 **No network at all?** The message turns into a **QR code** the next phone
+> reads with its camera. Nothing is transmitted — just light from one screen into
+> another lens.
+>
+> ✅ Installs straight from the browser — **no Play Store, no APK.**
+> ✅ Works fully **offline** once installed.
+> ✅ **No server, no account, no tracking.** Nothing ever leaves your phone.
+> ✅ Runs on a cheap Android. Fully bilingual — বাংলা and English.
+> ✅ **Open source, MIT licensed** — every number is reproducible from the repo.
+>
+> In 1952 people gave their lives for the right to *speak* Bangla. In 2024 the
+> fight was for the right to speak *at all*. This is the same fight, one layer
+> down — in the character encoding.
+>
+> ---
+>
+> 🔗 **Try it right now (any Android):** https://mayamoho.github.io/bornomala/
+> ⭐ **Code + benchmarks:** https://github.com/Mayamoho/bornomala
+> 🎪 **July Hackathon 2026:** https://www.facebook.com/events/s/july-hackathon-2026/1587478822794562/
+>
+> ---
+>
+> 💚 **One small ask — and it genuinely matters!**
+>
+> Public engagement counts for **10% of the score** in this hackathon, so a few
+> seconds from you goes a really long way:
+>
+> ⭐ **Star the GitHub repo** → https://github.com/Mayamoho/bornomala
+> 👍 **React** · 💬 **Comment** · 🔁 **Share this post**
+>
+> Every single star, reaction and share counts — and honestly, it is also the
+> fastest way to get a tool like this in front of someone who might actually need
+> it the next time the network goes down. Thank you so much for reading this far! 🙏🇧🇩
+>
+> #JulyHackathon2026 #CrisisTech #Bangla #OpenSource #Bangladesh
+
+---
+
+### Before you hit Post
+
+- **Upload the demo video natively to Facebook** (`bornomala-final-5min.mp4`) —
+  native video reaches far more people than a link. If the file will not upload,
+  link it and put "full video in the first comment."
+- **Set the audience to Public**, and leave it Public until 1 August, 23:59.
+  Changing reach settings after posting breaks rule 05.
+- **Link or tag the event page** — rule 03, organisers must be able to verify it.
+- **Paste the post URL into the submission website.** Only that URL is counted.
+  One post per team.
+- **Confirm the repository is public** and its URL is submitted on the website,
+  or stars cannot be counted at all (rule 06).
+
+**Do not** buy reactions, boost the post, or use farm accounts — the rules
+disqualify that entire scoring component.
 
 ---
 

@@ -15,14 +15,11 @@ three things, all on your phone, with no server and no internet:
 [Slide deck](https://mayamoho.github.io/bornomala/slides.html) ·
 [Deck as PDF](bornomala-slides.pdf)** — July Hackathon 2026, Track A (Crisis Tech).
 
-> **New here? Read [PRESENTATION.md](PRESENTATION.md) first.** It explains every
-> technical word in plain language — what an *SMS segment* actually is, why Bangla
-> only gets 70 characters, how compression can cost less than one bit per letter —
-> and walks through the app screen by screen, including exactly what **Relay** and
-> the **QR code** are for and when to use each. It also contains a five-minute
-> speech you can read aloud. A Bangla version of the script is in
-> [PRESENTATION-BN.md](PRESENTATION-BN.md), and a Banglish one for the demo
-> video in [PRESENTATION-BANGLISH.md](PRESENTATION-BANGLISH.md).
+> **New here? Watch the five-minute demo:
+> [`bornomala-final-5min.mp4`](bornomala-final-5min.mp4).** It walks through the
+> app screen by screen — what an *SMS segment* actually is, why Bangla only gets
+> 70 characters, how compression can cost less than one bit per letter, and what
+> **Emergency**, **Relay** and the **QR code** are each for.
 
 | | Bornomala | raw UCS-2 (phones today) | gzip -9 |
 |---|---|---|---|
