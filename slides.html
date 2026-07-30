@@ -128,40 +128,52 @@
   }
   @media print {
     @page { size: A4 landscape; margin: 0; }
-    body { background: #fff; }
-    .deck { max-width: none; padding: 0; }
     /*
-     * One slide, one page. Without the height cap a tall screenshot spills onto
-     * a second sheet and a nine-slide deck prints as twelve.
+     * The deck prints in its own dark palette rather than inverting to white.
+     * Inverting left every element that sets its own colour — the lead
+     * paragraphs, the pull quotes — white on white and therefore invisible, and
+     * the screenshots are dark UI, so they sit better on dark pages anyway.
      */
+    html, body {
+      background: var(--bg);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .deck { max-width: none; padding: 0; }
     .slide {
-      background: #fff;
-      color: #000;
+      background: var(--panel);
+      color: var(--fg);
       border: 0;
+      border-radius: 0;
+      margin: 0;
       height: 100vh;
       min-height: 0;
       overflow: hidden;
+      padding: 7vh 7vw;
       page-break-after: always;
       break-after: page;
       page-break-inside: avoid;
       break-inside: avoid;
-      margin: 0;
-      border-radius: 0;
-      padding: 6vh 7vw;
+      /* Centring plus a hard height crops the heading off the top of a full
+         slide, so print packs from the top instead. */
+      justify-content: flex-start;
     }
     .slide:last-child { page-break-after: auto; break-after: auto; }
-    h1 { font-size: 34pt; }
-    h2 { font-size: 22pt; }
-    p, li { font-size: 11.5pt; }
-    p.lead { font-size: 13pt; }
-    table { font-size: 10.5pt; }
-    .shots { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .shots img { max-height: 52vh; object-fit: contain; object-position: top; }
-    .shots figcaption { font-size: 8.5pt; }
+    .shots.wide { grid-template-columns: repeat(4, 1fr); }
+    .shots.wide img { max-height: 25vh; }
+    .shots.wide figcaption { font-size: 7pt; margin-top: 4px; }
+    h1 { font-size: 32pt; }
+    h2 { font-size: 20pt; }
+    p, li, .steps li { font-size: 11pt; }
+    p.lead { font-size: 12.5pt; }
+    .callout { font-size: 15pt; }
+    table { font-size: 10pt; }
+    .cell b { font-size: 17pt; }
+    .msg { font-size: 9.5pt; }
+    .shots { gap: 12px; }
+    .shots img { max-height: 58vh; object-fit: contain; object-position: top; }
+    .shots figcaption { font-size: 8pt; }
     .hint { display: none; }
-    .accent, .big, .cell b, tr.us td { color: #0a7a55; }
-    .dim, .num, .cell span, th { color: #55635e; }
-    .cell, .msg { background: #f4f7f6; border-color: #d6dedb; }
   }
 </style>
 </head>
@@ -228,7 +240,7 @@
           <li><span class="k">3</span><span>The bits go out as characters SMS treats as cheap.</span></li>
         </ul>
         <div class="msg bn">আমরা পাঁচজন নিরাপদ আছি, ঢাকা</div>
-        <div class="msg">B*?TΞ9(9Id'Θb</div>
+        <div class="msg">Bù8P9*+=!¤1+1j</div>
         <p class="callout">731 characters → 3 texts, not 11</p>
       </div>
       <div class="shots">
@@ -354,50 +366,32 @@
     </div>
     <p>Your location always travels twice — as a map link <em>and</em> as plain numbers beside it —
     because the numbers still make sense on a phone that cannot open the link.</p>
-    <p>No accounts, no tracking, no ads, nothing sent to us. The app is 92 kB and the language
-    model is a separate 1.7 MB, so the Emergency and Relay tabs work before it finishes loading.</p>
+    <div class="shots">
+      <figure><img src="image/6293860224368054159.jpg" alt="The QR shown on a laptop screen" /><figcaption>No network: screen to camera.</figcaption></figure>
+      <figure><img src="image/6293860224368054140.jpg" alt="The compressed message and a decoded one below it" /><figcaption>Compress and decode, side by side.</figcaption></figure>
+      <figure><img src="image/6293860224368054146.jpg" alt="Send is off until a phone number is entered" /><figcaption>Send stays off without a number.</figcaption></figure>
+    </div>
+    <p class="dim">No accounts, no tracking, no ads, nothing sent to us. The app is 92 kB and the
+    model a separate 1.7 MB, so Emergency and Relay work before it finishes loading.</p>
   </section>
 
   <section class="slide">
     <p class="num">09 — running on real phones</p>
-    <h2>Installed and sent, on two Android handsets.</h2>
-    <div class="shots">
-      <figure>
-        <img src="image/6293860224368054142.jpg" alt="Chrome's Install prompt for Bornomala on Android" />
-        <figcaption>Install from the browser menu — no Play Store, no APK.</figcaption>
-      </figure>
-      <figure>
-        <img src="image/6293860224368054147.jpg" alt="731 Bangla characters compressed to 3 SMS segments instead of 11" />
-        <figcaption>731 Bangla characters: 3 segments instead of 11.</figcaption>
-      </figure>
-      <figure>
-        <img src="image/6293860224368054150.jpg" alt="Emergency tab with a filled report and live location" />
-        <figcaption>An emergency report, built and previewed.</figcaption>
-      </figure>
-      <figure>
-        <img src="image/6293860224368054158.jpg" alt="QR code and the national hotline list with call and SMS buttons" />
-        <figcaption>QR handoff, and the hotlines underneath.</figcaption>
-      </figure>
-      <figure>
-        <img src="image/6293860224368054156.jpg" alt="Relay tab with two queued reports: 6 SMS segments batched against 8 sent separately" />
-        <figcaption>Two households, queued.</figcaption>
-      </figure>
-      <figure>
-        <img src="image/6293860224368054157.jpg" alt="Two relayed reports arriving as one plain-text SMS" />
-        <figcaption>The same batch, as it arrives.</figcaption>
-      </figure>
-      <figure>
-        <img src="image/6293860224368054148.jpg" alt="A compressed message arriving in the phone's SMS app" />
-        <figcaption>A compressed message, as it lands.</figcaption>
-      </figure>
+    <h2>Installed, sent, received — on two Android handsets.</h2>
+    <div class="shots wide">
+      <figure><img src="image/6293860224368054143.jpg" alt="Chrome menu button" /><figcaption>Chrome's ⋮ menu.</figcaption></figure>
+      <figure><img src="image/6293860224368054144.jpg" alt="Install and create shortcut in the Chrome menu" /><figcaption>Install and create shortcut.</figcaption></figure>
+      <figure><img src="image/6293860224368054142.jpg" alt="Confirming the install" /><figcaption>Confirm Install.</figcaption></figure>
+      <figure><img src="image/6293860224368054145.jpg" alt="The Bornomala icon on the Android home screen" /><figcaption>On the home screen.</figcaption></figure>
+      <figure><img src="image/6293860224368054149.jpg" alt="Emergency tab, typed message and ready sentences" /><figcaption>Typing the report.</figcaption></figure>
+      <figure><img src="image/6293860224368054150.jpg" alt="Emergency tab with live location captured" /><figcaption>Live location captured.</figcaption></figure>
+      <figure><img src="image/6293860224368054153.jpg" alt="Copied, with the Android share sheet open" /><figcaption>Copy and share out.</figcaption></figure>
+      <figure><img src="image/6293860224368054152.jpg" alt="The emergency report arriving as a plain SMS" /><figcaption>Arriving as plain words.</figcaption></figure>
     </div>
     <hr class="rule" />
     <p>Live at <span class="mono">mayamoho.github.io/bornomala</span> · bilingual, switchable
     mid-message · 81 automated checks across three suites · MIT licensed, with the benchmark and
     the model training tools in the repo.</p>
-    <p class="lead">One number worth remembering: <span class="accent">5.15×</span> more Bangla in
-    every SMS, on the network that was left.</p>
-    <p class="foot mono">github.com/Mayamoho/bornomala — a star helps this reach the people who need it.</p>
   </section>
 
 </div>

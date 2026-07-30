@@ -144,7 +144,7 @@ segments the compressed form needs, the segments the same text costs *today* in
 UCS-2, and the ratio between them. Below that sits the compressed message —
 
 ```
-আমরা পাঁচজন নিরাপদ আছি, ঢাকা   →   B*?TΞ9(9Id'Θb
+আমরা পাঁচজন নিরাপদ আছি, ঢাকা   →   Bù8P9*+=!¤1+1j
 ```
 
 — every payload beginning with `B`, so a receiver never has to guess what they
@@ -286,10 +286,6 @@ line, excluded from training and never read by the model (`npm run bench`):
 text on messages this short — its window never gets a chance to learn, and the
 header alone outweighs the message.
 
-Structured frames go further, because they are not compressing text at all:
-**11× versus UCS-2** on the same sentence, and **3× versus our own free-text
-compression**.
-
 ## How it works
 
 - **`src/coder.js`** — a deterministic integer arithmetic coder (Witten-Neal-Cleary,
@@ -301,16 +297,17 @@ compression**.
   stored as quantised 16-bit integer frequencies. Order 0 is complete, so
   decoding always terminates; characters outside the alphabet fall through to a
   21-bit literal.
-- **`src/phrasebook.js`** — the 32 messages and their slot ladders. Append-only:
-  the index *is* the wire value, so reordering it would silently change the
-  meaning of every message already in flight.
+- **`src/phrasebook.js`** — the 32 ready sentences and the values that fill their
+  blanks. The Emergency tab renders these into words in the sender's language and
+  sends them as plain text, so nothing about them has to be understood by the
+  receiving phone.
 - **`src/geo.js`** — the two location precisions, and the 64 districts.
 - **`src/qr.js`** — a self-contained QR encoder for the no-network handoff,
   checked against an outside decoder rather than trusted.
 - **`src/gsm7.js`** — packs the bitstream into GSM 03.38 basic characters,
-  excluding ESC, CR, LF and space (which composers mangle or trim). Three
-  profiles: `full` (124 symbols, 6.95 bits each), `ascii` for gateways that
-  transliterate, and `base32` for the paper path.
+  excluding ESC, CR, LF and space, which composers mangle or trim. Two profiles:
+  `full` (124 symbols, 6.95 bits each) and `ascii` for gateways that
+  transliterate. It also does the segment arithmetic the counters display.
 - **`index.html` / `app.js` / `sw.js`** — an installable offline PWA. Sending goes
   through an `sms:` URI so the phone's own composer transmits; receiving uses the
   Web Share Target API, with paste as the fallback.
@@ -339,7 +336,7 @@ python3 tools/train_model.py \
     corpus/clean/opensubtitles-bn.txt corpus/clean/wiki-bn.txt:8000000
 
 # 3. Verify
-npm test          # coder, GSM-7, frames, checksum, relay and codec round trips
+npm test          # arithmetic coder, GSM-7 packing, codec round trips
 npm run check     # the whole interface, headless: every send path, both languages
 npm run audit     # offline shell, translation parity, dead ids, privacy
 npm run bench     # held-out comparison against gzip and UCS-2
@@ -366,8 +363,10 @@ at once, that is exactly the message a congested cell drops.
 
 Then there are the three things a phone's SMS app cannot do at all:
 
-- **Sixty families' status in one SMS.** Not a feature of any SMS client. It is
-  the difference between a shelter volunteer spending one message and sixty.
+- **Many households' status in one SMS.** Not a feature of any SMS client. A
+  volunteer sends one message where they would otherwise send forty — the saving
+  is one send and one signature per report, not compression, because these go out
+  as plain readable words.
 - **A message with no network at any point.** Screen to camera over QR — no
   tower, no Bluetooth, no pairing, no permission.
 - **A message that costs a fifth as much to send.** Five times the Bangla in the
@@ -417,21 +416,21 @@ messages already in flight.
 
 ## Limitations, honestly
 
-- **A free-text message needs the app at the other end.** A crisis frame does
-  not need the *model*, and an `H` frame does not need a *device*, but prose
-  needs both. This is a tool for a network under stress, not a replacement for
-  SMS.
-- **The model must match.** Sender and receiver need the same `model.bin` for
-  prose and for notes. The payload carries a version marker so a mismatch fails
-  loudly instead of producing wrong text.
+- **A compressed message needs the app at the other end.** That is the whole
+  reason the Emergency and Relay tabs send plain words instead. This is a tool
+  for a network under stress, not a replacement for SMS.
+- **The model must match.** Sender and receiver need the same `model.bin`. A
+  mismatch fails to decode rather than producing plausible wrong text, but the
+  payload carries no explicit version marker — that is worth adding.
 - **The phrasebook is a guess.** 32 messages chosen from what a network
   blackout and a flood season actually produce. It is append-only by design,
   but the right list comes from people who have run a shelter, not from me.
-- **Hand-decoding is slow.** Realistically a minute or two per message with the
-  card, and it only covers frames without notes. It is a floor, not a workflow.
-- **The district index assumes Bangladesh.** The 32-bit coordinate grid covers
-  the national bounding box only; outside it the app tells you to pick a
-  district rather than sending a wrong position.
+- **Relay saves sends, not bits.** Two reports go out as 6 segments instead of
+  8. The gain scales with the number of reports, not with clever encoding.
+- **The district list assumes Bangladesh.** All 64 are national; outside the
+  country the app has no district to offer and live location is the only choice.
+- **Short codes do not reliably accept SMS.** 999 and the rest are offered as a
+  call first, and the app says so.
 - **Some SMS gateways transliterate.** The `ascii` profile exists for that case
   and costs about 7% capacity.
 
@@ -448,11 +447,21 @@ harness, and a first README. This was written after registration on the same
 day, as a working prototype of the compression idea. It is outside the 28–30
 July window and is not claimed as sprint work.
 
-**29 July — inside the sprint window.** Six commits, and everything that makes
-this a crisis-tech entry rather than a compression demo: the crisis phrasebook
-and structured frames, CRC-8 integrity, the paper profile, relay batching, the
-crisis/relay/paper-card UI, graceful degradation when the model will not load,
-the QR handoff for when there is no network at all, and this README.
+**29 July — inside the sprint window.** Everything that makes this a crisis-tech
+entry rather than a compression demo: the phrasebook, structured frames with a
+CRC-8 and a printable profile, relay batching, the tabbed interface, graceful
+degradation when the model will not load, the QR handoff, and this README.
+
+**30 July — inside the sprint window.** The structured-frame path was cut. It
+compressed well but it required the app at both ends, which is exactly the trap
+this project criticises in mesh messengers, so the Emergency and Relay tabs were
+rebuilt to send plain readable words instead and `src/frame.js` and `src/crc.js`
+were deleted. Then: the nine national hotlines, the English/Bangla toggle, a
+required recipient on every send path, the relay batch carrying one signature
+instead of one per household, mobile layout fixes found by testing on two
+Android handsets, and an update path so an installed app does not sit on an old
+build. The README, the slide deck and the submission pack were rewritten to
+describe the app that exists.
 
 **Repository and push times.** The work was developed in a local git repository
 from the start. The public GitHub repository was created on **29 July at
@@ -479,28 +488,26 @@ Bangla cyclone warning broadcast into a Rohingya camp reads as *it will rain*,
 in a place where word of mouth is the main channel and the wind is about to
 take the roofs off.
 
-Bornomala cannot make that mistake, because it never transmits the word. What
-travels is **template index 12** and its slot values. The sentence is rendered
-on the receiver's phone, from that receiver's own phrasebook, in that
-receiver's own language. Translation happens once, at the edge, against a fixed
-list of 32 facts a native speaker can check — not per message, under time
-pressure, by whoever is holding the radio.
+Bornomala's answer is narrower than it once was, and worth stating precisely.
+The sentence you send is not composed under pressure — it is chosen from a fixed
+list of 32, each one written and checked in advance in both languages. What
+travels is the rendered sentence itself, in plain words, because the receiving
+phone may have no app at all. So the translation risk is not eliminated the way
+a numeric wire format would eliminate it; it is moved off the person in the
+crisis and onto a list a native speaker can review on a calm day.
 
-That also makes the wire format language-neutral by construction. A frame
-contains no text: five bits of template, a few bits of slot values, an optional
-district or coordinate, an optional hour count. Adding Hindi, Nepali, Burmese
-or Rohingya is a render-layer change — one more field per phrasebook entry —
-and it costs **zero bits on the wire**. A message composed in Bangla decodes
-into Hindi on the other end. Only free prose is language-bound, because only
-free prose needs the trained model.
+An earlier build did send the template as a number, which made the wire format
+language-neutral and let a message composed in Bangla arrive in another
+language. That was cut, deliberately: it required the app on both ends. Adding a
+third language today is a change to the phrasebook table, and it changes what
+the sender's phone renders rather than what the receiver's phone interprets.
 
 And the person this is built for already exists in an org chart. The Cyclone
 Preparedness Programme has run since 1972 on roughly 43,000 trained volunteers
 and about 160 full-time staff, carrying Bangladesh Met Department warnings into
 coastal communities with a three-flag signalling system. That volunteer, with
-one bar of signal and sixty families' status in a notebook, is exactly who the
-relay tab is for: sixty reports, one SMS, instead of sixty SMS a congested cell
-will not carry.
+one bar of signal and a notebook of families' status, is exactly who the relay
+tab is for: one send instead of forty, on a cell that will not carry forty.
 
 Sources: [TWB glossaries](https://translatorswithoutborders.org/twb-glossaries/) ·
 [TWB's Rohingya language tool](https://reliefweb.int/report/bangladesh/translators-without-borders-launches-language-tool-rohingya-humanitarian-response) ·
