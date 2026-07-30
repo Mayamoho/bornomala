@@ -261,6 +261,28 @@ function emergencyMessage() {
   return [parts.join(' · '), ...locationLines()].join('\n');
 }
 
+/**
+ * The short-code version of the same report.
+ *
+ * A hotline is a call centre on a four- or five-digit short code, and those
+ * refuse far more than an ordinary handset does: many carry no inbound SMS at
+ * all, and the ones that do commonly drop concatenated messages. The full
+ * report runs to three UCS-2 segments once a maps link and the signature are
+ * attached, which is exactly the shape that silently fails.
+ *
+ * So a hotline gets the words and the bare coordinates, and nothing that only
+ * a smartphone could use: no link to tap, no signature. That is usually one
+ * segment, occasionally two.
+ */
+function hotlineMessage() {
+  const full = emergencyMessage();
+  if (!full) return '';
+  return full
+    .split('\n')
+    .filter((line) => !line.startsWith('http'))
+    .join(' · ');
+}
+
 function renderEmergencySlots() {
   const host = emEl.slots();
   host.replaceChildren();
@@ -313,8 +335,9 @@ function refreshEmergency() {
   else if (!number && typedNumber) el('em-note').textContent = t('badNumber');
   else if (!number) el('em-note').textContent = t('stillNeeded', t('needNumber'));
   else el('em-note').textContent = t('plainOk');
+  const short = hotlineMessage();
   for (const link of document.querySelectorAll('.hotline-sms')) {
-    const uri = smsUri(message, link.dataset.number);
+    const uri = smsUri(short, link.dataset.number);
     if (uri) {
       link.href = uri;
       link.setAttribute('aria-disabled', 'false');
@@ -766,7 +789,7 @@ async function main() {
   applyLang();
   markLangButtons();
   const stamp = el('build');
-  if (stamp) stamp.textContent = 'v27';
+  if (stamp) stamp.textContent = 'v28';
 
   buildEmergencyControls();
   buildHotlines();

@@ -46,7 +46,7 @@ export const STRINGS = {
     emSend: '5. What gets sent',
     emNumbers: '6. Emergency numbers',
     emNumbersHint:
-      'Tap to call, or send this message to them as an SMS. 999 is toll-free. Short codes do not always accept SMS — if it fails, call.',
+      'Call. These are call centres on short codes, and most of them do not accept SMS at all — the SMS button is a fallback, not a delivery guarantee. 999 is toll-free. The text sent here is shortened to one message, with no link, because short codes drop long ones.',
     chooseOne: 'Choose…',
     myDistrict: 'My district',
     myLocation: 'My live location',
@@ -134,7 +134,7 @@ export const STRINGS = {
     emSend: '৫. যা পাঠাবেন',
     emNumbers: '৬. জরুরি নম্বর',
     emNumbersHint:
-      'ফোনে চাপ দিলে কল যাবে, অথবা এই বার্তাটাই এসএমএস করুন। ৯৯৯ টোল-ফ্রি। শর্ট কোডে সব সময় এসএমএস যায় না — না গেলে কল করুন।',
+      'কল করুন। এগুলো শর্ট কোডে চালানো কল সেন্টার, বেশির ভাগই এসএমএস নেয় না — এসএমএস বোতামটি বিকল্প মাত্র, পৌঁছানোর নিশ্চয়তা নয়। ৯৯৯ টোল-ফ্রি। এখানে পাঠানো লেখা ছোট করে এক এসএমএসে আনা হয়, লিংক ছাড়া, কারণ শর্ট কোড লম্বা বার্তা ফেলে দেয়।',
     chooseOne: 'বেছে নিন…',
     myDistrict: 'আমার জেলা',
     myLocation: 'আমার সঠিক অবস্থান',

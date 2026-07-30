@@ -175,6 +175,19 @@ check('send: the send control is a real sms: link', () => {
   return assert(href.startsWith('sms:01712345678?body=') && decodeURIComponent(href).includes('ছাদ ভেঙে পড়েছে'), href.slice(0, 50));
 });
 
+check('hotlines: the short-code body carries no link and fits one or two segments', () => {
+  const href = document.querySelectorAll('.hotline-sms')[0].getAttribute('href') ?? '';
+  const body = decodeURIComponent(href.split('body=')[1] ?? '');
+  const segments = Math.ceil([...body].length / 67);
+  return assert(!body.includes('http') && segments <= 2 && body.includes('ছাদ'),
+    `chars=${[...body].length} segments=${segments} hasLink=${body.includes('http')}`);
+});
+
+check('hotlines: the personal send still carries the full report and its link', () => {
+  const body = decodeURIComponent((el('em-send').getAttribute('href') ?? '').split('body=')[1] ?? '');
+  return assert(body.includes('maps.google.com') && body.includes('Bornomala'), body.slice(-40));
+});
+
 check('send: every hotline row is a live sms: link', () => {
   const links = [...document.querySelectorAll('.hotline-sms')];
   const first = links[0].getAttribute('href') ?? '';
@@ -328,7 +341,7 @@ check('required: all three recipient fields are marked required', () => {
   return assert(marked.length === 3, marked.join(', '));
 });
 
-check('attribution: every outgoing message names the app', () => {
+check('attribution: every personal send names the app', () => {
   el('input').value = 'আমরা নিরাপদ আছি';
   fire(el('input'), 'input');
   for (const id of ['to', 'em-to', 'relay-to']) {
@@ -337,13 +350,20 @@ check('attribution: every outgoing message names the app', () => {
   }
   const compose = decodeURIComponent(el('send').getAttribute('href') ?? '');
   const emergency = decodeURIComponent(el('em-send').getAttribute('href') ?? '');
-  const hotline = decodeURIComponent(document.querySelectorAll('.hotline-sms')[0].getAttribute('href') ?? '');
   click(el('em-queue'));
   const relayBody = decodeURIComponent(el('relay-send').getAttribute('href') ?? '');
   click(el('relay-clear'));
   const carries = (s) => s.includes('Bornomala') || s.includes('বর্ণমালা');
-  return assert([compose, emergency, hotline, relayBody].every(carries),
-    [compose, emergency, hotline, relayBody].map((s) => s.split('—').pop()?.slice(0, 30)).join(' | '));
+  return assert([compose, emergency, relayBody].every(carries),
+    [compose, emergency, relayBody].map((s) => s.split('—').pop()?.slice(0, 24)).join(' | '));
+});
+
+check('attribution: a hotline body drops it, to stay inside one segment', () => {
+  el('em-text').value = 'ছাদ ভেঙে পড়েছে';
+  fire(el('em-text'), 'input');
+  const body = decodeURIComponent((document.querySelectorAll('.hotline-sms')[0].getAttribute('href') ?? '').split('body=')[1] ?? '');
+  return assert(!body.includes('Bornomala') && !body.includes('বর্ণমালা') && body.length > 0,
+    `chars=${[...body].length}`);
 });
 
 check('receive: a coded payload pasted back decodes to the original', () => {
